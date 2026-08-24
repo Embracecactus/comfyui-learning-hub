@@ -60,15 +60,17 @@ python -c "import torch; print(torch.__version__, torch.version.cuda)"
 ## 3. 安装 / 更新 ComfyUI
 
 ```bash
-cd ~
+cd /workspace
 git clone https://github.com/comfyanonymous/ComfyUI.git
 cd ComfyUI
 pip install -r requirements.txt
 ```
 
-- 之前装过就更新：`cd ~/ComfyUI && git pull --ff-only && pip install -r requirements.txt`
+> 路径说明：本文 ComfyUI 统一装在 **`/workspace/ComfyUI`**（你的实际环境即此路径）。若你装在别处（如 `~/ComfyUI`、`/mnt/workspace/ComfyUI`、或 CVM 的数据盘），**全文把 `/workspace/ComfyUI` 换成你的实际路径**即可，下面所有命令同理。
+
+- 之前装过就更新：`cd /workspace/ComfyUI && git pull --ff-only && pip install -r requirements.txt`
 - 检查版本：`git describe --tags`（≥0.30.0 才有 H3 节点）。
-- ⚠️ **别重复 clone**：只保留一个 `~/ComfyUI`，避免多层嵌套副本导致模型目录混乱（同 `tencent-cloud-comfyui-guide.md` 5.1.1 的坑）。
+- ⚠️ **别重复 clone**：只保留一个 `/workspace/ComfyUI`，避免多层嵌套副本导致模型目录混乱（同 `tencent-cloud-comfyui-guide.md` 5.1.1 的坑）。
 
 ---
 
@@ -77,14 +79,14 @@ pip install -r requirements.txt
 ### 4.1 启动
 
 ```bash
-cd ~/ComfyUI
+cd /workspace/ComfyUI
 python main.py --listen 0.0.0.0 --port 8188
 ```
 
 看到 `To see the GUI go to: http://0.0.0.0:8188` 说明服务起来。后台跑（关终端也能续）：
 
 ```bash
-cd ~/ComfyUI
+cd /workspace/ComfyUI
 nohup python main.py --listen 0.0.0.0 --port 8188 > comfy.log 2>&1 &
 tail -f comfy.log
 ```
@@ -148,7 +150,7 @@ models/loras/            minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetenso
 ```bash
 pip install -q -U "huggingface_hub[cli]"
 HF_ENDPOINT=https://hf-mirror.com huggingface-cli download Comfy-Org/MiniMax-H3 \
-  --local-dir ~/ComfyUI/models/MiniMax-H3 \
+  --local-dir /workspace/ComfyUI/models/MiniMax-H3 \
   --include "*pruned_int8_convrot*" "*nvfp4_awq*" "*.fp16*" "*.fp32*" "*turbo*"
 ```
 
@@ -206,10 +208,10 @@ nvidia-smi
 python -c "import torch; print(torch.__version__, torch.version.cuda)"
 
 # 启动 ComfyUI（前台）
-cd ~/ComfyUI && python main.py --listen 0.0.0.0 --port 8188
+cd /workspace/ComfyUI && python main.py --listen 0.0.0.0 --port 8188
 
 # 后台启动
-cd ~/ComfyUI && nohup python main.py --listen 0.0.0.0 --port 8188 > comfy.log 2>&1 &
+cd /workspace/ComfyUI && nohup python main.py --listen 0.0.0.0 --port 8188 > comfy.log 2>&1 &
 
 # 暴露公网（cloudflared，新终端别关）
 cd /tmp && ./cloudflared tunnel --url http://127.0.0.1:8188
@@ -222,7 +224,7 @@ pkill -f "main.py --listen"
 
 # 预拉权重（走镜像）
 HF_ENDPOINT=https://hf-mirror.com huggingface-cli download Comfy-Org/MiniMax-H3 \
-  --local-dir ~/ComfyUI/models/MiniMax-H3 \
+  --local-dir /workspace/ComfyUI/models/MiniMax-H3 \
   --include "*pruned_int8_convrot*" "*nvfp4_awq*" "*.fp16*" "*.fp32*" "*turbo*"
 ```
 
