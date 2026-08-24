@@ -19,6 +19,8 @@
 | PyTorch / CUDA | `int8_convrot` 权重需 **torch 带 cu130**；CVM 可自行 `pip install torch --index-url ...cu130` |
 | 显存门槛 | ≥24GB 直跑；16–24GB 依赖 int8 + nvfp4 量化 + offload；<16GB 没戏 |
 
+> **实测环境（用户当前机器，2026-08-24）**：腾讯云 **A10 24G**（23028 MiB），驱动 580.65 / CUDA 13.0（驱动层），**torch 2.10.0+cu128（CUDA 12.8）**，Python 3.11.1。→ torch **非 cu130**，故 H3 权重用 **`fp8_scaled`** 版（场景 B）；若想用 `int8_convrot`，需先 `pip install -U torch --index-url https://download.pytorch.org/whl/cu130`。
+
 > CVM 优势：系统盘持久（模型下次开机免重下）、环境自定（可装 cu130 torch 跑 int8_convrot）、有公网 IP。代价：按量计费、需自己配安全组/驱动。
 
 ---
@@ -145,14 +147,33 @@ models/loras/            minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetenso
 - **`pruned_` 剪枝版更小**，A10 24G 优先。
 - 下载慢：模板库走 HF，可换 `HF_ENDPOINT=https://hf-mirror.com` 或用 CLI 预拉（5.2）。
 
-### 5.2 可选：终端预拉权重（兜底）
+### 5.2 终端预拉权重（模板库慢时兜底，按场景选）
 
+> 首选仍是 **5.1 的模板库一键下载**（自动放对目录，最稳）。下面仅当模板库太慢时用，需手动指定子目录，且文件名/路径以 HF 仓库实际为准。
+
+**场景 B（fp8_scaled，当前实测 torch cu128）**：
 ```bash
 pip install -q -U "huggingface_hub[cli]"
-HF_ENDPOINT=https://hf-mirror.com huggingface-cli download Comfy-Org/MiniMax-H3 \
-  --local-dir /workspace/ComfyUI/models/MiniMax-H3 \
-  --include "*pruned_int8_convrot*" "*nvfp4_awq*" "*.fp16*" "*.fp32*" "*turbo*"
+REPO=Comfy-Org/MiniMax-H3
+BASE=/workspace/ComfyUI/models
+HF_ENDPOINT=https://hf-mirror.com
+
+huggingface-cli download "$REPO" minimax_h3_fl2va_pruned_fp8_scaled.safetensors --local-dir "$BASE/diffusion_models"
+huggingface-cli download "$REPO" qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors --local-dir "$BASE/text_encoders"
+huggingface-cli download "$REPO" minimax_h3_video_vae_fp16.safetensors --local-dir "$BASE/vae"
+huggingface-cli download "$REPO" minimax_h3_audio_vae_fp32.safetensors --local-dir "$BASE/vae"
+huggingface-cli download "$REPO" minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors --local-dir "$BASE/loras"
 ```
+
+下载完校验（每条应在对应子目录，**不要多套一层**）：
+```bash
+ls -lh /workspace/ComfyUI/models/diffusion_models /workspace/ComfyUI/models/text_encoders /workspace/ComfyUI/models/vae /workspace/ComfyUI/models/loras
+```
+
+**场景 A（int8_convrot，需 torch cu130）**：把第一行换成 `minimax_h3_fl2va_pruned_int8_convrot.safetensors` 即可，其余同场景 B。
+
+> 若 `huggingface-cli download` 报 `File not found`，说明仓库内文件名/路径不同：先去 https://huggingface.co/Comfy-Org/MiniMax-H3 核对实际文件名，或**直接用模板库下载**（它会按正确路径拉，最省心）。
+> 体积参考：文本编码器 nvfp4_awq ≈16GB，fp8_scaled 扩散 ≈10–20GB，两个 VAE 几个 GB，turbo LoRA 几百 MB——合计约 **30–40GB**，下前先 `df -h /workspace` 确认磁盘够（≥100GB 为宜）。
 
 > CVM 系统盘持久，**权重下完关机也还在**，下次开机免重下——这是比 DSW 容器大的优势。
 
