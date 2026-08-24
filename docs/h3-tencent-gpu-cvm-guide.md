@@ -150,6 +150,13 @@ models/loras/            minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetenso
 ### 5.2 终端预拉权重（模板库慢时兜底，按场景选）
 
 > 首选仍是 **5.1 的模板库一键下载**（自动放对目录，最稳）。下面仅当模板库太慢时用，需手动指定子目录，且文件名/路径以 HF 仓库实际为准。
+> ⚠️ `huggingface-cli` 已**废弃不可用**，新命令是 **`hf`**（同参数）。仓库若 gated（需接受 MiniMax Community License），先 `hf auth login` 登录 HF token 再下。
+
+**先列真实文件路径（避免 wget 404）**：
+```bash
+HF_ENDPOINT=https://hf-mirror.com hf download Comfy-Org/MiniMax-H3 --dry-run 2>&1 | tail -40
+```
+（直连 HF 把 `HF_ENDPOINT=` 去掉即可；gated 仓库此处会提示 401/需登录）
 
 **场景 B（fp8_scaled，当前实测 torch cu128）**：
 ```bash
@@ -158,11 +165,11 @@ REPO=Comfy-Org/MiniMax-H3
 BASE=/workspace/ComfyUI/models
 HF_ENDPOINT=https://hf-mirror.com
 
-huggingface-cli download "$REPO" minimax_h3_fl2va_pruned_fp8_scaled.safetensors --local-dir "$BASE/diffusion_models"
-huggingface-cli download "$REPO" qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors --local-dir "$BASE/text_encoders"
-huggingface-cli download "$REPO" minimax_h3_video_vae_fp16.safetensors --local-dir "$BASE/vae"
-huggingface-cli download "$REPO" minimax_h3_audio_vae_fp32.safetensors --local-dir "$BASE/vae"
-huggingface-cli download "$REPO" minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors --local-dir "$BASE/loras"
+hf download "$REPO" minimax_h3_fl2va_pruned_fp8_scaled.safetensors --local-dir "$BASE/diffusion_models"
+hf download "$REPO" qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors --local-dir "$BASE/text_encoders"
+hf download "$REPO" minimax_h3_video_vae_fp16.safetensors --local-dir "$BASE/vae"
+hf download "$REPO" minimax_h3_audio_vae_fp32.safetensors --local-dir "$BASE/vae"
+hf download "$REPO" minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors --local-dir "$BASE/loras"
 ```
 
 下载完校验（每条应在对应子目录，**不要多套一层**）：
@@ -172,7 +179,7 @@ ls -lh /workspace/ComfyUI/models/diffusion_models /workspace/ComfyUI/models/text
 
 **场景 A（int8_convrot，需 torch cu130）**：把第一行换成 `minimax_h3_fl2va_pruned_int8_convrot.safetensors` 即可，其余同场景 B。
 
-> 若 `huggingface-cli download` 报 `File not found`，说明仓库内文件名/路径不同：先去 https://huggingface.co/Comfy-Org/MiniMax-H3 核对实际文件名，或**直接用模板库下载**（它会按正确路径拉，最省心）。
+> 若 `hf download` 报 `File not found`，说明仓库内文件名/路径不同：先去 https://huggingface.co/Comfy-Org/MiniMax-H3 核对实际文件名，或**直接用模板库下载**（它会按正确路径拉，最省心）。
 > 体积参考：文本编码器 nvfp4_awq ≈16GB，fp8_scaled 扩散 ≈10–20GB，两个 VAE 几个 GB，turbo LoRA 几百 MB——合计约 **30–40GB**，下前先 `df -h /workspace` 确认磁盘够（≥100GB 为宜）。
 
 > CVM 系统盘持久，**权重下完关机也还在**，下次开机免重下——这是比 DSW 容器大的优势。
@@ -244,7 +251,7 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8188
 pkill -f "main.py --listen"
 
 # 预拉权重（走镜像）
-HF_ENDPOINT=https://hf-mirror.com huggingface-cli download Comfy-Org/MiniMax-H3 \
+HF_ENDPOINT=https://hf-mirror.com hf download Comfy-Org/MiniMax-H3 \
   --local-dir /workspace/ComfyUI/models/MiniMax-H3 \
   --include "*pruned_int8_convrot*" "*nvfp4_awq*" "*.fp16*" "*.fp32*" "*turbo*"
 ```
