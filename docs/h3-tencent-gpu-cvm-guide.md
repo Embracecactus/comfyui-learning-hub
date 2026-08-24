@@ -180,7 +180,18 @@ ls -lh /workspace/ComfyUI/models/diffusion_models /workspace/ComfyUI/models/text
 **场景 A（int8_convrot，需 torch cu130）**：把第一行换成 `minimax_h3_fl2va_pruned_int8_convrot.safetensors` 即可，其余同场景 B。
 
 > 若 `hf download` 报 `File not found`，说明仓库内文件名/路径不同：先去 https://huggingface.co/Comfy-Org/MiniMax-H3 核对实际文件名，或**直接用模板库下载**（它会按正确路径拉，最省心）。
-> 体积参考：文本编码器 nvfp4_awq ≈16GB，fp8_scaled 扩散 ≈10–20GB，两个 VAE 几个 GB，turbo LoRA 几百 MB——合计约 **30–40GB**，下前先 `df -h /workspace` 确认磁盘够（≥100GB 为宜）。
+
+**场景 B 也可用 wget（断点续传，仓库路径已核实）**：仓库子目录名与 ComfyUI 目标子目录一致，直接映射：
+```bash
+wget -c "https://hf-mirror.com/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_fl2va_pruned_fp8_scaled.safetensors" -O /workspace/ComfyUI/models/diffusion_models/minimax_h3_fl2va_pruned_fp8_scaled.safetensors
+wget -c "https://hf-mirror.com/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors" -O /workspace/ComfyUI/models/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors
+wget -c "https://hf-mirror.com/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_video_vae_fp16.safetensors" -O /workspace/ComfyUI/models/vae/minimax_h3_video_vae_fp16.safetensors
+wget -c "https://hf-mirror.com/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors" -O /workspace/ComfyUI/models/vae/minimax_h3_audio_vae_fp32.safetensors
+wget -c "https://hf-mirror.com/Comfy-Org/MiniMax-H3/resolve/main/loras/minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors" -O /workspace/ComfyUI/models/loras/minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors
+```
+
+> 体积参考（已核实）：T2V + fp8_scaled 组合 ≈ **44.5GB**（diffusion 21.0G + text_enc 15.7G + video_vae 5.2G + audio_vae 0.6G + turbo_lora 2.0G）。下前 `df -h /workspace` 确认空闲 ≥60GB。
+> A10 24G 显存提示：diffusion 21G 已接近 24G 上限，跑时若 `CUDA out of memory`，用 `python main.py --lowvram --listen 0.0.0.0 --port 8188` 重启 ComfyUI（或依赖自动 offload + 充足内存）。先 `free -h` 确认内存 ≥32GB（64GB 更稳）。
 
 > CVM 系统盘持久，**权重下完关机也还在**，下次开机免重下——这是比 DSW 容器大的优势。
 
