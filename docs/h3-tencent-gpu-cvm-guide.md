@@ -233,6 +233,7 @@ wget -c "https://hf-mirror.com/Comfy-Org/MiniMax-H3/resolve/main/loras/minimax_h
 | Sage Attention `using pytorch attention instead` | 正常现象，不影响出视频 |
 | 模型下载慢 | `HF_ENDPOINT=https://hf-mirror.com` 或 ModelScope |
 | 文本编码器体积爆炸 | 下成 `bf16` 版(~64GB)，删掉改 `nvfp4_awq` |
+| wget 报 `OpenSSL: unexpected eof while reading` / `Unable to establish SSL connection` | hf-mirror 偶发 SSL 抖动（非本地问题）。重跑该条：`wget -c --tries=5 --waitretry=10 --timeout=60 "<url>" -O <目标>`；仍断就去掉镜像直连 `huggingface.co` |
 | 公网打不开 | 方式 A：cloudflared 在跑？方式 B：安全组 8188 放通？`curl ... 127.0.0.1:8188` 应 200 |
 | `nvidia-smi` 不可用 | 驱动没装；重装 CUDA 镜像或按腾讯云文档装驱动 |
 | 公网 IP 裸奔风险 | 用 cloudflared 隧道（方式 A）或加反向代理 + 密码 |
