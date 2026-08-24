@@ -274,6 +274,30 @@ ls -lh /workspace/ComfyUI/models/diffusion_models
 
 ---
 
+## 8. 导出与分享工作流 JSON
+
+搭好 / 跑通工作流后，把它存成 `.json` 分享给别人、或自己下次一键复用。
+
+### 8.1 导出到本地文件
+顶部菜单 **`Workflow`（工作流）→ `Export`**：
+- 浏览器下载一个 `.json`（带节点布局），最适合分享、再导入。
+- 想用程序 / API 调用才选 **`Export (API Format)`**（纯 API 格式、无布局）。
+- 另有 **`Workflow → Save`（Ctrl+S）**：存到**当前实例本地**（实例里能重开），但**不会下载到你电脑**——想带走用 `Export`。
+
+### 8.2 别人怎么用（在你的 trycloudflare 网站上）
+1. 对方浏览器打开你的 `https://xxx.trycloudflare.com` 链接。
+2. 顶部 `Workflow → Open`（或 `Load`）选 JSON；更直接：把 JSON **拖到画布**松手即加载。
+3. 加载后 `unet_name` 默认还是 `int8_convrot`（模板默认值），对方也得切成 `fp8_scaled` 才能跑（除非他是 cu130 环境）。
+
+### 8.3 两个关键提醒
+- **JSON 不含权重**：它只记录工作流结构 + 引用的模型文件名。44.5GB 权重不在 JSON 里。对方 `models/` 里必须有同名文件，否则照样报「缺失模型」——分享 JSON 同时要对方自己下权重（或用模板库一键下）。
+- **JSON 不是模型备份**：它只是「菜谱」，不是「食材」。
+
+### 8.4 进 git 版本管理（可选）
+想让工作流也进本仓库：把导出的 `.json` 放进仓库的 `workflows/` 目录提交即可（仓库根目录下建一个 `workflows/` 放工作流 JSON）。配合 `docs/` 里的说明，别人 clone 后能直接 `Open` 复用。
+
+---
+
 ## 关键参考链接
 
 - H3 工作流本地部署：`docs/h3-tencent-gpu-cvm-guide.md`（本仓库，腾讯云 GPU CVM 实操版）

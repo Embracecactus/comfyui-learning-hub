@@ -19,6 +19,8 @@ docs/                                # 文档
 scripts/                             # 脚本
 ├── deploy_comfyui_h3_dsw.sh                # 一键部署：硬件确认→装 ComfyUI→启动→提示接 H3
 └── h3_demo_workflow.js                     # 生成报告所用的动态工作流脚本（溯源用）
+
+workflows/                          # ComfyUI 工作流 JSON（导出后放入，便于 git 管理与复用）
 ```
 
 ## 文档怎么用
