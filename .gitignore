@@ -1,0 +1,30 @@
+# ---- 依赖 / 缓存 ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.node_modules/
+
+# ---- 日志 ----
+*.log
+comfy.log
+
+# ---- 模型权重（体积大，单卡几十 GB，勿入仓库）----
+*.safetensors
+*.ckpt
+*.pt
+*.bin
+models/
+MiniMax-H3/
+
+# ---- 生成产物 ----
+output/
+temp/
+
+# ---- 凭证 / 本地配置 ----
+.env
+*.local
+credentials.json
+
+# ---- 系统 ----
+.DS_Store
+Thumbs.db
