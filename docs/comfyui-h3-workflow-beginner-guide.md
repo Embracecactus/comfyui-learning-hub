@@ -298,6 +298,41 @@ ls -lh /workspace/ComfyUI/models/diffusion_models
 
 ---
 
+## 9. 示例提示词：男朋友给冰冰过生日
+
+H3 提示词把**画面 + 动作 + 音效**写在同一段里，没有 negative prompt。下面给一个可直接粘进 `prompt` 字段的优化版（英文为主，Qwen3-VL 对英文描述更稳；也附中文版）。
+
+**英文（推荐）**：
+```
+A heartwarming birthday scene. Bingbing (a young woman with long hair) sits at a
+softly lit dinner table; her boyfriend walks into frame holding a small cake with a
+single lit candle, warm fairy lights and a few balloons behind them, shallow depth of
+field, cinematic 35mm look. He leans in, smiles, and gently presents the cake; soft
+candlelight flickers across their faces, she covers her mouth in happy surprise then
+leans closer to blow the candle; slow, tender push-in on their faces, subtle handheld
+warmth. Audio: a quiet intimate room tone, the soft crackle of the candle flame, a faint
+hum of the birthday tune, gentle genuine laughter, and a warm swelling acoustic guitar
+motif that resolves as she blows out the candle.
+```
+
+**中文**：
+```
+温馨的生日场景。冰冰（长发年轻女孩）坐在暖光餐桌前；男朋友端着插着一根蜡烛的小蛋糕走入画面，
+背景有串灯和几个气球，浅景深，电影感 35mm 质感。他俯身微笑，轻轻递上蛋糕；烛光在两人脸上摇曳，
+冰冰惊喜地捂嘴，随后凑近吹灭蜡烛。缓慢温柔的推近，轻微手持呼吸感。
+音频：私密安静的房间底噪、蜡烛火焰的细微噼啪、隐约的生日歌哼唱、真诚的轻笑，
+以及一段温暖的木吉他旋律在吹灭蜡烛时收束。
+```
+
+**优化点**：画面给美术锚点（暖光/串灯/气球/浅景深/35mm）；动作写成连贯序列（走入→递蛋糕→捂嘴惊喜→吹蜡烛）；指定运镜（slow push-in + handheld）；音效独立成句（烛火/生日歌/轻笑/木吉他）让 H3 原生立体声出氛围；全程无 negative prompt。
+
+**用法**：
+- **有冰冰的照片** → 用 fl2va（I2V）：照片作 `first_frame`，prompt 描述照片之后的动作；照片最好是"吹蜡烛前"状态。
+- **没有照片** → 用 t2va（T2V）：断开 `first_frame` 连线，prompt 不变，模型自己生成整幅画面。
+- 参数：duration 5s、百万像素 0.4（A10 显存紧可降到 0.3）、seed 固定可复现。
+
+---
+
 ## 关键参考链接
 
 - H3 工作流本地部署：`docs/h3-tencent-gpu-cvm-guide.md`（本仓库，腾讯云 GPU CVM 实操版）
