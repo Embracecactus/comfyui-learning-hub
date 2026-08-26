@@ -16,6 +16,9 @@ comfy.log
 models/
 MiniMax-H3/
 
+# ---- 本地上游源码快照（仅用于生成节点索引，不纳入学习资料仓库）----
+/ComfyUI/
+
 # ---- 生成产物 ----
 output/
 temp/

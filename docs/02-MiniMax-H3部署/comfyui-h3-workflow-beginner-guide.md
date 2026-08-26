@@ -1,6 +1,6 @@
 # ComfyUI MiniMax H3 工作流逐节点详解（新手版）
 
-> 配套阅读：`docs/h3-tencent-gpu-cvm-guide.md`（部署）、`docs/tencent-cloud-comfyui-guide.md`（ComfyUI 基础）
+> 配套阅读：[腾讯云 H3 部署](h3-tencent-gpu-cvm-guide.md)、[腾讯云 ComfyUI 基础](tencent-cloud-comfyui-guide.md)
 > 目标读者：懂 ML 基本概念（扩散模型、量化、显存），但**第一次用 ComfyUI** 的人
 > 本文逐节点拆解你截图里那个 **MiniMax H3 fl2va（首末帧图生视频）** 工作流，照着读一遍就能理解每条线、每个参数的含义
 
@@ -335,8 +335,8 @@ motif that resolves as she blows out the candle.
 
 ## 关键参考链接
 
-- H3 工作流本地部署：`docs/h3-tencent-gpu-cvm-guide.md`（本仓库，腾讯云 GPU CVM 实操版）
-- ComfyUI 基础：`docs/tencent-cloud-comfyui-guide.md`（本仓库，Z-Image-Turbo 完整流程）
+- H3 工作流本地部署：[腾讯云 GPU CVM 实操版](h3-tencent-gpu-cvm-guide.md)
+- ComfyUI 基础：[Z-Image-Turbo 完整流程](tencent-cloud-comfyui-guide.md)
 - H3 官方文档：https://docs.comfy.org/zh/tutorials/video/minimax/minimax-h3
 - H3 官方 GitHub：https://github.com/MiniMax-AI/MiniMax-H3
 - Comfy-Org 权重仓库：https://huggingface.co/Comfy-Org/MiniMax-H3

@@ -1,39 +1,40 @@
-# ComfyUI × MiniMax H3（阿里云 PAI DSW）项目索引
+# ComfyUI 学习与 MiniMax H3 部署资料
 
-在阿里云 PAI DSW 单卡 GPU 实例上，以 demo 级跑通 **ComfyUI + MiniMax H3** 的调研与部署资料。
+包含面向零基础的 ComfyUI 系统学习手册，以及在阿里云 PAI DSW 单卡 GPU 实例上跑通 **ComfyUI + MiniMax H3** 的调研与部署资料。
 
 > 背景：用户拥有阿里云天池 PAI DSW 探索者版 **60 GPU 小时**（至 2026-12-31），目标是验证 MiniMax H3 单卡可行性、实测速度并估算配额产出。
 
 ## 目录结构
 
 ```
-docs/                                # 文档
-├── h3-tencent-gpu-cvm-guide.md            # 【腾讯云 H3】GPU 云服务器（≥24G）跑 MiniMax H3（撰写版，待实测回填）
-├── h3-dsw-a10-guide.md                    # 【阿里云 H3】PAI DSW（A10 24G）跑 MiniMax H3（实测版，对齐腾讯云那份结构）
-├── comfyui-h3-workflow-beginner-guide.md  # 【新手】ComfyUI MiniMax H3 工作流逐节点详解（截图讲解版）
-├── MiniMax_H3_ComfyUI_DSW_demo_report.md   # 调研报告（结论分级：官方/社区/未证实）
-├── minimax-h3-dsw-manual-guide.md          # 手动操作指南（逐步照着做，比 A10 版更细）
-├── free-gpu-compute-list.md                # 免费 GPU 算力选择清单（国内/海外/ComfyUI 云服务）
-└── tencent-cloud-comfyui-guide.md          # 腾讯云 Cloud Studio 跑 ComfyUI（已验证版，Z-Image-Turbo）
+docs/
+├── 01-新手入门/
+│   ├── README.md                           # 新手资料入口
+│   ├── ComfyUI-系统学习手册/               # 9 章教程 + 节点手册 + 全量节点索引
+│   ├── ComfyUI-小白上手学习指南.md          # 快速入门版
+│   ├── images/                             # 新手文档共享图片
+│   └── examples/                           # 示例工作流
+├── 02-MiniMax-H3部署/                      # H3 调研、部署与逐节点工作流资料
+└── 03-GPU资源参考/                         # 免费/低成本 GPU 算力参考
 
-scripts/                             # 脚本
+scripts/
 ├── deploy_comfyui_h3_dsw.sh                # 一键部署：硬件确认→装 ComfyUI→启动→提示接 H3
 └── h3_demo_workflow.js                     # 生成报告所用的动态工作流脚本（溯源用）
-
-workflows/                          # ComfyUI 工作流 JSON（导出后放入，便于 git 管理与复用）
 ```
 
 ## 文档怎么用
 
 | 场景 | 看哪个 |
 |---|---|
-| **腾讯云 GPU 云服务器（≥24G）跑 H3** | `docs/h3-tencent-gpu-cvm-guide.md`（撰写版，0–11 节，待实测回填） |
-| 阿里云 PAI DSW（A10 24G）跑 H3 | `docs/h3-dsw-a10-guide.md`（对齐本结构，实测版） |
-| **ComfyUI 新手**看不懂工作流截图 | `docs/comfyui-h3-workflow-beginner-guide.md`（节点/连线/参数逐项讲解） |
-| 想知道"能不能跑、怎么取舍" | `docs/MiniMax_H3_ComfyUI_DSW_demo_report.md`（含可行性决策树、60h 产出公式） |
-| 第一次上手，一步步点（更细） | `docs/minimax-h3-dsw-manual-guide.md`（第 0–8 步 + 排错表 + 复查清单） |
+| **从零系统学习 ComfyUI，逐节点查资料** | [ComfyUI 零基础学习手册](docs/01-新手入门/ComfyUI-系统学习手册/README.md)（安装→基础工作流→进阶→排错，含 639 个内置节点索引） |
+| **腾讯云 GPU 云服务器（≥24G）跑 H3** | [腾讯云 H3 指南](docs/02-MiniMax-H3部署/h3-tencent-gpu-cvm-guide.md)（撰写版，0–11 节，待实测回填） |
+| 阿里云 PAI DSW（A10 24G）跑 H3 | [阿里云 DSW A10 指南](docs/02-MiniMax-H3部署/h3-dsw-a10-guide.md)（对齐本结构，实测版） |
+| **ComfyUI 新手**看不懂 H3 工作流 | [H3 工作流逐节点指南](docs/02-MiniMax-H3部署/comfyui-h3-workflow-beginner-guide.md)（节点/连线/参数逐项讲解） |
+| 想知道"能不能跑、怎么取舍" | [H3 DSW 调研报告](docs/02-MiniMax-H3部署/MiniMax_H3_ComfyUI_DSW_demo_report.md)（含可行性决策树、60h 产出公式） |
+| 第一次上手 H3，一步步点 | [H3 手动操作指南](docs/02-MiniMax-H3部署/minimax-h3-dsw-manual-guide.md)（第 0–8 步 + 排错表 + 复查清单） |
 | 想省事直接跑 | `scripts/deploy_comfyui_h3_dsw.sh`（在 DSW Terminal 执行 `bash scripts/deploy_comfyui_h3_dsw.sh`） |
-| 腾讯云 Cloud Studio 免费 T4 练手 | `docs/tencent-cloud-comfyui-guide.md`（Z-Image-Turbo，已验证） |
+| 腾讯云 Cloud Studio 免费 T4 练手 | [腾讯云 ComfyUI 指南](docs/02-MiniMax-H3部署/tencent-cloud-comfyui-guide.md)（Z-Image-Turbo，已验证） |
+| 查找免费/低成本 GPU | [GPU 资源参考](docs/03-GPU资源参考/free-gpu-compute-list.md) |
 
 ## 核心结论（速览）
 
