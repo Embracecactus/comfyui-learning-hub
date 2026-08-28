@@ -12,6 +12,7 @@
 | 2 | [自动抠图与白底主图](02-自动抠图与白底主图工作流.md) | 普通照片自动分割、透明 PNG、动态同尺寸白底合成 | [打开](workflows/ecommerce-auto-cutout-white-background-birefnet.json) |
 | 3 | [四种风格商品主图批量生成](03-四种风格商品主图批量生成.md) | 四套提示词顺序采样、图片合批、同一商品批量保真合成 | [打开](workflows/ecommerce-main-image-four-styles-sdxl.json) |
 | 4 | [参考图驱动商品主图](04-参考图驱动商品主图工作流.md) | 商品身份与对标视觉双参考、FLUX.2 Klein 完整图像编辑 | [打开](workflows/ecommerce-reference-main-image-flux2-klein.json) |
+| 4A | [映海卫衣公开案例同输入对比](test-cases/01-映海卫衣公开案例对比.md) | 固定商品、代表性参考、网站公开结果基线与逐项验收 | [打开](workflows/ecommerce-yinghai-hoodie-comparison-flux2-klein.json) |
 
 参考站登录实测、公开接口、案例观察、差异判断、技术选型和未验证事项统一记录在[2026-08-28 映海站实测与重构决策](reference-site-audit-2026-08-28.md)，后续不需要重新调查同一批信息。
 
@@ -21,6 +22,8 @@
 - [无品牌象牙白面霜罐](assets/test-products/ivory-cream-jar-transparent.png)：适合验证第三章四种明暗背景批量生成。
 
 两张图片均为 1:1 RGBA PNG，背景 alpha 已验证为真实透明。
+
+需要验证第 4 阶段是否真正借鉴了参考版式时，直接使用[映海卫衣公开案例同输入对比](test-cases/01-映海卫衣公开案例对比.md)。第三方公开案例素材只保存在本机 ComfyUI `input` 目录，仓库记录来源、哈希和用法，不再分发图片文件。
 
 ## 电商素材工作流路线
 

@@ -2,9 +2,11 @@
 
 ## Comfy-Org/workflow_templates
 
-The file
+The files
 `docs/04-电商AI工作流/workflows/ecommerce-reference-main-image-flux2-klein.json`
-is derived from:
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-hoodie-comparison-flux2-klein.json`
+are derived from:
 
 ```text
 https://github.com/Comfy-Org/workflow_templates

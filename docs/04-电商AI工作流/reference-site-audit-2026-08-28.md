@@ -207,3 +207,38 @@ SamplerCustomAdvanced
 ```
 
 因此下一步不需要先更新 Core，应直接重启实例、导入派生 JSON，并检查三个模型下拉框是否自动命中。
+
+## 11. 卫衣公开案例本地 A/B 素材准备记录
+
+准备日期：`2026-08-28`。
+
+为了让第 4 阶段第一次运行就能与参考站公开结果做可重复比较，已把卫衣案例的商品图、最有代表性的白底版式参考图和网站公开结果保存到目标实例：
+
+```text
+%LOCALAPPDATA%\Comfy-Desktop\ComfyUI-Installs\ComfyUI-RTX5060\ComfyUI\input\yinghai-hoodie-comparison
+```
+
+本地文件与哈希：
+
+```text
+01-product-1977-hoodie.png
+SHA-256 5cc9ab74ec3f09b47e5d921a5f9af37dc22f02eb14edc6217d24f4d3ee950082
+
+01b-product-1977-hoodie-9x16-canvas.png
+SHA-256 74325ea19aa0ba7749835ab69f92379f8be925dbd4cd88a5ab04e0ac13ae7319
+
+02-reference-white-chicerro-layout.png
+SHA-256 cfc1fa95fe6784cbfa792b9eeb4a716abc15a88a6d3b31fc2202e170e182344c
+
+03-site-result-baseline.png
+SHA-256 38e4445a3ad055b721704100250e3822caf6481b9aebb2fec27928242faf446a
+```
+
+`01b` 只把网站商品原图等比放入 `576 × 1024` 白色画布，没有 AI 重绘，用于让本地输出与网站的 `9:16` 比例一致。网站案例实际用了三张对标图；本地首轮只选最直接反映在公开结果中的白底版式图，以减少变量。详细 URL、尺寸、字节数、运行方法和验收表见[卫衣公开案例对比测试](test-cases/01-映海卫衣公开案例对比.md)。
+
+为该案例新增了可重复派生文件：
+
+- [案例工作流](workflows/ecommerce-yinghai-hoodie-comparison-flux2-klein.json)
+- [案例派生脚本](../../scripts/derive_yinghai_hoodie_comparison_workflow.mjs)
+
+工作流会自动选择前述三张图片，固定 seed `2026082802`，并把网站结果作为断开的预览节点。图片是第三方公开案例，只保存在本机，没有提交到 GitHub；仓库只保留 URL、哈希、配置和派生方法。本次仍未调用网站生成接口或消耗积分。

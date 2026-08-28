@@ -24,6 +24,7 @@ scripts/
 ├── deploy_comfyui_h3_dsw.sh                # 一键部署：硬件确认→装 ComfyUI→启动→提示接 H3
 ├── h3_demo_workflow.js                     # 生成报告所用的动态工作流脚本（溯源用）
 ├── derive_flux2_klein_reference_workflow.mjs # 从官方模板派生双参考商品主图工作流
+├── derive_yinghai_hoodie_comparison_workflow.mjs # 从通用版派生映海卫衣固定输入对比工作流
 └── validate_comfy_workflow.mjs              # 静态检查工作流节点、连线和子图引用
 ```
 
