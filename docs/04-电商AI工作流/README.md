@@ -16,6 +16,7 @@
 | 5 | [映海卫衣三结果分支复刻](05-映海卫衣三结果复刻实战.md) | 原像素平铺 + 男模全身 + 男模近景，三条独立工作流 | [平铺](workflows/ecommerce-yinghai-hoodie-flat-pixel-faithful-birefnet.json) / [全身](workflows/ecommerce-yinghai-hoodie-model-full-flux2-klein.json) / [近景](workflows/ecommerce-yinghai-hoodie-model-close-flux2-klein.json) |
 | 6 | [通用商品自动排版](06-通用商品自动排版工作流.md) | 从遮罩自动裁边，按画布百分比缩放和定位，不绑定某个商品 | [打开](workflows/ecommerce-generic-product-layout-birefnet.json) |
 | 7 | [通用商品 2K 与确定性排版](07-通用商品2K与确定性排版.md) | RealESRGAN 4× 后精确输出 1440×2560，并添加可编辑的真实卖点和自有品牌 | [打开](workflows/ecommerce-generic-product-layout-2k-branded.json) |
+| 8 | [小白版：与参考站功能对比及阶段成果](08-与参考站功能对比及阶段成果.md) | 用生活化语言说明当前能做什么、不能做什么，以及为什么抠图排版不等于 AI 换装 | — |
 
 参考站登录实测、公开接口、案例观察、差异判断、技术选型和未验证事项统一记录在[2026-08-28 映海站实测与重构决策](reference-site-audit-2026-08-28.md)，后续不需要重新调查同一批信息。
 
