@@ -45,3 +45,23 @@ SOFTWARE.
 
 Upstream license source:
 <https://github.com/Comfy-Org/workflow_templates/blob/main/LICENSE>
+
+## RealESRGAN_x4plus local model dependency
+
+`docs/04-电商AI工作流/workflows/ecommerce-generic-product-layout-2k-branded.json`
+references the local model file `RealESRGAN_x4plus.pth`. The model file is not
+redistributed in this repository. The tutorial downloads it from a mirror of:
+
+```text
+https://github.com/xinntao/Real-ESRGAN
+https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+```
+
+Real-ESRGAN is distributed under the BSD 3-Clause License. Upstream license:
+<https://github.com/xinntao/Real-ESRGAN/blob/master/LICENSE>
+
+The expected SHA-256 for the local model dependency is:
+
+```text
+4fa0d38905f75ac06eb49a7951b426670021be3018265fd191d2125df9d682f1
+```

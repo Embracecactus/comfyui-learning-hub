@@ -62,5 +62,45 @@ class ExpandBoundingBoxTests(unittest.TestCase):
             LAYOUT_MATH.expand_bbox(10, 10, 9, 20, 100, 100, 1)
 
 
+class ComputeTextOriginTests(unittest.TestCase):
+    def test_top_left_uses_percentage_as_visible_box_corner(self):
+        self.assertEqual(
+            LAYOUT_MATH.compute_text_origin(
+                1000, 2000, (-2, 4, 198, 104), 10, 5, "top_left"
+            ),
+            (102, 96),
+        )
+
+    def test_center_anchor_centers_visible_text_box(self):
+        self.assertEqual(
+            LAYOUT_MATH.compute_text_origin(
+                1000, 2000, (0, 0, 200, 100), 50, 50, "center_center"
+            ),
+            (400, 950),
+        )
+
+    def test_bottom_right_anchor_places_visible_box_at_target(self):
+        self.assertEqual(
+            LAYOUT_MATH.compute_text_origin(
+                1000, 2000, (0, 0, 200, 100), 90, 95, "bottom_right"
+            ),
+            (700, 1800),
+        )
+
+    def test_keep_inside_clamps_text_block_to_canvas(self):
+        self.assertEqual(
+            LAYOUT_MATH.compute_text_origin(
+                100, 200, (0, 0, 80, 50), 100, 100, "top_left"
+            ),
+            (20, 150),
+        )
+
+    def test_invalid_anchor_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "unsupported"):
+            LAYOUT_MATH.compute_text_origin(
+                100, 200, (0, 0, 10, 10), 50, 50, "middle"
+            )
+
+
 if __name__ == "__main__":
     unittest.main()

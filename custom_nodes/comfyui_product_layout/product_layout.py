@@ -5,6 +5,7 @@ import comfy.utils
 from comfy_api.latest import ComfyExtension, io
 
 from .layout_math import compute_layout, expand_bbox
+from .product_text_overlay import ProductTextOverlay
 
 
 def _parse_hex_color(value):
@@ -178,7 +179,7 @@ class ProductLayoutByMask(io.ComfyNode):
 class ProductLayoutExtension(ComfyExtension):
     @override
     async def get_node_list(self):
-        return [ProductLayoutByMask]
+        return [ProductLayoutByMask, ProductTextOverlay]
 
 
 async def comfy_entrypoint():

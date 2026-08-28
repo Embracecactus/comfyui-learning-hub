@@ -63,3 +63,55 @@ def compute_layout(
     x = min(max(0, x), canvas_width - width)
     y = min(max(0, y), canvas_height - height)
     return x, y, width, height
+
+
+def compute_text_origin(
+    canvas_width,
+    canvas_height,
+    text_bbox,
+    x_percent,
+    y_percent,
+    anchor,
+    keep_inside=True,
+):
+    """Return the PIL draw origin for a text bounding box and percentage anchor."""
+    if canvas_width < 1 or canvas_height < 1:
+        raise ValueError("canvas dimensions must be positive")
+    if not 0 <= x_percent <= 100 or not 0 <= y_percent <= 100:
+        raise ValueError("text x/y percentages must be in [0, 100]")
+
+    try:
+        vertical, horizontal = anchor.split("_", 1)
+    except ValueError as error:
+        raise ValueError(f"unsupported text anchor: {anchor}") from error
+    if vertical not in {"top", "center", "bottom"} or horizontal not in {
+        "left",
+        "center",
+        "right",
+    }:
+        raise ValueError(f"unsupported text anchor: {anchor}")
+
+    bbox_left, bbox_top, bbox_right, bbox_bottom = text_bbox
+    block_width = bbox_right - bbox_left
+    block_height = bbox_bottom - bbox_top
+    if block_width < 0 or block_height < 0:
+        raise ValueError("text bounding box is invalid")
+
+    target_x = canvas_width * x_percent / 100.0
+    target_y = canvas_height * y_percent / 100.0
+    desired_left = {
+        "left": target_x,
+        "center": target_x - block_width / 2.0,
+        "right": target_x - block_width,
+    }[horizontal]
+    desired_top = {
+        "top": target_y,
+        "center": target_y - block_height / 2.0,
+        "bottom": target_y - block_height,
+    }[vertical]
+
+    if keep_inside:
+        desired_left = min(max(0.0, desired_left), max(0.0, canvas_width - block_width))
+        desired_top = min(max(0.0, desired_top), max(0.0, canvas_height - block_height))
+
+    return round(desired_left - bbox_left), round(desired_top - bbox_top)
