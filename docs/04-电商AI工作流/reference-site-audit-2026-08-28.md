@@ -170,8 +170,40 @@ node scripts/validate_comfy_workflow.mjs \
 截至本记录：
 
 - 派生工作流的 JSON 结构可以静态校验。
-- 尚未在目标 Windows ComfyUI Desktop 中下载三个 FLUX.2 Klein 模型并实际运行。
+- 三个 FLUX.2 Klein 模型已经下载到目标 Windows Desktop 共享模型目录，并通过精确字节数检查；尚未实际运行工作流。
 - 尚未验证 RTX 5060 8 GB 的首张生成耗时、峰值显存和包装文字保真率。
 - 尚未使用网站余额提交同一商品做 A/B 生成，所以没有声称本地成片已经追平参考站。
 
 下一次继续时应从[第 4 阶段搭建文档](04-参考图驱动商品主图工作流.md)的“运行前验收”开始，不需要重新调查网站表单和官方基础模板。
+
+## 10. 目标机器模型与 Core 验证记录
+
+验证日期：`2026-08-28`。
+
+共享模型目录使用 `%LOCALAPPDATA%\Comfy-Desktop\ComfyUI-Shared\models`。三个目标文件均已去掉 `.download`，没有发现同名断点残留：
+
+| 文件 | 实测字节数 | 结果 |
+|---|---:|---|
+| `vae/flux2-vae.safetensors` | `336,213,556` | 通过 |
+| `diffusion_models/flux-2-klein-4b-fp8.safetensors` | `4,070,624,520` | 通过 |
+| `text_encoders/qwen_3_4b.safetensors` | `8,044,982,048` | 通过 |
+
+目标 Desktop 实例：
+
+```text
+ComfyUI Core 0.33.4
+Git commit 7a131a3afadc8200120f67f9236311a2c48b7445
+Build date 2026-08-24
+```
+
+已在该实例源码中确认存在以下必需 Core 节点：
+
+```text
+EmptyFlux2LatentImage
+Flux2Scheduler
+ReferenceLatent
+GetImageSize
+SamplerCustomAdvanced
+```
+
+因此下一步不需要先更新 Core，应直接重启实例、导入派生 JSON，并检查三个模型下拉框是否自动命中。
