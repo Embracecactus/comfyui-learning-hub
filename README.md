@@ -26,8 +26,13 @@ scripts/
 ├── derive_flux2_klein_reference_workflow.mjs # 从官方模板派生双参考商品主图工作流
 ├── derive_yinghai_hoodie_comparison_workflow.mjs # 从通用版派生映海卫衣固定输入对比工作流
 ├── derive_yinghai_hoodie_three_output_workflows.mjs # 派生卫衣平铺、男模全身和男模近景三分支
+├── derive_generic_product_layout_workflow.mjs # 派生任意单商品自动裁边与白底排版工作流
 └── validate_comfy_workflow.mjs              # 静态检查工作流节点、连线和子图引用
 ```
+
+`custom_nodes/comfyui_product_layout/` 是本项目配套的小型 ComfyUI 节点，用前景遮罩自动裁边，再按目标画布百分比缩放和定位商品。它用于通用确定性排版，不包含模型文件或机器专属配置。
+
+`tests/custom_nodes/` 保存自动裁边和相对排版的纯几何单元测试，不需要下载模型即可运行。
 
 ## 文档怎么用
 

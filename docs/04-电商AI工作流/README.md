@@ -14,6 +14,7 @@
 | 4 | [参考图驱动商品主图](04-参考图驱动商品主图工作流.md) | 商品身份与对标视觉双参考、FLUX.2 Klein 完整图像编辑 | [打开](workflows/ecommerce-reference-main-image-flux2-klein.json) |
 | 4A | [映海卫衣公开案例同输入对比](test-cases/01-映海卫衣公开案例对比.md) | 固定商品、代表性参考、网站公开结果基线与逐项验收 | [打开](workflows/ecommerce-yinghai-hoodie-comparison-flux2-klein.json) |
 | 5 | [映海卫衣三结果分支复刻](05-映海卫衣三结果复刻实战.md) | 原像素平铺 + 男模全身 + 男模近景，三条独立工作流 | [平铺](workflows/ecommerce-yinghai-hoodie-flat-pixel-faithful-birefnet.json) / [全身](workflows/ecommerce-yinghai-hoodie-model-full-flux2-klein.json) / [近景](workflows/ecommerce-yinghai-hoodie-model-close-flux2-klein.json) |
+| 6 | [通用商品自动排版](06-通用商品自动排版工作流.md) | 从遮罩自动裁边，按画布百分比缩放和定位，不绑定某个商品 | [打开](workflows/ecommerce-generic-product-layout-birefnet.json) |
 
 参考站登录实测、公开接口、案例观察、差异判断、技术选型和未验证事项统一记录在[2026-08-28 映海站实测与重构决策](reference-site-audit-2026-08-28.md)，后续不需要重新调查同一批信息。
 
