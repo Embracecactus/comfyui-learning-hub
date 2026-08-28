@@ -2,6 +2,8 @@
 
 包含面向零基础的 ComfyUI 系统学习手册，以及在阿里云 PAI DSW 单卡 GPU 实例上跑通 **ComfyUI + MiniMax H3** 的调研与部署资料。
 
+派生自外部开源模板的文件及许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
 > 背景：用户拥有阿里云天池 PAI DSW 探索者版 **60 GPU 小时**（至 2026-12-31），目标是验证 MiniMax H3 单卡可行性、实测速度并估算配额产出。
 
 ## 目录结构
@@ -15,11 +17,14 @@ docs/
 │   ├── images/                             # 新手文档共享图片
 │   └── examples/                           # 示例工作流
 ├── 02-MiniMax-H3部署/                      # H3 调研、部署与逐节点工作流资料
-└── 03-GPU资源参考/                         # 免费/低成本 GPU 算力参考
+├── 03-GPU资源参考/                         # 免费/低成本 GPU 算力参考
+└── 04-电商AI工作流/                        # 商品图、参考图编辑、换装与视频路线
 
 scripts/
 ├── deploy_comfyui_h3_dsw.sh                # 一键部署：硬件确认→装 ComfyUI→启动→提示接 H3
-└── h3_demo_workflow.js                     # 生成报告所用的动态工作流脚本（溯源用）
+├── h3_demo_workflow.js                     # 生成报告所用的动态工作流脚本（溯源用）
+├── derive_flux2_klein_reference_workflow.mjs # 从官方模板派生双参考商品主图工作流
+└── validate_comfy_workflow.mjs              # 静态检查工作流节点、连线和子图引用
 ```
 
 ## 文档怎么用
@@ -35,6 +40,7 @@ scripts/
 | 想省事直接跑 | `scripts/deploy_comfyui_h3_dsw.sh`（在 DSW Terminal 执行 `bash scripts/deploy_comfyui_h3_dsw.sh`） |
 | 腾讯云 Cloud Studio 免费 T4 练手 | [腾讯云 ComfyUI 指南](docs/02-MiniMax-H3部署/tencent-cloud-comfyui-guide.md)（Z-Image-Turbo，已验证） |
 | 查找免费/低成本 GPU | [GPU 资源参考](docs/03-GPU资源参考/free-gpu-compute-list.md) |
+| 搭建参考图驱动的电商商品主图 | [电商 AI 工作流项目](docs/04-电商AI工作流/README.md)（含参考站实测、差异记录和可复现 JSON） |
 
 ## 核心结论（速览）
 
