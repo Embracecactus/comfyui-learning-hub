@@ -212,10 +212,10 @@ SamplerCustomAdvanced
 
 准备日期：`2026-08-28`。
 
-为了让第 4 阶段第一次运行就能与参考站公开结果做可重复比较，已把卫衣案例的商品图、最有代表性的白底版式参考图和网站公开结果保存到目标实例：
+为了让第 4 阶段第一次运行就能与参考站公开结果做可重复比较，已把卫衣案例的商品图、最有代表性的白底版式参考图和网站公开结果保存到 Desktop 共享输入目录：
 
 ```text
-%LOCALAPPDATA%\Comfy-Desktop\ComfyUI-Installs\ComfyUI-RTX5060\ComfyUI\input\yinghai-hoodie-comparison
+%LOCALAPPDATA%\Comfy-Desktop\ComfyUI-Shared\input\yinghai-hoodie-comparison
 ```
 
 本地文件与哈希：
@@ -242,3 +242,20 @@ SHA-256 38e4445a3ad055b721704100250e3822caf6481b9aebb2fec27928242faf446a
 - [案例派生脚本](../../scripts/derive_yinghai_hoodie_comparison_workflow.mjs)
 
 工作流会自动选择前述三张图片，固定 seed `2026082802`，并把网站结果作为断开的预览节点。图片是第三方公开案例，只保存在本机，没有提交到 GitHub；仓库只保留 URL、哈希、配置和派生方法。本次仍未调用网站生成接口或消耗积分。
+
+### 11.1 第一次导入的缺失输入错误与修正
+
+第一次导入专用 JSON 时，三个 `LoadImage` 节点同时报告“所需的媒体输入未选择文件”。根因是素材最初放在了实例源码目录：
+
+```text
+ComfyUI-Installs\ComfyUI-RTX5060\ComfyUI\input
+```
+
+但该 Desktop 实例的启动日志明确记录：
+
+```text
+Setting input directory to: C:\Users\lijian\AppData\Local\Comfy-Desktop\ComfyUI-Shared\input
+Setting output directory to: C:\Users\lijian\AppData\Local\Comfy-Desktop\ComfyUI-Shared\output
+```
+
+`2026-08-28` 已将四张素材复制到正确的 `ComfyUI-Shared\input\yinghai-hoodie-comparison`，并重新核对四个 SHA-256，均与本节记录一致。原实例目录文件暂时保留作备份。修正后应重启/刷新实例并重新导入 JSON；因为首次导入时前端可能已经把不存在的下拉值清空，只按 `R` 不一定恢复。
