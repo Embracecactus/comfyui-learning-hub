@@ -13,6 +13,7 @@
 | 3 | [四种风格商品主图批量生成](03-四种风格商品主图批量生成.md) | 四套提示词顺序采样、图片合批、同一商品批量保真合成 | [打开](workflows/ecommerce-main-image-four-styles-sdxl.json) |
 | 4 | [参考图驱动商品主图](04-参考图驱动商品主图工作流.md) | 商品身份与对标视觉双参考、FLUX.2 Klein 完整图像编辑 | [打开](workflows/ecommerce-reference-main-image-flux2-klein.json) |
 | 4A | [映海卫衣公开案例同输入对比](test-cases/01-映海卫衣公开案例对比.md) | 固定商品、代表性参考、网站公开结果基线与逐项验收 | [打开](workflows/ecommerce-yinghai-hoodie-comparison-flux2-klein.json) |
+| 5 | [映海卫衣三结果分支复刻](05-映海卫衣三结果复刻实战.md) | 原像素平铺 + 男模全身 + 男模近景，三条独立工作流 | [平铺](workflows/ecommerce-yinghai-hoodie-flat-pixel-faithful-birefnet.json) / [全身](workflows/ecommerce-yinghai-hoodie-model-full-flux2-klein.json) / [近景](workflows/ecommerce-yinghai-hoodie-model-close-flux2-klein.json) |
 
 参考站登录实测、公开接口、案例观察、差异判断、技术选型和未验证事项统一记录在[2026-08-28 映海站实测与重构决策](reference-site-audit-2026-08-28.md)，后续不需要重新调查同一批信息。
 
@@ -35,7 +36,7 @@
 | 2 | 自动抠图与白底主图 | 已完成 | 背景分割、遮罩方向、边缘和半透明材质 |
 | 3 | 商品主图批量变体 | 链路完成，视觉验收中 | 风格模板、种子管理、显存安全的顺序采样与图片批次 |
 | 4 | 参考图驱动商品主图 | 已搭建，待本机运行 | 多参考语义编辑、商品保真、8 GB 模型卸载 |
-| 5 | 模特穿戴/换装 | 待学习 | 姿态、服装区域、身份与商品一致性 |
+| 5 | 模特穿戴/换装 | 最小双参考分支已搭建，待本机实测 | 姿态、服装区域、身份与商品一致性 |
 | 6 | 详情页素材与版式 | 待学习 | 多图叙事、中文文字、最终排版工具 |
 | 7 | 商品广告与带货视频 | 待学习 | 商品一致性、镜头设计、视频模型选择 |
 | 8 | 参考视频拆镜与成片 | 待学习 | 分镜、节奏、音频、字幕和镜头拼接 |

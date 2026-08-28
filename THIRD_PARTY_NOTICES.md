@@ -6,6 +6,10 @@ The files
 `docs/04-电商AI工作流/workflows/ecommerce-reference-main-image-flux2-klein.json`
 and
 `docs/04-电商AI工作流/workflows/ecommerce-yinghai-hoodie-comparison-flux2-klein.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-hoodie-model-full-flux2-klein.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-hoodie-model-close-flux2-klein.json`
 are derived from:
 
 ```text
