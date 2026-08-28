@@ -127,10 +127,10 @@ function makeFlatPixelFaithfulWorkflow() {
     pos: [-360, 410],
     size: [310, 180],
     order: 6,
-    title: "原商品等比缩放｜宽 480，高度自动",
+    title: "原商品等比缩放｜宽 560，高度自动",
     inputs: [{ name: "image", type: "IMAGE", link: 5 }],
     outputs: [{ name: "IMAGE", type: "IMAGE", links: [10] }],
-    widgets: ["lanczos", 480, 0, "disabled"],
+    widgets: ["lanczos", 560, 0, "disabled"],
   });
 
   const maskToImage = coreNode({
@@ -150,10 +150,10 @@ function makeFlatPixelFaithfulWorkflow() {
     pos: [-40, 650],
     size: [310, 180],
     order: 8,
-    title: "遮罩等比缩放｜必须与商品同宽 480",
+    title: "遮罩等比缩放｜必须与商品同宽 560",
     inputs: [{ name: "image", type: "IMAGE", link: 7 }],
     outputs: [{ name: "IMAGE", type: "IMAGE", links: [8] }],
-    widgets: ["bilinear", 480, 0, "disabled"],
+    widgets: ["bilinear", 560, 0, "disabled"],
   });
 
   const imageToMask = coreNode({
@@ -185,14 +185,14 @@ function makeFlatPixelFaithfulWorkflow() {
     pos: [700, 360],
     size: [330, 230],
     order: 11,
-    title: "原像素合成｜x=48，y=90",
+    title: "原像素合成｜x=8，y=114",
     inputs: [
       { name: "destination", type: "IMAGE", link: 9 },
       { name: "source", type: "IMAGE", link: 10 },
       { name: "mask", shape: 7, type: "MASK", link: 11 },
     ],
     outputs: [{ name: "IMAGE", type: "IMAGE", links: [12, 13] }],
-    widgets: [48, 90, false],
+    widgets: [8, 114, false],
   });
 
   const preview = coreNode({

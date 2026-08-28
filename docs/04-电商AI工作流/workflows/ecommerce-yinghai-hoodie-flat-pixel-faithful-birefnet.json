@@ -254,14 +254,14 @@
           ]
         }
       ],
-      "title": "原商品等比缩放｜宽 480，高度自动",
+      "title": "原商品等比缩放｜宽 560，高度自动",
       "properties": {
         "Node name for S&R": "ImageScale",
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
         "lanczos",
-        480,
+        560,
         0,
         "disabled"
       ]
@@ -333,14 +333,14 @@
           ]
         }
       ],
-      "title": "遮罩等比缩放｜必须与商品同宽 480",
+      "title": "遮罩等比缩放｜必须与商品同宽 560",
       "properties": {
         "Node name for S&R": "ImageScale",
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
         "bilinear",
-        480,
+        560,
         0,
         "disabled"
       ]
@@ -462,14 +462,14 @@
           ]
         }
       ],
-      "title": "原像素合成｜x=48，y=90",
+      "title": "原像素合成｜x=8，y=114",
       "properties": {
         "Node name for S&R": "ImageCompositeMasked",
         "cnr_id": "comfy-core"
       },
       "widgets_values": [
-        48,
-        90,
+        8,
+        114,
         false
       ]
     },
