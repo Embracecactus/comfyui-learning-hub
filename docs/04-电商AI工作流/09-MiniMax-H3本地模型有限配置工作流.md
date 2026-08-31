@@ -1,213 +1,299 @@
-# MiniMax H3 本地模型：有限配置工作流
+# MiniMax H3 本地模型：RTX 5060 8GB 无量化流式工作流
 
-这一章使用真正的 MiniMax H3 本地权重，不调用 Partner Node，不登录 Comfy 账户，也不按生成次数扣 Credits。
+这一章坚持在本机运行 MiniMax H3，不调用视频生成 API，也不把扩散模型或文本编码器改成 INT8、FP8、NVFP4、NF4 或 GGUF。
 
-配套工作流：[ecommerce-minimax-h3-local-ref2va.json](workflows/ecommerce-minimax-h3-local-ref2va.json)
+配套文件：
 
-## 1. 先看当前电脑能不能跑
+- [RTX 5060 8GB BF16 流式工作流](workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json)
+- [Windows 断点续传下载脚本](../../scripts/download_minimax_h3_bf16_windows.cmd)
+- [24GB 量化实验旧版](workflows/ecommerce-minimax-h3-local-ref2va.json)仅保留用于历史对比，本章不使用。
 
-2026-08-31 对当前电脑实测：
+## 1. 先说结论
+
+当前电脑实测环境：
 
 ```text
-GPU：NVIDIA GeForce RTX 5060，8 GB 显存
-Windows 标称内存：16 GB；WSL/系统实际可见约 15 GiB，当时可用约 8.6 GiB
-Swap：4 GiB，已经使用约 3.9 GiB
-C 盘可用：约 205 GB
+GPU：NVIDIA GeForce RTX 5060
+显存：7.96 GiB
+计算能力：SM 12.0（Blackwell）
+Windows 物理内存：约 32 GB
+当前 Windows 页面文件：22 GB
+当前 C 盘可用：约 204 GiB
+ComfyUI Python：ComfyUI/.venv/Scripts/python.exe
+Python：3.13.12
+PyTorch：2.12.1+cu130
+CUDA runtime：13.0
 ```
 
-结论：磁盘勉强够，显存和内存不够，不能在当前电脑实际运行本地 H3 Ref2VA。这里的 15 GiB 是 16 GB 内存经过单位换算和系统保留后的可见容量，并不是另一台电脑或检测错误。
+这台电脑无法把约 37.46 GiB 的 BF16 扩散模型和约 47.97 GiB 的 BF16 文本编码器同时放进显存或物理内存，但可以尝试让 ComfyUI：
 
-理由不是“8 GB 可能慢一点”，而是最小核心文件本身已经超过硬件容量：
+1. 从 NVMe 映射模型文件；
+2. 文本/图片条件编码完成后卸载编码器；
+3. 每次只把当前扩散层换入 GPU；
+4. 把 H3 的 MLP 激活按 2048 token 分块计算；
+5. 最后用分块 VAE 解码。
 
-| 文件 | 作用 | 官方仓库显示大小 |
-|---|---|---:|
-| `minimax_h3_ref2va_pruned_int8_convrot.safetensors` | 参考视频扩散模型 | 约 21 GB |
-| `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | 文本/多模态编码器 | 约 15.7 GB |
-| 两个 VAE | 解码视频与音频 | 另计 |
-| Ref2V Turbo LoRA | 4 步加速 | 另计 |
+这个方案优化的是“峰值驻留量”，不是把 90 多 GiB 权重凭空变小。验收目标是**能够完成一条最低规格视频**，预计会非常慢，也不能在尚未实跑前承诺一定成功。
 
-即使分阶段 offload，15 GiB 系统内存也放不下 21 GB 扩散权重和运行中间数据。扩大 Windows 页文件只能造成严重磁盘换页，不能把它变成可用的视频生成方案。
+## 2. “未量化”到底指什么
 
-## 2. 可执行方案
+默认文件：
 
-把“本地”理解为模型权重部署在自己控制的 GPU 机器上，而不是调用 MiniMax/Comfy API：
-
-| 机器 | 结论 | 用法 |
-|---|---|---|
-| 当前 RTX 5060 8 GB / 15 GiB RAM | 不运行 | 编辑工作流、准备素材、查看结果 |
-| 24 GB VRAM / 64 GB RAM | 最低实验档 | `--lowvram`、4 步、0.4 MP、5 秒 |
-| 32–48 GB VRAM / 64 GB+ RAM | 推荐 | 先 0.4 MP 验证，再升 0.98 MP |
-| 80 GB VRAM | 最稳 | 更高分辨率、更少 offload |
-
-24 GB 是实验起点，不是官方保证的最低门槛。不同显卡架构、Torch/CUDA、系统内存和后台占用都会影响能否完成。
-
-你已有的腾讯云 A10 24 GB 或阿里云 DSW A10 24 GB，可以作为第一台本地权重运行机器。模型文件在该实例磁盘上，生成过程不调用付费视频 API。
-
-## 3. 为什么必须用 Ref2VA
-
-H3 有两类扩散权重：
-
-- `fl2va`：文本生成视频、首尾帧生成视频；
-- `ref2va`：图片、视频、音频多素材参考生成视频。
-
-我们要复刻“最多 9 图、3 视频、3 音频”的功能，因此必须下载 `minimax_h3_ref2va_...`，不能拿 `fl2va` 代替。
-
-## 4. 四个必需权重
-
-进入云 GPU 上的 ComfyUI 根目录，设置镜像后下载。下面使用 Hugging Face CLI；命令中的路径必须与 ComfyUI 模型目录一致。
-
-```bash
-export HF_ENDPOINT=https://hf-mirror.com
-export COMFY_ROOT=/workspace/ComfyUI
-
-hf download Comfy-Org/MiniMax-H3 \
-  diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors \
-  text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors \
-  vae/minimax_h3_video_vae_fp16.safetensors \
-  vae/minimax_h3_audio_vae_fp32.safetensors \
-  loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors \
-  --local-dir "$COMFY_ROOT/models"
+```text
+minimax_h3_ref2va_pruned_bf16.safetensors
+qwen3vl_32b_minimax_h3_bf16.safetensors
+minimax_h3_video_vae_fp16.safetensors
+minimax_h3_audio_vae_fp32.safetensors
+minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors
 ```
 
-下载后检查：
+- 扩散模型和文本/视觉编码器保持 BF16 数值精度；
+- 视频 VAE 是官方 FP16，音频 VAE 是官方 FP32；
+- `pruned` 是 ComfyUI 版 AdaLN 结构剪枝，不是低比特数值量化；
+- 4 步 Turbo LoRA 是减少采样步数的蒸馏 LoRA，不是量化。
 
-```bash
-find "$COMFY_ROOT/models" -type f \
-  \( -name 'minimax_h3_ref2va*' \
-  -o -name 'qwen3vl_32b_minimax_h3*' \
-  -o -name 'minimax_h3_*vae*' \
-  -o -name 'minimax_h3_ref2v_turbo*' \) \
-  -printf '%p  %s bytes\n'
+若连结构剪枝也不要，可把扩散模型换成 `minimax_h3_ref2va_bf16.safetensors`，但单文件约 61.73 GiB，当前配置的磁盘换页压力会明显增加。本章先使用 BF16 pruned 版。
+
+早先在 WSL 中看到约 15 GiB，是 WSL 虚拟机的内存上限；ComfyUI Desktop 运行在 Windows `.venv` 中，应以 Windows 的约 32 GB 物理内存为准。
+
+## 3. 为什么这套改法不降低计算精度
+
+主链路：
+
+```text
+BF16 UNETLoader
+  ↓
+MiniMax H3 Low VRAM
+  ├─ MLP 每次只算 2048 token
+  └─ 禁止提前预取下一层
+  ↓
+4 步 Turbo LoRA / 采样
+  ↓
+VAEDecodeTiled
 ```
 
-不要使用 `huggingface-cli download ... --local-dir models/MiniMax-H3` 把所有文件堆在一个目录；ComfyUI 需要分别在 `diffusion_models`、`text_encoders`、`vae`、`loras` 下找到它们。
+MLP 分块只是把同一个矩阵运算拆成多批执行，再按原顺序写回输出；它不修改模型权重，也不跳过 token。代价是重复调度和换入次数增加，所以更慢。
 
-## 5. Torch 与 int8_convrot
+当前工作流没有默认启用 Sol-Attn。Sol-Attn 是稀疏注意力近似，虽然不是量化，但可能改变结果；而本机当前也没有 Triton，因此先用可比较的精确注意力建立基线。
 
-`int8_convrot` 路线依赖较新的 CUDA/Torch 支持。先检查：
+## 4. 磁盘和 Windows 页面文件
 
-```bash
-cd /workspace/ComfyUI
-python -c "import torch; print(torch.__version__); print(torch.version.cuda); print(torch.cuda.get_device_name()); print(round(torch.cuda.get_device_properties(0).total_memory/1024**3, 1), 'GiB')"
+准备条件：
+
+- 模型文件至少预留 105 GB；
+- 使用 NVMe SSD，机械硬盘不适合逐层流式换入；
+- 建议另留 64 GB 页面文件和至少 30 GB 系统余量；
+- 下载前确认模型、页面文件和系统盘不会共同挤满同一块磁盘。
+
+设置页面文件：
+
+1. Windows 搜索“查看高级系统设置”。
+2. 打开“性能 → 设置 → 高级 → 虚拟内存 → 更改”。
+3. 取消“自动管理”后选择 NVMe 所在盘。
+4. 初始大小和最大值先都填 `65536 MB`。
+5. 应用并重启 Windows。
+
+本机当前只分配了 22 GB 页面文件，建议调整到 64 GB 后再开始。64 GB 是实验起点，不是通用保证。若磁盘空间不足，优先把 ComfyUI Shared models 放到另一块 NVMe，不要把系统盘塞满。
+
+## 5. 安装唯一必需的低显存节点
+
+本机已安装：
+
+```text
+ComfyUI/custom_nodes/ComfyUI-MiniMaxH3-LowVRAM
 ```
 
-如果运行时报 int8、convrot、kernel 或 CUDA 算子不支持：
+其他电脑可在 Manager 中使用 Git URL 安装：
 
-1. 优先使用 ComfyUI 官方模板所对应的当前 Nightly 环境；
-2. 更新 ComfyUI 和它要求的 Torch 版本；
-3. 若仍不兼容，把扩散权重换成 `minimax_h3_ref2va_pruned_fp8_scaled.safetensors`，并在 `UNETLoader` 中选择它。
-
-FP8 文件也约 21 GB，只是兼容路径不同，不会让 8 GB 显卡变得可运行。
-
-## 6. 启动参数
-
-24 GB 实验机先用：
-
-```bash
-cd /workspace/ComfyUI
-python main.py --listen 0.0.0.0 --port 8188 --lowvram
+```text
+https://github.com/lericogit/ComfyUI-MiniMaxH3-LowVRAM
 ```
 
-不要在公网直接暴露 8188。使用云平台自带代理、SSH 隧道或安全组白名单。
+该节点只对原生 MiniMax H3 模型的 MLP 做等价分块。本工作流不需要 ComfyUI-GGUF。
 
-## 7. 第一次导入和运行
+## 6. 一键断点续传下载
 
-1. 把测试图放到云端 `ComfyUI/input/amber-serum-transparent.png`。
-2. 导入配套 JSON。
-3. 确认所有模型节点都不是红色。
-4. 在 `Picture 1` 节点重新选择商品图。
-5. 保持默认：
+在 Windows CMD 进入本仓库，然后执行：
+
+```bat
+cd /d D:\path\to\comfyui-learning-hub
+set HF_ENDPOINT=https://hf-mirror.com
+scripts\download_minimax_h3_bf16_windows.cmd
+```
+
+脚本默认写入：
+
+```text
+C:\Users\lijian\AppData\Local\Comfy-Desktop\ComfyUI-Shared\models
+```
+
+其他电脑可把模型根目录作为第一个参数：
+
+```bat
+scripts\download_minimax_h3_bf16_windows.cmd "D:\ComfyUI-Shared\models"
+```
+
+下载中断后重新执行同一命令即可。脚本使用 `curl.exe -C -` 从 `.download` 文件续传，完整下载后才改成正式文件名，因此 ComfyUI 不会误加载半个模型。
+
+五个文件下载完成前不要运行工作流。
+
+只想检查脚本和链接、不下载大文件时：
+
+```bat
+set H3_VERIFY_ONLY=1
+scripts\download_minimax_h3_bf16_windows.cmd
+set H3_VERIFY_ONLY=
+```
+
+## 7. Desktop 启动参数
+
+打开：
+
+```text
+左上角菜单 → 打开仪表板 → 当前本地实例 → 启动参数
+```
+
+设置为：
+
+```text
+--enable-manager --novram --cpu-vae --disable-smart-memory --reserve-vram 1.0 --async-offload 1 --preview-method none
+```
+
+参数作用：
+
+| 参数 | 作用 |
+|---|---|
+| `--novram` | 比 `--lowvram` 更激进地减少模型显存驻留 |
+| `--cpu-vae` | 在 CPU 上执行 VAE，给扩散采样留显存 |
+| `--disable-smart-memory` | 不把暂时不用的模型继续留在显存 |
+| `--reserve-vram 1.0` | 给 Windows 桌面和 CUDA 临时缓冲留约 1 GB |
+| `--async-offload 1` | 只用一条异步卸载流，降低并行换入峰值 |
+| `--preview-method none` | 禁用采样预览，减少额外解码和显存占用 |
+
+不要添加 `--disable-mmap`。当前方案依赖文件映射；禁用后会尝试把大权重完整读入 16 GB 内存。
+
+保存后重启本地实例。
+
+## 8. 不要再装错 Python 环境
+
+Desktop 中存在两个 Python：
+
+```text
+standalone-env/python.exe          # Desktop 管理/安装环境，不含 Torch
+ComfyUI/.venv/Scripts/python.exe   # 当前实例真正运行模型的环境
+```
+
+检查模型环境必须使用：
+
+```bat
+"C:\Users\lijian\AppData\Local\Comfy-Desktop\ComfyUI-Installs\ComfyUI-RTX5060\ComfyUI\.venv\Scripts\python.exe" -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.get_device_name(0))"
+```
+
+安装自定义节点依赖时也应使用 `.venv\Scripts\python.exe -m pip`，不能使用 `standalone-env`。
+
+## 9. 第一次运行必须保持这些参数
+
+1. 导入 `ecommerce-minimax-h3-bf16-streaming-8gb.json`。
+2. 在 `Picture 1` 重新选择一张商品图。
+3. 检查五个模型加载节点都不是红色。
+4. 保持：
 
    ```text
-   9:16 (Portrait Widescreen)
-   0.4 megapixels，约 480×864
+   9:16
+   0.1 megapixels（约 256×416）
    5 秒
-   Enable Lightning LoRA = true
-   4 steps
+   一张参考图
    ref_image_size = match
+   Turbo LoRA = true
+   4 steps
+   Low VRAM profile = minimum_vram
+   block_prefetch = disable
+   VAE tile = 256
    ```
 
-6. 关闭其他占显存程序，点击运行一次。
-7. 输出目录：
+5. 关闭游戏、浏览器视频、其他 AI 软件和占用 GPU 的窗口。
+6. 打开任务管理器的 GPU、内存和磁盘页，再点击一次运行。
+7. 不要因为磁盘长时间 100% 就立即终止；流式换入阶段可能主要消耗磁盘而不是 GPU。
+
+输出目录：
+
+```text
+ComfyUI-Shared/output/ecommerce/video
+```
+
+## 10. 每个关键节点做什么
+
+| 节点 | 当前设置 | 职责 |
+|---|---|---|
+| `UNETLoader` | Ref2VA pruned BF16 | 映射约 37.46 GiB 扩散权重 |
+| `CLIPLoader` | Qwen3-VL 32B BF16 / minimax | 编码提示词和商品参考图 |
+| `MiniMaxH3LowVRAM` | 2048 token、禁预取 | 限制每个 MLP 激活峰值，不改权重 |
+| `MiniMaxH3ReferenceToVideo` | 单图、match、5 秒 | 生成参考条件和联合音视频 latent |
+| `LoraLoaderModelOnly` | Ref2V Turbo BF16 | 把采样步数降到 4 步 |
+| `SamplerCustomAdvanced` | 4 steps | 执行最耗时的逐层扩散计算 |
+| `VAEDecodeTiled` | 256/64、32/8 | 分块解码视频，降低解码峰值 |
+| `VAEDecodeAudio` | 官方 FP32 Audio VAE | 解码原生音频 |
+| `CreateVideo` | 24 fps | 合并画面和声音 |
+| `SaveVideo` | 本地目录 | 保存最终视频 |
+
+## 11. OOM 或系统卡死时按顺序处理
+
+不要同时乱改参数。按以下顺序逐项确认：
+
+1. 确认启动日志真的出现 `novram`、CPU VAE 和异步卸载设置。
+2. 确认没有误选 0.4/0.98 MP，也没有添加第二张参考图。
+3. 确认页面文件已经生效，系统盘仍有 30 GB 以上空闲。
+4. 将 Low VRAM 节点改成：
 
    ```text
-   ComfyUI/output/ecommerce/video
+   memory_profile = custom
+   custom_chunk_tokens = 1024
+   block_prefetch = disable
    ```
 
-不要第一次就改成 0.98 MP、20 步或多张参考图。先证明链路能完整完成。
+5. 若仍在 MLP OOM，最后试 `512` token；会更慢，但仍是等价分块。
+6. 若在 VAE 解码 OOM，保持 `--cpu-vae`，把 VAE `tile_size` 从 256 降到 192。
+7. 若 Windows 直接无响应，停止本次实验，确认 64 GB 页面文件已生效；仍失败再考虑升级到 64 GB 系统内存。反复强行换页可能导致应用和系统一起超时。
 
-## 8. 工作流节点分组
+## 12. 跑通后的升级顺序
 
-官方本地 R2V 模板的主链路是：
+每次只改一项，并固定 seed：
 
-```text
-LoadImage
-  ↓
-MiniMaxH3ReferenceToVideo ← CLIPLoader + 两个 VAELoader
-  ↓ CONDITIONING + LATENT
-BasicGuider + SamplerCustomAdvanced
-  ↓
-VAEDecode（画面） + VAEDecodeAudio（声音）
-  ↓
-CreateVideo
-  ↓
-SaveVideo
-```
+1. `0.1 MP → 0.2 MP`；
+2. MLP `512/1024 → 2048`，观察是否提速；
+3. `block_prefetch=disable → keep`，观察峰值是否仍能承受；
+4. 最后才增加第二张参考图；
+5. 不建议 8GB 机器直接尝试 0.98 MP。
 
-关键节点：
+## 13. 验收与留痕
 
-- `UNETLoader`：加载约 21 GB Ref2VA 扩散权重。
-- `CLIPLoader`：加载 Qwen3-VL 32B NVFP4 编码器。
-- `MiniMaxH3ReferenceToVideo`：把 `<Picture 1>` 素材和提示词编码为参考条件与联合音视频 latent。
-- `LoraLoaderModelOnly`：加载 4 步 Turbo LoRA。
-- `ComfySwitchNode`：开启 Turbo 时同时选择 LoRA 模型和 4 步采样。
-- `SamplerCustomAdvanced`：真正执行扩散采样，是最耗显存和时间的部分。
-- `VAEDecode` / `VAEDecodeAudio`：分别解码画面和原生声音。
-- `CreateVideo`：按 24 fps 合并音视频。
-
-## 9. 多素材怎么加
-
-H3 本地节点使用尖括号标签：
+第一次完整运行记录：
 
 ```text
-ref_image_0 → <Picture 1>
-ref_image_1 → <Picture 2>
-ref_video_0 → <Video 1>
-ref_audio_0 → <Audio 1>
+GPU / 显存：
+系统内存：
+页面文件：
+模型所在磁盘：
+分辨率与帧数：
+MLP chunk tokens：
+文本编码耗时：
+每步采样耗时：
+VAE 解码耗时：
+总耗时：
+峰值 GPU：
+峰值内存：
+是否完成：
+错误原文：
 ```
 
-增加素材时，先在加载节点选择有效文件，再连接。一次只增加一种素材，并同步修改提示词。
+只有本机完整生成过视频，才能把状态从“结构与环境已验证”改成“RTX 5060 8GB 实跑通过”。
 
-第一版不预放空的可选媒体节点，避免导入后出现“媒体输入未选择”。
+## 14. 来源与边界
 
-## 10. 参数升级顺序
-
-链路跑通后按顺序升级，每次只改一项：
-
-1. 固定 seed，重复一次，确认结果可比较。
-2. `0.4 MP → 0.6 MP`。
-3. `0.6 MP → 0.98 MP`，约 768×1344。
-4. 增加第二张场景参考图。
-5. 最后才增加参考视频或音频。
-
-若 OOM，按相反顺序回退，并确认 `--lowvram`、Turbo 4 步和 `ref_image_size=match` 仍然开启。
-
-## 11. 验收标准
-
-- 全程只有一个商品，不出现复制品；
-- 包装比例、主色、材质和 Logo 位置基本稳定；
-- 5 秒镜头连续，没有突然切成另一场景；
-- 能同时输出画面和声音；
-- 没有陌生字幕、水印或额外品牌；
-- 峰值显存、系统内存、总耗时和 GPU 型号记录到测试日志。
-
-## 12. 来源与边界
-
-- [Comfy-Org 官方 MiniMax H3 本地 R2V 模板](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json)
-- [Comfy-Org MiniMax H3 权重仓库](https://huggingface.co/Comfy-Org/MiniMax-H3)
-- [ComfyUI 内置本地 H3 节点源码](https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_extras/nodes_minimax_h3.py)
+- [Comfy-Org MiniMax H3 R2V 模板](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json)
+- [Comfy-Org MiniMax H3 模型文件](https://huggingface.co/Comfy-Org/MiniMax-H3)
+- [ComfyUI MiniMax H3 原生节点](https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_extras/nodes_minimax_h3.py)
+- [MiniMax H3 Low VRAM 等价 MLP 分块节点](https://github.com/lericogit/ComfyUI-MiniMaxH3-LowVRAM)
 - [MiniMax H3 官方项目](https://github.com/MiniMax-AI/MiniMax-H3)
 
-MiniMax H3 权重采用其 Community License，不是普通 MIT 模型许可证。部署和商用前应阅读模型仓库中的许可条款。
-
-本项目派生官方工作流并针对电商商品、有限配置和小白操作做了修改；参考站的内部工作流没有公开，不能声称服务端实现完全一致。
+MiniMax H3 权重受其 Community License 约束。工作流结构校验和本机软件环境已经核实；在模型下载完成并实际产出视频前，不夸大为已验证性能。

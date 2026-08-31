@@ -12,6 +12,8 @@ and
 `docs/04-电商AI工作流/workflows/ecommerce-yinghai-hoodie-model-close-flux2-klein.json`
 and
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-local-ref2va.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json`
 are derived from:
 
 ```text
@@ -64,6 +66,18 @@ loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors
 
 The model files are hosted at:
 <https://huggingface.co/Comfy-Org/MiniMax-H3>
+
+`docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json`
+references the following non-low-bit local model files without redistributing
+them:
+
+```text
+diffusion_models/minimax_h3_ref2va_pruned_bf16.safetensors
+text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors
+vae/minimax_h3_video_vae_fp16.safetensors
+vae/minimax_h3_audio_vae_fp32.safetensors
+loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors
+```
 
 MiniMax H3 is distributed under the MiniMax H3 Community License Agreement,
 not the MIT License used by the workflow template repository. Review the

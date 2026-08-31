@@ -29,6 +29,7 @@ scripts/
 ├── derive_generic_product_layout_workflow.mjs # 派生任意单商品自动裁边与白底排版工作流
 ├── derive_generic_product_layout_2k_workflow.mjs # 派生 2K 放大、无字母母版与自有品牌排版工作流
 ├── derive_minimax_h3_local_reference_video_workflow.mjs # 从官方模板派生本地 H3 Ref2VA 电商视频工作流
+├── download_minimax_h3_bf16_windows.cmd # Windows 下载 H3 BF16 无量化权重，支持断点续传
 └── validate_comfy_workflow.mjs              # 静态检查工作流节点、连线和子图引用
 ```
 
@@ -54,7 +55,8 @@ scripts/
 ## 核心结论（速览）
 
 - **路径 A（推荐）**：ComfyUI ≥ 0.30.0 原生内置 H3 节点，模板库一键加载 + 从 `Comfy-Org/MiniMax-H3` 下权重，单卡即可跑。
-- **显存门槛**：≥24GB 直跑；16–24GB 依赖 int8 + nvfp4 量化 + offload；<16GB 基本没戏，走官方 API 节点兜底。
+- **8GB 无量化实验路径**：BF16 pruned Ref2VA + BF16 Qwen3-VL，依赖 NVMe 文件映射、`--novram`、CPU VAE、等价 MLP 分块和大页面文件；目标是极慢地跑完最低规格，不是实时，也尚待本机完整生成验收。
+- **常规显存门槛**：≥24GB 才适合常规本地使用；8GB 路径是工程极限实验，不能据此承诺普通用户体验。
 - **最大环境坑**：`int8_convrot` 权重需 torch 带 **cu130**，否则换 `fp8_scaled` 版。
 - **60h 产出公式**：`片段数 ≈ 216000 / T`（T = 单条 5s 片段稳态耗时秒）。
 
