@@ -17,7 +17,7 @@ GPU：NVIDIA GeForce RTX 5060
 显存：7.96 GiB
 计算能力：SM 12.0（Blackwell）
 Windows 物理内存：约 32 GB
-当前 Windows 页面文件：22 GB
+首次实跑前 Windows 页面文件：22 GB；已配置为 80 GB，重启后生效
 当前 C 盘可用：约 204 GiB
 ComfyUI Python：ComfyUI/.venv/Scripts/python.exe
 Python：3.13.12
@@ -82,7 +82,7 @@ MLP 分块只是把同一个矩阵运算拆成多批执行，再按原顺序写�
 
 - 模型文件至少预留 105 GB；
 - 使用 NVMe SSD，机械硬盘不适合逐层流式换入；
-- 建议另留 64 GB 页面文件和至少 30 GB 系统余量；
+- 32 GB 内存运行 BF16 文本编码器时，建议另留 80 GB 页面文件和至少 30 GB 系统余量；
 - 下载前确认模型、页面文件和系统盘不会共同挤满同一块磁盘。
 
 设置页面文件：
@@ -90,10 +90,17 @@ MLP 分块只是把同一个矩阵运算拆成多批执行，再按原顺序写�
 1. Windows 搜索“查看高级系统设置”。
 2. 打开“性能 → 设置 → 高级 → 虚拟内存 → 更改”。
 3. 取消“自动管理”后选择 NVMe 所在盘。
-4. 初始大小和最大值先都填 `65536 MB`。
+4. 初始大小和最大值先都填 `81920 MB`。
 5. 应用并重启 Windows。
 
-本机当前只分配了 22 GB 页面文件，建议调整到 64 GB 后再开始。64 GB 是实验起点，不是通用保证。若磁盘空间不足，优先把 ComfyUI Shared models 放到另一块 NVMe，不要把系统盘塞满。
+本机首次实跑时只分配了 22 GB 页面文件，加载 47.97 GiB 文本编码器时崩溃。现已配置为 80 GB，必须重启 Windows 后才会从旧的 22 GB 切换。也可以在管理员 PowerShell 中运行：
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\set_windows_pagefile_80gb.ps1
+```
+
+80 GB 是本机实验值，不是所有电脑的固定答案。若磁盘空间不足，优先把 ComfyUI Shared models 放到另一块 NVMe，不要把系统盘塞满。
 
 ## 5. 安装唯一必需的低显存节点
 
@@ -153,10 +160,10 @@ set H3_VERIFY_ONLY=
 左上角菜单 → 打开仪表板 → 当前本地实例 → 启动参数
 ```
 
-设置为：
+RTX 50 系 Windows 首次稳定性验证设置为：
 
 ```text
---enable-manager --novram --cpu-vae --disable-smart-memory --reserve-vram 1.0 --async-offload 1 --preview-method none
+--enable-manager --novram --cpu-vae --disable-smart-memory --reserve-vram 1.0 --disable-async-offload --disable-dynamic-vram --disable-pinned-memory --disable-mmap --preview-method none
 ```
 
 参数作用：
@@ -167,10 +174,20 @@ set H3_VERIFY_ONLY=
 | `--cpu-vae` | 在 CPU 上执行 VAE，给扩散采样留显存 |
 | `--disable-smart-memory` | 不把暂时不用的模型继续留在显存 |
 | `--reserve-vram 1.0` | 给 Windows 桌面和 CUDA 临时缓冲留约 1 GB |
-| `--async-offload 1` | 只用一条异步卸载流，降低并行换入峰值 |
+| `--disable-async-offload` | 避开 Windows/Blackwell 上异步文件读取与 HostBuffer 崩溃路径 |
+| `--disable-dynamic-vram` | 避开 comfy-aimdo 大模型映射的原生访问冲突路径 |
+| `--disable-pinned-memory` | 不预留本机日志中约 12.7 GB 的不可分页内存 |
+| `--disable-mmap` | 配合下方 `pread` 补丁真正绕开 Windows 大 safetensors mmap 崩溃 |
 | `--preview-method none` | 禁用采样预览，减少额外解码和显存占用 |
 
-不要添加 `--disable-mmap`。当前方案依赖文件映射；禁用后会尝试把大权重完整读入 16 GB 内存。
+当前 ComfyUI 0.33.4 的 `--disable-mmap` 仍会先通过 `safe_open().get_tensor()` 访问 mmap，再复制张量，因此单独添加该参数无法解决本次崩溃。应用仓库补丁后，它才会调用 safetensors 0.8 的 `backend="pread"`：
+
+```bat
+cd /d C:\path\to\ComfyUI
+git apply C:\path\to\comfyui-learning-hub\patches\comfyui-windows-large-safetensors-pread.patch
+```
+
+更新 ComfyUI 后先检查补丁是否仍需要，不要不加判断地重复应用。
 
 保存后重启本地实例。
 
@@ -267,6 +284,17 @@ ComfyUI-Shared/output/ecommerce/video
 
 ## 13. 验收与留痕
 
+### 13.1 本机第一次提交记录（2026-08-31）
+
+- MCP：`Comfy-Org/comfy-mcp 0.10.0`，`comfy-cli 1.19.0`，已注册到 Codex；
+- 工作流成功转换为 26 个 API 节点并通过服务端校验；
+- Prompt ID：`eb6b1c62-c444-4cd9-a5db-4cd04d7735ca`；
+- 失败阶段：两个 VAE 被识别后，`CLIPLoader` 加载 `qwen3vl_32b_minimax_h3_bf16.safetensors`；
+- 错误：`Windows fatal exception: access violation`，Windows WER 为 `torch_cpu.dll / c0000005`；
+- 堆栈：`torch/storage.py:471 → comfy/utils.py:136 → comfy/sd.py:1534 → nodes.py:1031`；
+- 当时页面文件：22 GB；分辨率尚未进入采样，因此降分辨率不能修复这个加载崩溃；
+- 后续措施：真实 `pread` 补丁、80 GB 页面文件、关闭 DynamicVRAM/async offload/pinned memory，待重启复测。
+
 第一次完整运行记录：
 
 ```text
@@ -293,6 +321,9 @@ VAE 解码耗时：
 - [Comfy-Org MiniMax H3 R2V 模板](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json)
 - [Comfy-Org MiniMax H3 模型文件](https://huggingface.co/Comfy-Org/MiniMax-H3)
 - [ComfyUI MiniMax H3 原生节点](https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_extras/nodes_minimax_h3.py)
+- [ComfyUI #15424：Windows 大型 CLIP safetensors 访问冲突及 pread 绕过](https://github.com/Comfy-Org/ComfyUI/issues/15424)
+- [ComfyUI #15337：MiniMax H3 在 Windows/Blackwell 上禁用异步卸载和 pinned memory 的验证](https://github.com/Comfy-Org/ComfyUI/issues/15337)
+- [Comfy-Org/comfy-mcp：本地 MCP 服务](https://github.com/Comfy-Org/comfy-mcp)
 - [MiniMax H3 Low VRAM 等价 MLP 分块节点](https://github.com/lericogit/ComfyUI-MiniMaxH3-LowVRAM)
 - [MiniMax H3 官方项目](https://github.com/MiniMax-AI/MiniMax-H3)
 
