@@ -28,6 +28,7 @@ scripts/
 ├── derive_yinghai_hoodie_three_output_workflows.mjs # 派生卫衣平铺、男模全身和男模近景三分支
 ├── derive_generic_product_layout_workflow.mjs # 派生任意单商品自动裁边与白底排版工作流
 ├── derive_generic_product_layout_2k_workflow.mjs # 派生 2K 放大、无字母母版与自有品牌排版工作流
+├── derive_minimax_h3_local_reference_video_workflow.mjs # 从官方模板派生本地 H3 Ref2VA 电商视频工作流
 └── validate_comfy_workflow.mjs              # 静态检查工作流节点、连线和子图引用
 ```
 
