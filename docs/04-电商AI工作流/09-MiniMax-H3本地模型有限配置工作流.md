@@ -183,7 +183,10 @@ H3 Release Encoders After Conditioning
 H3 Release DiT After Sampling
 H3 VAE Decode Tiled and Release
 H3 VAE Decode Audio and Release
+H3 Reference Video Frames (24 FPS)
 ```
+
+最后一个节点供[第 10 章的对标视频工作流](10-映海爆款带货视频本地复刻.md)使用：它根据源视频真实帧率重采样到 H3 的 24 fps 时间轴，并把帧数对齐为 `17n + 5`。单商品图工作流不会经过它。
 
 这套工作流不再依赖外部 `ComfyUI-MiniMaxH3-LowVRAM`。旧节点可以保留给旧工作流，但不要把两个 H3 MLP 分块节点串在一起，否则会被新节点明确拒绝。
 

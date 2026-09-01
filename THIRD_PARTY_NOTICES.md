@@ -18,6 +18,8 @@ and
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json`
 and
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-int8-low-vram.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-low-vram.json`
 are derived from:
 
 ```text
@@ -60,6 +62,8 @@ Upstream license source:
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-local-ref2va.json`
 and
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-low-vram.json`
 reference the following local model files without redistributing them:
 
 ```text
@@ -96,6 +100,17 @@ loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors
 MiniMax H3 is distributed under the MiniMax H3 Community License Agreement,
 not the MIT License used by the workflow template repository. Review the
 current license in the model repository before deployment or commercial use.
+
+## Yinghai public comparison case
+
+`scripts/download_yinghai_copy_hot_video_public_case_windows.cmd` records the
+public media URLs, expected sizes, and SHA-256 values for one comparison case
+visible on <https://yinghai.xin/>. The repository does not redistribute those
+image or video files; the script downloads them to the user's local ComfyUI
+input directory solely for reproducible feature comparison. The media remains
+third-party material and is not covered by this repository's license. Review
+the source site's current terms and obtain any required rights before reuse or
+commercial distribution.
 
 ## RealESRGAN_x4plus local model dependency
 

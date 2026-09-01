@@ -7,15 +7,16 @@ const [sourcePath, outputPath, profile = "standard"] = process.argv.slice(2);
 
 if (!sourcePath || !outputPath) {
   console.error(
-    "Usage: node scripts/derive_minimax_h3_local_reference_video_workflow.mjs <official-r2v.json> <output.json> [standard|quantized-nvfp4-low-vram|quantized-int8-low-vram|bf16-streaming-8gb]",
+    "Usage: node scripts/derive_minimax_h3_local_reference_video_workflow.mjs <official-r2v.json> <output.json> [standard|quantized-nvfp4-low-vram|quantized-int8-low-vram|bf16-streaming-8gb|yinghai-copy-hot-video-nvfp4-low-vram]",
   );
   process.exit(2);
 }
 
-if (!new Set(["standard", "quantized-nvfp4-low-vram", "quantized-int8-low-vram", "bf16-streaming-8gb"]).has(profile)) {
+if (!new Set(["standard", "quantized-nvfp4-low-vram", "quantized-int8-low-vram", "bf16-streaming-8gb", "yinghai-copy-hot-video-nvfp4-low-vram"]).has(profile)) {
   throw new Error(`Unknown profile: ${profile}`);
 }
-const quantizedNvfp4 = profile === "quantized-nvfp4-low-vram";
+const yinghaiCopyHotVideo = profile === "yinghai-copy-hot-video-nvfp4-low-vram";
+const quantizedNvfp4 = profile === "quantized-nvfp4-low-vram" || yinghaiCopyHotVideo;
 const quantizedInt8 = profile === "quantized-int8-low-vram";
 const quantizedLowVram = quantizedNvfp4 || quantizedInt8;
 const bf16Streaming8gb = profile === "bf16-streaming-8gb";
@@ -47,7 +48,14 @@ for (const [name, id] of Object.entries(requiredNodes)) {
   }
 }
 
-const prompt = [
+const prompt = yinghaiCopyHotVideo ? [
+  "<Picture 1> (Picture1) is the clothing product identity reference: preserve its exact product color, silhouette, fit, fabric, flower positions, proportions, and construction.",
+  "<Video 1> (Video1) provides only the person's actions, camera movement, pacing, and scene composition. Replace the clothing in Video1 with the clothing from Picture1.",
+  "Create a five-second vertical ecommerce product video following Video1's motion, camera rhythm, and setting while keeping the clothing from Picture1 unchanged in color, cut, and flower placement.",
+  "Do not copy the original clothing from Video1. Do not copy its garment color, pattern, logo, or design; use Picture1 as the only clothing identity.",
+  "No subtitles, captions, text overlays, logos, or watermarks. Keep the subject anatomically coherent and the product clearly visible.",
+  "Reference audio is intentionally disconnected because the website case sets BGM=false. Generate quiet natural street ambience only; no music and no speech.",
+].join("\n") : [
   "<Picture 1> is the only product identity reference.",
   "Create a five-second vertical ecommerce product film. Preserve the exact product geometry, proportions, colors, material, package structure, logo placement, and label layout as much as possible.",
   "[0:00-0:02.00] Clean warm studio background, medium close-up. The camera slowly pushes in. The product remains still while soft highlights move naturally across its surface.",
@@ -59,9 +67,9 @@ const prompt = [
 
 const productImage = nodesById.get(requiredNodes.productImage);
 productImage.title = "Picture 1｜商品主体（必选）";
-productImage.widgets_values = ["amber-serum-transparent.png", "image"];
+productImage.widgets_values = [yinghaiCopyHotVideo ? "yinghai-copy-hot-video-v2-02-product.png" : "amber-serum-transparent.png", "image"];
 productImage.widgets_values_named = {
-  image: "amber-serum-transparent.png",
+  image: yinghaiCopyHotVideo ? "yinghai-copy-hot-video-v2-02-product.png" : "amber-serum-transparent.png",
   upload: "image",
 };
 
@@ -75,6 +83,94 @@ image2Input.link = null;
 h3Reference.title = "本地 MiniMax H3 Ref2VA｜商品多素材参考";
 h3Reference.widgets_values[4] = "match";
 if (h3Reference.widgets_values_named) h3Reference.widgets_values_named.ref_image_size = "match";
+
+if (yinghaiCopyHotVideo) {
+  const nextNodeId = () => Math.max(...workflow.nodes.map((node) => node.id)) + 1;
+  const nextLinkId = () => Math.max(...workflow.links.map(([id]) => id)) + 1;
+  const loadId = nextNodeId();
+  const sliceId = loadId + 1;
+  const componentsId = loadId + 2;
+  const scaleId = loadId + 3;
+  const framesId = loadId + 4;
+  const loadLink = nextLinkId();
+  const sliceLink = loadLink + 1;
+  const imagesLink = loadLink + 2;
+  const fpsLink = loadLink + 3;
+  const scaledImagesLink = loadLink + 4;
+  const framesLink = loadLink + 5;
+  workflow.nodes.push(
+    {
+      id: loadId, type: "LoadVideo", pos: [-1810, 7040], size: [300, 300], flags: {}, order: 8, mode: 0,
+      inputs: [], outputs: [{ name: "VIDEO", type: "VIDEO", links: [loadLink] }],
+      properties: { "Node name for S&R": "LoadVideo" }, title: "Video1｜映海公开视频动作参考",
+      widgets_values: ["yinghai-copy-hot-video-v2-01-benchmark.mp4"],
+      widgets_values_named: { file: "yinghai-copy-hot-video-v2-01-benchmark.mp4" },
+    },
+    {
+      id: sliceId, type: "Video Slice", pos: [-1450, 7040], size: [300, 260], flags: {}, order: 9, mode: 0,
+      inputs: [
+        { name: "video", type: "VIDEO", link: loadLink },
+        { name: "start_time", type: "FLOAT", widget: { name: "start_time" }, link: null },
+        { name: "duration", type: "FLOAT", widget: { name: "duration" }, link: null },
+        { name: "strict_duration", type: "BOOLEAN", widget: { name: "strict_duration" }, link: null },
+      ], outputs: [{ name: "VIDEO", type: "VIDEO", links: [sliceLink] }],
+      properties: { "Node name for S&R": "Video Slice" }, title: "Video1｜取前 5.2 秒",
+      widgets_values: [0, 5.2, false],
+      widgets_values_named: { start_time: 0, duration: 5.2, strict_duration: false },
+    },
+    {
+      id: componentsId, type: "GetVideoComponents", pos: [-1080, 7040], size: [320, 280], flags: {}, order: 10, mode: 0,
+      inputs: [{ name: "video", type: "VIDEO", link: sliceLink }],
+      outputs: [
+        { name: "images", type: "IMAGE", links: [imagesLink] },
+        { name: "audio", type: "AUDIO", links: null },
+        { name: "fps", type: "FLOAT", links: [fpsLink] },
+        { name: "bit_depth", type: "INT", links: null },
+      ], properties: { "Node name for S&R": "GetVideoComponents" }, title: "Video1｜拆分帧与帧率",
+      widgets_values: [], widgets_values_named: {},
+    },
+    {
+      id: scaleId, type: "ImageScaleToTotalPixels", pos: [-690, 7040], size: [320, 250], flags: {}, order: 11, mode: 0,
+      inputs: [
+        { name: "image", type: "IMAGE", link: imagesLink },
+        { name: "upscale_method", type: "COMBO", widget: { name: "upscale_method" }, link: null },
+        { name: "megapixels", type: "FLOAT", widget: { name: "megapixels" }, link: null },
+        { name: "resolution_steps", type: "INT", widget: { name: "resolution_steps" }, link: null },
+      ], outputs: [{ name: "IMAGE", type: "IMAGE", links: [scaledImagesLink] }],
+      properties: { "Node name for S&R": "ImageScaleToTotalPixels" }, title: "Video1｜整批帧缩至 0.1 MP",
+      widgets_values: ["area", 0.1, 32],
+      widgets_values_named: { upscale_method: "area", megapixels: 0.1, resolution_steps: 32 },
+    },
+    {
+      id: framesId, type: "H3ReferenceVideoFrames24FPS", pos: [-300, 7040], size: [350, 300], flags: {}, order: 12, mode: 0,
+      inputs: [
+        { name: "images", type: "IMAGE", link: scaledImagesLink },
+        { name: "source_fps", type: "FLOAT", link: fpsLink },
+        { name: "target_fps", type: "FLOAT", widget: { name: "target_fps" }, link: null },
+        { name: "max_seconds", type: "FLOAT", widget: { name: "max_seconds" }, link: null },
+      ], outputs: [{ name: "images", type: "IMAGE", links: [framesLink] }],
+      properties: { "Node name for S&R": "H3ReferenceVideoFrames24FPS" }, title: "Video1｜H3 24fps，最多 5.2 秒",
+      // ComfyUI 0.33.x serializes a value for the linked source_fps widget too.
+      // Keep it in slot 0 so target_fps and max_seconds do not shift on load.
+      widgets_values: [24, 24, 5.2],
+      widgets_values_named: { source_fps: 24, target_fps: 24, max_seconds: 5.2 },
+    },
+  );
+  workflow.links.push(
+    [loadLink, loadId, 0, sliceId, 0, "VIDEO"],
+    [sliceLink, sliceId, 0, componentsId, 0, "VIDEO"],
+    [imagesLink, componentsId, 0, scaleId, 0, "IMAGE"],
+    [scaledImagesLink, scaleId, 0, framesId, 0, "IMAGE"],
+    [fpsLink, componentsId, 2, framesId, 1, "FLOAT"],
+    [framesLink, framesId, 0, h3Reference.id, 6, "IMAGE"],
+  );
+  h3Reference.inputs.find((input) => input.name === "ref_videos.ref_video_0").link = framesLink;
+  h3Reference.title = "MiniMax H3 Ref2VA｜Picture1 商品 + Video1 动作参考";
+  workflow.groups = [
+    ...(workflow.groups || []),
+    { id: 7, title: "Video 1｜对标视频预处理", bounding: [-1860, 6980, 2000, 470], color: "#3f789e", flags: {} },
+  ];
+}
 
 const promptNode = nodesById.get(requiredNodes.prompt);
 promptNode.title = "电商视频提示词｜Picture 1 是商品身份";
@@ -126,6 +222,8 @@ const saveVideo = nodesById.get(requiredNodes.saveVideo);
 saveVideo.title = "保存 5 秒竖屏商品视频";
 const outputPrefix = bf16Streaming8gb
   ? "ecommerce/video/minimax-h3-bf16-streaming-8gb"
+  : yinghaiCopyHotVideo
+    ? "ecommerce/video/yinghai-copy-hot-video-h3-nvfp4-low-vram"
   : quantizedNvfp4
     ? "ecommerce/video/minimax-h3-quantized-nvfp4-low-vram"
     : quantizedInt8
@@ -435,7 +533,9 @@ if (lowMemory8gb) {
 const overviewNote = nodesById.get(requiredNodes.overviewNote);
 overviewNote.title = "先读这里｜这是本地权重，不调用付费 API";
 const overviewText = [
-    bf16Streaming8gb
+    yinghaiCopyHotVideo
+      ? "## 映海公开案例｜服装热卖视频 H3 前 5 秒低分辨率验证"
+      : bf16Streaming8gb
       ? "## MiniMax H3 本地 Ref2VA｜BF16 磁盘流式实验版"
       : quantizedLowVram
         ? "## MiniMax H3 本地 Ref2VA｜通用量化低显存首跑版"
@@ -445,7 +545,9 @@ const overviewText = [
     "",
     "### 硬件结论",
     "",
-    bf16Streaming8gb
+    yinghaiCopyHotVideo
+      ? "- 这是网站公开 11 秒结果的前 5 秒、0.1 MP 本地链路验证，不声称复现其私有实现。"
+      : bf16Streaming8gb
       ? "- RTX 5060 8 GB + Windows 32 GB 已完成 BF16 最低规格实跑，但磁盘读取压力很高。"
       : quantizedLowVram
         ? "- 本配置以 8 GB 显存为保守首跑档；12/16/24 GB 可逐级提高分块和分辨率。"
@@ -480,6 +582,7 @@ const overviewText = [
       ? "- Qwen/参考 VAE 编码后定向卸载；DiT 采样后再定向卸载，避免三阶段同时驻留"
       : "",
     "- ref_image_size=match，避免保留 2048px 参考 token",
+    yinghaiCopyHotVideo ? "- Video1 只提供人物动作、镜头、节奏和场景；Picture1 是唯一服装商品身份。网站案例 BGM=false，未连接参考音频。" : "",
     "",
     "模型、下载、启动和排错：docs/04-电商AI工作流/09-MiniMax-H3本地模型有限配置工作流.md",
   ].join("\n");
@@ -487,7 +590,9 @@ overviewNote.widgets_values = [overviewText];
 overviewNote.widgets_values_named = { text: overviewText };
 
 const modelNote = nodesById.get(requiredNodes.modelNote);
-modelNote.title = bf16Streaming8gb
+modelNote.title = yinghaiCopyHotVideo
+  ? "五个官方量化组合文件｜约 41.38 GiB"
+  : bf16Streaming8gb
   ? "五个 BF16/FP 权重｜约 93 GiB｜没有低比特量化"
   : quantizedLowVram
     ? `五个官方量化组合文件｜约 ${quantizedNvfp4 ? "41.38" : "52.04"} GiB`
@@ -561,7 +666,7 @@ sizeNote.widgets_values_named = { text: sizeNoteText };
 workflow.extra = {
   ...(workflow.extra || {}),
   audit: {
-    derived_at: "2026-08-31",
+    derived_at: yinghaiCopyHotVideo ? "2026-09-01" : "2026-08-31",
     derived_by: "scripts/derive_minimax_h3_local_reference_video_workflow.mjs",
     source:
       "https://raw.githubusercontent.com/Comfy-Org/workflow_templates/main/templates/video_minimax_h3_r2v.json",
@@ -571,6 +676,13 @@ workflow.extra = {
       "Kept the official local MiniMax H3 ref2va loading, conditioning, sampling, audio/video decode, and mux chain.",
       "Reduced the starting input from two images to one required ecommerce product image.",
       `Changed output to portrait 9:16 at ${megapixels} megapixels and five seconds for a lower-load first test.`,
+      ...(yinghaiCopyHotVideo ? [
+        "Added the public Yinghai benchmark video as a motion/camera/scene reference: LoadVideo -> Video Slice (0, 5.2, non-strict) -> GetVideoComponents -> ImageScaleToTotalPixels (0.1 MP) -> H3ReferenceVideoFrames24FPS (24 fps, 5.2 seconds) -> ref_videos.ref_video_0.",
+        "Kept reference audio disconnected because the public case specifies BGM=false; this validates only the first five seconds locally and does not claim Yinghai's private implementation.",
+        "Added ImageScaleToTotalPixels (area, 0.1 MP, 32-pixel steps) before temporal resampling to bound reference-video frame memory.",
+        "Used prefixed filenames in the shared input root because ComfyUI 0.33.4 media discovery did not accept the same files from a nested input directory during live validation.",
+        "Serialized the linked source_fps placeholder before target_fps and max_seconds so ComfyUI 0.33.4 restores the three float widgets without shifting values.",
+      ] : []),
       "Enabled the official four-step Ref2V Turbo LoRA path.",
       bf16Streaming8gb
         ? "Kept BF16 diffusion/text weights and official VAE precision; added live-VRAM H3 MLP chunking, staged model release, disabled block prefetch, tiled video VAE decode, and a 0.1 MP first-run profile."
@@ -581,6 +693,9 @@ workflow.extra = {
     profile,
   },
 };
+
+workflow.last_node_id = Math.max(...workflow.nodes.map((node) => node.id));
+workflow.last_link_id = Math.max(...workflow.links.map(([id]) => id));
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, `${JSON.stringify(workflow, null, 2)}\n`);

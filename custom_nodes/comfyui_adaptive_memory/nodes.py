@@ -13,6 +13,12 @@ from comfy.ldm.minimax.model import MiniMaxH3Model
 from comfy_api.latest import ComfyExtension, io
 
 from .runtime import AdaptiveH3MLPForward, AdaptiveH3RuntimeState, AdaptiveH3Settings
+from .reference_video import (
+    DEFAULT_MAX_SECONDS,
+    DEFAULT_TARGET_FPS,
+    MAX_SECONDS,
+    h3_reference_frame_indices,
+)
 
 
 ADAPTIVE_WRAPPER_KEY = "comfyui_adaptive_memory_h3"
@@ -358,6 +364,34 @@ class H3VAEDecodeAudioRelease(io.ComfyNode):
                 logging.info("Adaptive memory: released H3 audio VAE after decode")
 
 
+class H3ReferenceVideoFrames24FPS(io.ComfyNode):
+    @classmethod
+    def define_schema(cls) -> io.Schema:
+        return io.Schema(
+            node_id="H3ReferenceVideoFrames24FPS",
+            display_name="H3 Reference Video Frames (24 FPS)",
+            description="Resamples reference video frames to H3's 17n+5 temporal layout.",
+            category="advanced/video",
+            inputs=[
+                io.Image.Input("images"),
+                io.Float.Input("source_fps", min=0.001),
+                io.Float.Input("target_fps", default=DEFAULT_TARGET_FPS, min=0.001),
+                io.Float.Input("max_seconds", default=DEFAULT_MAX_SECONDS, min=0.001, max=MAX_SECONDS),
+            ],
+            outputs=[io.Image.Output("images")],
+        )
+
+    @classmethod
+    def execute(cls, images, source_fps, target_fps=DEFAULT_TARGET_FPS, max_seconds=DEFAULT_MAX_SECONDS):
+        if images.ndim < 1:
+            raise ValueError("images must contain a frame dimension")
+        indices = h3_reference_frame_indices(
+            images.shape[0], source_fps, target_fps, max_seconds
+        )
+        index_tensor = torch.tensor(indices, dtype=torch.long, device=images.device)
+        return io.NodeOutput(torch.index_select(images, 0, index_tensor))
+
+
 class AdaptiveMemoryExtension(ComfyExtension):
     @override
     async def get_node_list(self):
@@ -367,6 +401,7 @@ class AdaptiveMemoryExtension(ComfyExtension):
             H3ReleaseAfterSampling,
             H3VAEDecodeTiledRelease,
             H3VAEDecodeAudioRelease,
+            H3ReferenceVideoFrames24FPS,
         ]
 
 
