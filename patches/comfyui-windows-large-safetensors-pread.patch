@@ -1,7 +1,7 @@
 diff --git a/comfy/utils.py b/comfy/utils.py
 --- a/comfy/utils.py
 +++ b/comfy/utils.py
-@@ -125,7 +125,16 @@ def load_torch_file(ckpt, safe_load=False, device=None, return_metadata=False):
+@@ -125,7 +125,21 @@ def load_torch_file(ckpt, safe_load=False, device=None, return_metadata=False):
      metadata = None
      if ckpt.lower().endswith(".safetensors") or ckpt.lower().endswith(".sft"):
          try:
@@ -13,13 +13,18 @@ diff --git a/comfy/utils.py b/comfy/utils.py
 +                # provides a real non-mmap backend for this case.
 +                sd = safetensors.torch.load_file(ckpt, device=device.type, backend="pread")
 +                if return_metadata:
-+                    with safetensors.safe_open(ckpt, framework="pt", device=device.type) as f:
-+                        metadata = f.metadata()
++                    # safe_open() itself creates a Windows file mapping. A very
++                    # large CLIP can therefore still fail with WinError 1455
++                    # even though tensor loading already uses pread. Read only
++                    # the small JSON header directly instead.
++                    with open(ckpt, "rb") as f:
++                        header_size = struct.unpack("<Q", f.read(8))[0]
++                        metadata = json.loads(f.read(header_size)).get("__metadata__", {})
 +            elif comfy.memory_management.aimdo_enabled:
                  sd, metadata = load_safetensors(ckpt)
                  if not return_metadata:
                      metadata = None
-@@ -134,8 +143,6 @@ def load_torch_file(ckpt, safe_load=False, device=None, return_metadata=False):
+@@ -134,8 +148,6 @@ def load_torch_file(ckpt, safe_load=False, device=None, return_metadata=False):
                      sd = {}
                      for k in f.keys():
                          tensor = f.get_tensor(k)

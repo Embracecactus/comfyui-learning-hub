@@ -1,5 +1,5 @@
 @echo off
-setlocal EnableExtensions
+setlocal EnableExtensions EnableDelayedExpansion
 
 rem MiniMax H3 Ref2VA BF16 streaming profile for ComfyUI Desktop on Windows.
 rem No INT8, FP8, NVFP4, NF4, or GGUF model weights are downloaded.
@@ -23,19 +23,19 @@ for %%D in (diffusion_models text_encoders vae loras) do (
   if not exist "%MODEL_ROOT%\%%D" mkdir "%MODEL_ROOT%\%%D"
 )
 
-call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_bf16.safetensors" "%MODEL_ROOT%\diffusion_models\minimax_h3_ref2va_pruned_bf16.safetensors"
+call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_bf16.safetensors" "%MODEL_ROOT%\diffusion_models\minimax_h3_ref2va_pruned_bf16.safetensors" 40225724176
 if errorlevel 1 exit /b 1
 
-call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors" "%MODEL_ROOT%\text_encoders\qwen3vl_32b_minimax_h3_bf16.safetensors"
+call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors" "%MODEL_ROOT%\text_encoders\qwen3vl_32b_minimax_h3_bf16.safetensors" 51506295256
 if errorlevel 1 exit /b 1
 
-call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_video_vae_fp16.safetensors" "%MODEL_ROOT%\vae\minimax_h3_video_vae_fp16.safetensors"
+call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_video_vae_fp16.safetensors" "%MODEL_ROOT%\vae\minimax_h3_video_vae_fp16.safetensors" 5207808496
 if errorlevel 1 exit /b 1
 
-call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors" "%MODEL_ROOT%\vae\minimax_h3_audio_vae_fp32.safetensors"
+call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors" "%MODEL_ROOT%\vae\minimax_h3_audio_vae_fp32.safetensors" 605254808
 if errorlevel 1 exit /b 1
 
-call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors" "%MODEL_ROOT%\loras\minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors"
+call :download "%HF_BASE%/Comfy-Org/MiniMax-H3/resolve/main/loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors" "%MODEL_ROOT%\loras\minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors" 1956193000
 if errorlevel 1 exit /b 1
 
 echo.
@@ -50,6 +50,7 @@ exit /b 0
 :download
 set "DOWNLOAD_URL=%~1"
 set "FINAL_FILE=%~2"
+set "EXPECTED_SIZE=%~3"
 if defined H3_VERIFY_ONLY (
   echo [HEAD] %DOWNLOAD_URL%
   curl.exe -L --fail --retry 3 -I "%DOWNLOAD_URL%" >nul
@@ -57,8 +58,14 @@ if defined H3_VERIFY_ONLY (
 )
 
 if exist "%FINAL_FILE%" (
-  echo [SKIP] %FINAL_FILE%
-  exit /b 0
+  for %%S in ("%FINAL_FILE%") do set "ACTUAL_SIZE=%%~zS"
+  if "!ACTUAL_SIZE!"=="!EXPECTED_SIZE!" (
+    echo [SKIP] %FINAL_FILE% ^(!ACTUAL_SIZE! bytes verified^)
+    exit /b 0
+  )
+  echo [FAIL] Existing file has !ACTUAL_SIZE! bytes; expected !EXPECTED_SIZE!.
+  echo        Delete or rename the bad final file, then run this script again.
+  exit /b 1
 )
 
 echo [GET ] %FINAL_FILE%
@@ -68,6 +75,13 @@ if errorlevel 1 (
   exit /b 1
 )
 
+for %%S in ("%FINAL_FILE%.download") do set "ACTUAL_SIZE=%%~zS"
+if not "!ACTUAL_SIZE!"=="!EXPECTED_SIZE!" (
+  echo [FAIL] Download has !ACTUAL_SIZE! bytes; expected !EXPECTED_SIZE!.
+  echo        The .download file was kept. Check the URL or upstream revision before retrying.
+  exit /b 1
+)
+
 move /Y "%FINAL_FILE%.download" "%FINAL_FILE%" >nul
-echo [DONE] %FINAL_FILE%
+echo [DONE] %FINAL_FILE% ^(!ACTUAL_SIZE! bytes verified^)
 exit /b 0
