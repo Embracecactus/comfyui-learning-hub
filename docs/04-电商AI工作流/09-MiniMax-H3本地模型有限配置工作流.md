@@ -1,279 +1,346 @@
-# MiniMax H3 本地模型：RTX 5060 8GB 无量化流式工作流
+# MiniMax H3 量化模型：通用低显存自适应工作流
 
-这一章坚持在本机运行 MiniMax H3，不调用视频生成 API，也不把扩散模型或文本编码器改成 INT8、FP8、NVFP4、NF4 或 GGUF。
+这一章解决的不是“让某一张 5060 能跑”，而是先用检测器按显卡算子能力、显存、系统内存和磁盘条件给出保守候选，再由用户导入对应的 NVFP4 或 INT8 工作流。工作流运行后，MLP 窗口与预取才会继续动态调整。
 
 配套文件：
 
-- [RTX 5060 8GB BF16 流式工作流](workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json)
-- [Windows 断点续传下载脚本](../../scripts/download_minimax_h3_bf16_windows.cmd)
-- [24GB 量化实验旧版](workflows/ecommerce-minimax-h3-local-ref2va.json)仅保留用于历史对比，本章不使用。
+- [NVFP4 量化低显存工作流](workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json)
+- [INT8 量化低显存工作流](workflows/ecommerce-minimax-h3-quantized-int8-low-vram.json)
+- [通用硬件检测器](../../scripts/detect_minimax_h3_quant_profile.py)
+- [Windows 断点续传下载脚本](../../scripts/download_minimax_h3_quantized_windows.cmd)
+- [本项目自带的自适应内存节点](../../custom_nodes/comfyui_adaptive_memory)
+- [恢复 Windows 系统管理分页文件脚本](../../scripts/restore_windows_pagefile_system_managed.ps1)
+
+旧的 [BF16 磁盘流式工作流](workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json)只保留为已经跑通的历史基线，不再是小白首选。测试机上的两份 BF16 大权重已经为量化路线腾出磁盘；要重跑旧工作流必须重新下载。
 
 ## 1. 先说结论
 
-当前电脑实测环境：
+量化只解决“权重有多大”，不能单独解决低显存运行。完整方案有四层：
+
+1. 按 GPU 原生算子能力选择 NVFP4 或 INT8 权重；
+2. 按实时空闲显存计算 H3 MLP 每次处理多少 token；
+3. 在 Qwen 编码、DiT 采样、VAE 解码三个阶段之间定向卸载已经用完的模型；
+4. 从 `0.1 MP、5 秒、4 步` 起跑，再逐项提高分辨率。
+
+本项目没有把某个显卡名称写进节点。`MiniMaxH3AdaptiveMemory` 读取实际剩余显存和内存，并用 H3 的真实维度估算 SwiGLU 临时张量预算。它只约束 MLP 窗口，不是整个 H3 的显存上限；attention、packed `h`、CUDA workspace 和 VAE 仍要通过真实运行验收。
+
+## 2. 为什么“模型文件只有 15GB”仍可能 OOM
+
+一次生成会遇到三类内存：
+
+| 类型 | 例子 | 量化是否直接减少 |
+|---|---|---|
+| 权重 | Qwen、H3 DiT、VAE 参数 | 是 |
+| 激活 | attention、MLP 中间张量、latent | 否，通常仍是 FP16/BF16 |
+| 调度缓冲 | CUDA workspace、预取块、视频解码 tile | 否 |
+
+所以不能用模型文件大小直接推断显存需求。自适应节点会把 H3 MLP 的 token 维度拆成多个窗口；数学运算、权重和 token 都没有被省略，只是牺牲一部分速度换取更低峰值。
+
+## 3. 先让检测器推荐模型，不要猜
+
+ComfyUI Desktop 必须使用当前实例自己的 Python：
 
 ```text
-GPU：NVIDIA GeForce RTX 5060
-显存：7.96 GiB
-计算能力：SM 12.0（Blackwell）
-Windows 物理内存：约 32 GB
-Windows 页面文件：测试机配置为 80 GB；成功运行时当前占用约 1.3 GB
-当前 C 盘可用：约 204 GiB
-ComfyUI Python：ComfyUI/.venv/Scripts/python.exe
-Python：3.13.12
-PyTorch：2.12.1+cu130
-CUDA runtime：13.0
+ComfyUI/.venv/Scripts/python.exe
 ```
 
-这台电脑无法把约 37.46 GiB 的 BF16 扩散模型和约 47.97 GiB 的 BF16 文本编码器同时放进显存或物理内存。实测可行的办法不是把整份权重换进页面文件，而是让 ComfyUI：
+`standalone-env/python.exe` 是 Desktop 的管理环境，不是模型运行环境。
 
-1. 从 NVMe 映射模型文件；
-2. 文本/图片条件编码完成后卸载编码器；
-3. 每次只把当前扩散层换入 GPU；
-4. 把 H3 的 MLP 激活按 2048 token 分块计算；
-5. 最后用分块 VAE 解码。
+在仓库根目录执行，实例名按自己的电脑修改：
 
-这个方案优化的是“同一时刻驻留在内存/显存中的权重”，不是把 90 多 GiB 权重凭空变小。2026-09-01 已在上述机器上以原始 BF16/FP16/FP32 权重完成一条 `256×416、5.167 秒、4 步` 的带声音 MP4，总耗时 `261.72 秒`。这证明最低规格链路可运行，但不等于 8 GB 显存可以直接制作高清长视频。
+```bat
+"C:\Users\你的用户名\AppData\Local\Comfy-Desktop\ComfyUI-Installs\你的实例\ComfyUI\.venv\Scripts\python.exe" scripts\detect_minimax_h3_quant_profile.py
+```
 
-## 2. “未量化”到底指什么
+上面的用户名与实例目录都是占位符，不能原样复制。检测器只打印候选，不会自动替你导入工作流或下载模型。
 
-默认文件：
+检测器只依据实际硬件信息：
+
+- NVIDIA compute capability；
+- CUDA/PyTorch 运行时；
+- 显存大小；
+- Windows 物理内存；
+- `comfy-kitchen` 的 CUDA backend 是否提供实际加载路径调用的原生算子；
+- 任一已启用 backend 是否提供必要的嵌入表回退算子。
+
+只有 CUDA 版本、SM 下限、已启用的 `comfy-kitchen` CUDA backend 和所需 capability 同时通过，检测器才输出 `supported=true`。SM 7.0 不会再被归入 SM 7.5 的 INT8 候选。
+
+当前保守矩阵：
+
+| 设备能力 | 文本/视觉编码器 | 工作流 | 状态 |
+|---|---|---|---|
+| NVIDIA SM 10 或更高 | NVFP4 AWQ | `quantized-nvfp4-low-vram` | 推荐候选 |
+| NVIDIA SM 7.5、8.x、8.9 | INT8 ConvRot | `quantized-int8-low-vram` | 必须短片实测 |
+| NVIDIA SM 6.x 或更早 | 无 | 无 | 当前不承诺 |
+| AMD gfx11/gfx12、部分 CDNA | INT8 ConvRot | 实验候选 | 需 ROCm、Triton 3.7+ 和完整验证 |
+| Intel/CPU | 无 | 无 | 当前不推荐本地 H3 |
+
+NVFP4 不是“所有 NVIDIA 都更省”的通用格式。硬件没有原生 NVFP4 算子时，强行选择它可能报错或走低效回退。
+
+这里没有根据文件名中的 `AWQ` 猜算子。对官方 safetensors 文件头和当前 ComfyUI 加载路径的核对结果是：
+
+- NVFP4 Qwen 线性层记录为 `format=nvfp4, full_precision_matrix_mult=true`，当前路径需要 CUDA `dequantize_nvfp4`；
+- 同一文件的嵌入表记录为 `int8_tensorwise`，需要任一已启用 backend 提供 `dequantize_int8_embedding`；
+- INT8 DiT 和 INT8 Qwen 线性层记录为 `int8_tensorwise + convrot=true`，需要 CUDA `int8_linear`；
+- 因此检测器不会仅因存在名字相似的 `gemv_awq_w4a16` 就把 NVFP4 路线标为可用。
+
+如果显卡属于 SM 10+，但当前安装缺少 NVFP4 解码或嵌入回退能力，而 CUDA `int8_linear` 可用，检测器会自动改推 INT8 工作流。这样牺牲约 10.67 GiB 磁盘占用换取可运行性，不会把“NVFP4 不可用”误报成“整台机器不可用”。
+
+## 4. 两套量化模型有什么区别
+
+两套工作流共用：
 
 ```text
-minimax_h3_ref2va_pruned_bf16.safetensors
-qwen3vl_32b_minimax_h3_bf16.safetensors
-minimax_h3_video_vae_fp16.safetensors
-minimax_h3_audio_vae_fp32.safetensors
-minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors
+diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors
+vae/minimax_h3_video_vae_fp16.safetensors
+vae/minimax_h3_audio_vae_fp32.safetensors
+loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors
 ```
 
-- 扩散模型和文本/视觉编码器保持 BF16 数值精度；
-- 视频 VAE 是官方 FP16，音频 VAE 是官方 FP32；
-- `pruned` 是 ComfyUI 版 AdaLN 结构剪枝，不是低比特数值量化；
-- 4 步 Turbo LoRA 是减少采样步数的蒸馏 LoRA，不是量化。
+只替换 Qwen3-VL 文本/视觉编码器：
 
-若连结构剪枝也不要，可把扩散模型换成 `minimax_h3_ref2va_bf16.safetensors`，但单文件约 61.73 GiB，磁盘 I/O、首次调度和总运行时间都会明显增加。本章先使用 BF16 pruned 版。
+| 档位 | 文件 | 文件大小约 | 完整五文件约 |
+|---|---|---:|---:|
+| NVFP4 | `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | 14.61 GiB | 41.38 GiB |
+| INT8 | `qwen3vl_32b_minimax_h3_int8_convrot.safetensors` | 25.28 GiB | 52.04 GiB |
 
-早先在 WSL 中看到约 15 GiB，是 WSL 虚拟机的内存上限；ComfyUI Desktop 运行在 Windows `.venv` 中，应以 Windows 的约 32 GB 物理内存为准。
+扩散模型约 19.53 GiB。视频 VAE、音频 VAE 和 Turbo LoRA 保留官方精度。
 
-## 3. 为什么这套改法不降低计算精度
+官方 Hugging Face LFS 身份如下；`x-linked-etag` 就是文件 SHA-256：
 
-主链路：
+| 文件 | 字节数 | SHA-256 |
+|---|---:|---|
+| `minimax_h3_ref2va_pruned_int8_convrot.safetensors` | 20,970,379,616 | `9255f52b6677845ad238f20dfaafa94727053694127ab7f255c048f0f9365779` |
+| `qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors` | 15,687,142,551 | `35a88d51044231fe332301d7a62aa81e3f2cba62febeb446e2c1e3e0ef76f2c6` |
+| `qwen3vl_32b_minimax_h3_int8_convrot.safetensors` | 27,141,342,152 | `bc2ced0fbea64757fa9acddccfc0b3f4819d1dcf1da6c124d690d368be283923` |
+| `minimax_h3_video_vae_fp16.safetensors` | 5,207,808,496 | `7c1f131492e7eddacaac9069a61b81bdd39de5cc96561e677c5eab1cdce5e522` |
+| `minimax_h3_audio_vae_fp32.safetensors` | 605,254,808 | `8e505d95dd1561d47abd43d4238fd40d9bb1ae9e147ed0a4cba778d76ae4db48` |
+| `minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors` | 1,956,193,000 | `5b9ab5ade15d0775676d01a907268a69a1468dc6033b3b0d3ded5502f3ebb84c` |
 
-```text
-BF16 UNETLoader
-  ↓
-MiniMax H3 Low VRAM
-  ├─ MLP 每次只算 2048 token
-  └─ 禁止提前预取下一层
-  ↓
-4 步 Turbo LoRA / 采样
-  ↓
-VAEDecodeTiled
-```
-
-MLP 分块只是把同一个矩阵运算拆成多批执行，再按原顺序写回输出；它不修改模型权重，也不跳过 token。代价是重复调度和换入次数增加，所以更慢。
-
-当前工作流没有默认启用 Sol-Attn。Sol-Attn 是稀疏注意力近似，虽然不是量化，但可能改变结果；而本机当前也没有 Triton，因此先用可比较的精确注意力建立基线。
-
-## 4. 磁盘、内存和 Windows 页面文件
-
-准备条件：
-
-- 模型文件至少预留 105 GB；
-- 使用 NVMe SSD，机械硬盘不适合逐层流式换入；
-- 运行前关闭游戏、其他 AI 软件和不必要的浏览器页面；
-- 下载前确认模型、输出和系统盘不会共同挤满同一块磁盘。
-
-### 4.1 先纠正一个容易踩的坑
-
-本工作流的主方案**不要求把 90 多 GiB 权重全部塞进页面文件**。`DynamicVRAM + fast-disk` 会把大权重保留为磁盘文件切片，需要某一层时才读取。测试机虽然曾为旧方案配置 80 GB 页面文件，但成功运行结束时 `CurrentUsage` 约为 `1282 MB`。
-
-Windows 的 `PeakUsage` 会保留本次开机以来的历史峰值。本机曾用错误的 eager/pread 方案冲到约 42 GB，因此成功后仍能看到这个旧峰值；它不能用来证明成功工作流消耗了 42 GB 页面文件。
-
-查看当前值：
+下载脚本先做逐文件字节数闸门。需要进一步人工校验时，在 PowerShell 执行：
 
 ```powershell
+Get-FileHash -Algorithm SHA256 -LiteralPath "C:\你的\ComfyUI-Shared\models\对应目录\文件名.safetensors"
+```
+
+## 5. 下载：支持断点续传和大小校验
+
+在 Windows CMD 的仓库根目录执行：
+
+Desktop 默认共享模型目录会通过 `%LOCALAPPDATA%` 自动定位，不绑定用户名。下面显式传入第一个参数，是为了让非默认安装位置的小白看清模型会写到哪里；路径请换成自己的实际目录。
+
+```bat
+set HF_ENDPOINT=https://hf-mirror.com
+scripts\download_minimax_h3_quantized_windows.cmd "C:\你的\ComfyUI-Shared\models" nvfp4
+```
+
+检测器推荐 INT8 时，把最后一个参数改为：
+
+```bat
+scripts\download_minimax_h3_quantized_windows.cmd "C:\你的\ComfyUI-Shared\models" int8
+```
+
+脚本行为：
+
+- 使用 `curl.exe -C -` 从 `.download` 文件续传；
+- 每次断流都新建一个 curl 进程并重新读取当前文件长度，避免内部 retry 重复追加旧 Range；
+- 每个文件默认允许 100 次外层重连；可在运行前设置 `H3_MAX_DOWNLOAD_ATTEMPTS` 调整，但不建议并发启动第二个下载器；
+- 只有 curl 退出码严格等于 `0` 才进入完成校验，外部中止返回的负退出码不会被误判成功；
+- 每个目标文件都有单写者锁；不要同时打开两个下载窗口写同一模型；
+- 网络中断后重新运行同一命令即可；如果提示 stale lock，先确认任务管理器中没有对应 `curl.exe` 再删除锁目录；
+- 从 WSL 或自动化工具启动 Windows 批处理时，外层会话退出不一定表示子 `curl.exe` 已退出。不要绕过现有锁直接启动另一种下载器；先在任务管理器确认 `curl.exe` 消失，并观察 `.download` 文件长度不再变化；
+- 五个文件逐一核对官方字节数；
+- 大小完全正确才改成正式 `.safetensors` 文件名；
+- 已存在且大小正确的 VAE/LoRA 会跳过。
+
+只检查下载地址，不下载模型：
+
+```bat
+set H3_VERIFY_ONLY=1
+scripts\download_minimax_h3_quantized_windows.cmd "C:\你的\ComfyUI-Shared\models" nvfp4
+set H3_VERIFY_ONLY=
+```
+
+## 6. 安装本项目自己的自适应节点
+
+将仓库里的整个目录：
+
+```text
+custom_nodes/comfyui_adaptive_memory
+```
+
+复制到当前实例：
+
+```text
+ComfyUI/custom_nodes/comfyui_adaptive_memory
+```
+
+然后重启 ComfyUI。节点搜索中应能看到：
+
+```text
+MiniMax H3 Adaptive Memory
+H3 Release Encoders After Conditioning
+H3 Release DiT After Sampling
+H3 VAE Decode Tiled and Release
+H3 VAE Decode Audio and Release
+```
+
+这套工作流不再依赖外部 `ComfyUI-MiniMaxH3-LowVRAM`。旧节点可以保留给旧工作流，但不要把两个 H3 MLP 分块节点串在一起，否则会被新节点明确拒绝。
+
+## 7. 自研优化一：实时显存分块
+
+`MiniMaxH3AdaptiveMemory` 不读取“5060”“4090”之类的型号表。第一次进入每个扩散 forward 时，它会：
+
+1. 读取当前 CUDA 空闲显存；
+2. 留出 `reserve_vram_mb` 给 attention、采样器、Windows 桌面和 CUDA workspace；
+3. 根据 H3 的 `hidden=5376`、`ffn=14336` 和当前激活精度估算每个 token 的 SwiGLU 临时内存；
+4. 在 `min_chunk_tokens` 与 `max_chunk_tokens` 之间选出本次窗口；
+5. 同一个 forward 的 50 个 H3 block 共用该决定，避免每层来回抖动。
+
+四个 profile：
+
+| profile | 目标 | 典型用途 |
+|---|---|---|
+| `auto_stable` | 峰值优先 | 6–8GB 参数设计目标；每种机器仍需实跑 |
+| `auto_balanced` | 显存与速度平衡 | 12–16GB 参数设计目标 |
+| `auto_speed` | 尽量放大窗口 | 24GB 及以上参数设计目标 |
+| `manual` | 固定窗口 | 对比测试和排错 |
+
+量化权重影响模型驻留；自适应分块影响激活峰值。两者解决的是不同问题。
+
+## 8. 自研优化二：三阶段定向卸载
+
+工作流现在按以下顺序建立强依赖：
+
+```text
+Qwen + 视频/音频 VAE 编码参考素材
+  ↓ H3ReleaseAfterConditioning
+只保留 CONDITIONING + LATENT
+  ↓
+H3 DiT 4 步采样
+  ↓ H3ReleaseAfterSampling
+只保留采样后的 LATENT
+  ↓
+视频 VAE 分块解码后卸载
+  ↓ released 布尔屏障
+音频 VAE 解码后卸载
+```
+
+两个释放节点不是“无连接的清缓存按钮”。它们把真正的条件或 latent 作为输入输出，因此 ComfyUI 必须先完成上一个阶段，才能卸载该阶段的模型。
+
+两个阶段释放节点还被标记为不可复用缓存的副作用节点。否则第二次用相同输入排队时，ComfyUI 可能复用上次输出而跳过卸载动作。
+
+视频解码节点还会在释放动作成功返回后输出一个很小的 `released=true`，音频解码节点必须收到它才会运行；若关闭视频 `release`，音频节点会明确报错。这个屏障不传整批视频帧，能保证“视频解码与释放调用在音频解码前完成”。Windows 驱动、mmap 与页缓存的实际驻留峰值仍以日志和监测为准。
+
+释放使用 ComfyUI 的定向 `unload_model_and_clones()`，不会粗暴清空所有全局模型。小白不要从这些模型输出再接绕过释放屏障的并行支路；本工作流中的 VAE 只会在采样结束后按依赖重新加载用于解码。额外分支可能增加重复 I/O 和峰值，必须重新验收。
+
+## 9. 自研优化三：预取只在真的可用时开启
+
+旧工作流把 `block_prefetch=keep` 写死，但如果启动参数包含 `--disable-async-offload`，ComfyUI 的异步流数量就是 0，“保留预取”实际上不会创建预取队列。
+
+新节点的 `prefetch_mode=auto` 会同时检查：
+
+- 至少有一个异步卸载流；
+- 预留显存之上仍有足够余量；
+- 系统可用内存足以承受提前读取下一 block。
+
+任何一项不满足就关闭预取，并在日志中写明原因。它用于降低显存和页面文件抖动风险，但没有测量磁盘吞吐，也不代替真实 A/B 验收。
+
+## 10. 模型格式先看 GPU/Native ops，I/O 模式再看系统内存
+
+所有档位都保留：
+
+```text
+--enable-dynamic-vram --disable-smart-memory --reserve-vram 1.0 --vram-headroom 0.5 --disable-pinned-memory --preview-method none
+```
+
+不想手工判断时，在管理员权限不必要的普通 PowerShell 中运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start_comfyui_h3_quantized.ps1 `
+  -InstanceName "你的实例目录名" -ModelProfile nvfp4
+```
+
+请在仓库根目录执行。脚本默认会停止该实例现有的 ComfyUI 进程再按新参数启动；不会停止独立的模型下载器。
+
+脚本会按物理内存选择 `RamAssisted` 或 `DiskStreaming`，默认使用稳定的同步卸载档。INT8 工作流把 `-ModelProfile` 改为 `int8`。
+
+### 10.1 稳定首跑
+
+在上面的参数后添加：
+
+```text
+--disable-async-offload
+```
+
+此时自适应节点会自动关闭 block prefetch。先证明完整短片可运行，再做速度 A/B 测试。
+
+### 10.2 物理内存放不下最大单阶段模型
+
+再添加：
+
+```text
+--fast-disk
+```
+
+自动判断不是“总模型文件多大”，而是同时检查总物理内存和当前可用内存。脚本采用的保守启发式为：总内存至少是最大阶段 `+8 GiB`，当前可用内存至少是最大阶段 `+4 GiB`；这不是已经证明的安全线。
+
+| 组合 | 最大阶段约 | I/O 候选门槛 |
+|---|---:|---:|
+| NVFP4 Qwen + INT8 DiT | 19.53 GiB | 总 RAM ≥27.53 GiB 且当前可用 ≥23.53 GiB，才候选内存辅助 |
+| INT8 Qwen + INT8 DiT | 25.28 GiB | 总 RAM ≥33.28 GiB 且当前可用 ≥29.28 GiB，才候选内存辅助 |
+
+16GB 内存只能列为磁盘流式实验候选。32GB 也不能仅凭总容量断言可用内存辅助：浏览器、桌面程序和页缓存占用较高时，Auto 会退回 `--fast-disk`。
+
+### 10.3 速度实验，不是默认值
+
+稳定首跑成功后，可把 `--disable-async-offload` 替换为：
+
+```text
+--async-offload 1
+```
+
+节点会在余量允许时做一 block ahead 预取。Windows、驱动、PyTorch 与显卡组合差异很大；若出现原生崩溃、显存尖峰或磁盘更慢，立即退回稳定首跑参数。
+
+不要添加：
+
+| 参数 | 原因 |
+|---|---|
+| `--novram` | 会绕开当前依赖的 DynamicVRAM 路径 |
+| `--disable-dynamic-vram` | 关闭逐模块动态加载 |
+| `--disable-mmap` | 容易把大文件转成整文件加载，推高 RAM/分页文件 |
+| `--cpu-vae` | H3 Video VAE 精度路径可能出现 `float != Half` |
+
+## 11. Windows 分页文件：恢复系统管理
+
+分页文件是内存不足时的安全网，不是 H3 的“额外高速内存”。固定 80GB 会长期占磁盘空间，也可能掩盖错误的整文件加载路径。
+
+推荐在管理员 PowerShell 中执行：
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\restore_windows_pagefile_system_managed.ps1
+```
+
+然后重启 Windows。只有重启后，旧的固定页面文件大小才会真正释放并由系统重新管理。
+
+查看状态：
+
+```powershell
+Get-CimInstance Win32_ComputerSystem | Select-Object AutomaticManagedPagefile
 Get-CimInstance Win32_PageFileUsage |
   Select-Object Name, AllocatedBaseSize, CurrentUsage, PeakUsage
 ```
 
-### 4.2 页面文件怎么设
+`AutomaticManagedPagefile` 应为 `True`。`PeakUsage` 是本次开机以来的历史峰值，不能单独证明当前工作流正在使用同样多的分页文件。
 
-优先保留“系统管理的大小”。若系统提交内存不足，再把页面文件放在空间充足的 NVMe 上作为安全网；不要一开始就把 80 GB 当成必需条件。
+## 12. 第一次运行
 
-> 主方案用户可以跳过下面的固定 80 GB 设置。以下步骤只用于复现本机排查旧加载路径时的实验环境。
-
-设置页面文件：
-
-1. Windows 搜索“查看高级系统设置”。
-2. 打开“性能 → 设置 → 高级 → 虚拟内存 → 更改”。
-3. 取消“自动管理”后选择 NVMe 所在盘。
-4. 初始大小和最大值先都填 `81920 MB`。
-5. 应用并重启 Windows。
-
-只有明确需要复现实验配置时，才在仓库根目录的管理员 PowerShell 中运行：
-
-```powershell
-Set-ExecutionPolicy -Scope Process Bypass
-.\scripts\set_windows_pagefile_80gb.ps1
-```
-
-80 GB 不是推荐起步值，也不是 DynamicVRAM 的运行前提。若当前提交量持续上涨几十 GB，通常说明仍在使用 `--disable-mmap`/pread 等整文件加载路径，应先修正启动参数，而不是继续扩大页面文件。
-
-## 5. 安装唯一必需的低显存节点
-
-本机已安装：
-
-```text
-ComfyUI/custom_nodes/ComfyUI-MiniMaxH3-LowVRAM
-```
-
-其他电脑可在 Manager 中使用 Git URL 安装：
-
-```text
-https://github.com/lericogit/ComfyUI-MiniMaxH3-LowVRAM
-```
-
-该节点只对原生 MiniMax H3 模型的 MLP 做等价分块。本工作流不需要 ComfyUI-GGUF。
-
-## 6. 一键断点续传下载
-
-在 Windows CMD 进入本仓库，然后执行：
-
-```bat
-cd /d D:\path\to\comfyui-learning-hub
-set HF_ENDPOINT=https://hf-mirror.com
-scripts\download_minimax_h3_bf16_windows.cmd
-```
-
-脚本默认写入：
-
-```text
-C:\Users\lijian\AppData\Local\Comfy-Desktop\ComfyUI-Shared\models
-```
-
-其他电脑可把模型根目录作为第一个参数：
-
-```bat
-scripts\download_minimax_h3_bf16_windows.cmd "D:\ComfyUI-Shared\models"
-```
-
-下载中断后重新执行同一命令即可。脚本使用 `curl.exe -C -` 从 `.download` 文件续传，并核对五个官方文件的字节数；大小正确后才改成正式文件名。已有正式文件也会重新检查，避免把中断文件或错误页面误当成模型。
-
-五个文件下载完成前不要运行工作流。
-
-只想检查脚本和链接、不下载大文件时：
-
-```bat
-set H3_VERIFY_ONLY=1
-scripts\download_minimax_h3_bf16_windows.cmd
-set H3_VERIFY_ONLY=
-```
-
-## 7. Desktop 启动参数
-
-打开：
-
-```text
-左上角菜单 → 打开仪表板 → 当前本地实例 → 启动参数
-```
-
-RTX 50 系 Windows 的实测稳定参数为：
-
-```text
---enable-manager --enable-manager-legacy-ui --enable-dynamic-vram --fast-disk --disable-smart-memory --reserve-vram 1.0 --vram-headroom 0.5 --disable-async-offload --disable-pinned-memory --preview-method none
-```
-
-参数作用：
-
-| 参数 | 作用 |
-|---|---|
-| `--enable-dynamic-vram` | 将大模型权重保留为文件切片，按当前模块换入，而不是一次载入整份 48 GiB 编码器 |
-| `--fast-disk` | 模型在 NVMe 时直接从文件切片读取，避免额外建立巨大的内存缓存 |
-| `--disable-smart-memory` | 不把暂时不用的模型继续留在显存 |
-| `--reserve-vram 1.0` | 给 Windows 桌面和 CUDA 临时缓冲留约 1 GB |
-| `--vram-headroom 0.5` | DynamicVRAM 再留约 0.5 GB 调度余量 |
-| `--disable-async-offload` | 避开 Windows/Blackwell 上异步文件读取与 HostBuffer 崩溃路径 |
-| `--disable-pinned-memory` | 避开 Windows/Blackwell 的 pinned host memory 原生崩溃路径 |
-| `--preview-method none` | 禁用采样预览，减少额外解码和显存占用 |
-
-也可以在仓库根目录直接运行已经固化的启动脚本：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start_comfyui_h3_8gb.ps1
-```
-
-脚本会自动查找 Desktop 的共享模型 YAML，停止同一实例的旧 `main.py`、检查 8188 端口、使用正确的 Desktop `.venv` 启动，并同时核对目标进程和 `/system_stats` 中的 `--enable-dynamic-vram --fast-disk`。
-
-本地实例不叫 `ComfyUI-RTX5060` 时传入自己的实例目录名：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start_comfyui_h3_8gb.ps1 `
-  -InstanceName "你的实例目录名"
-```
-
-电脑里有多个 Desktop 模型路径 YAML、无法自动判断时，明确传入当前实例的文件：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start_comfyui_h3_8gb.ps1 `
-  -ExtraModelsConfig "$env:APPDATA\Comfy Desktop\instance-model-paths\inst-你的实例编号.yaml"
-```
-
-### 7.1 这四个参数不要加
-
-| 不要添加 | 原因 |
-|---|---|
-| `--novram` | 会绕开这次依赖的 DynamicVRAM 文件切片路径 |
-| `--disable-dynamic-vram` | 会直接关闭逐模块流式加载 |
-| `--disable-mmap` | 进入 eager/pread 整文件加载，48 GiB Qwen 容易把 RAM/页面文件吃满 |
-| `--cpu-vae` | H3 Video VAE 权重为 FP16，而 CPU VAE 输入会选 FP32；本机已复现 `float != Half` 错误 |
-
-确认实际进程参数：
-
-```powershell
-(Invoke-RestMethod http://127.0.0.1:8188/system_stats).system.argv
-```
-
-### 7.2 `pread` 补丁只作为兼容回退
-
-仓库仍保留针对本机 ComfyUI v0.33.4 的 Windows 非 mmap 回退补丁，主要用于记录历史故障。确实需要时先检查上下文是否匹配：
-
-```bat
-cd /d C:\path\to\ComfyUI
-git apply --check C:\path\to\comfyui-learning-hub\patches\comfyui-windows-large-safetensors-pread.patch
-git apply C:\path\to\comfyui-learning-hub\patches\comfyui-windows-large-safetensors-pread.patch
-```
-
-若 `--check` 失败，不要强行应用；先用 `git apply --reverse --check <补丁路径>` 判断是否已经打过补丁。该补丁让 `--disable-mmap` 使用 safetensors `backend="pread"`，并直接读取 JSON 头部，避免 `safe_open()` 再创建 Windows 文件映射。但 `load_file()` 仍会把整份权重读入内存，所以它不是 32 GB 内存运行 H3 BF16 的推荐路径。本章成功运行时补丁虽然已安装，启动参数没有启用 `--disable-mmap`，因此走的是 DynamicVRAM。
-
-更新 ComfyUI 后先检查补丁是否仍需要，不要不加判断地重复应用。
-
-保存后重启本地实例。
-
-## 8. 不要再装错 Python 环境
-
-Desktop 中存在两个 Python：
-
-```text
-standalone-env/python.exe          # Desktop 管理/安装环境，不含 Torch
-ComfyUI/.venv/Scripts/python.exe   # 当前实例真正运行模型的环境
-```
-
-检查模型环境必须使用：
-
-```bat
-"C:\Users\lijian\AppData\Local\Comfy-Desktop\ComfyUI-Installs\ComfyUI-RTX5060\ComfyUI\.venv\Scripts\python.exe" -c "import torch; print(torch.__version__, torch.version.cuda, torch.cuda.get_device_name(0))"
-```
-
-安装自定义节点依赖时也应使用 `.venv\Scripts\python.exe -m pip`，不能使用 `standalone-env`。
-
-## 9. 第一次运行必须保持这些参数
-
-1. 导入 `ecommerce-minimax-h3-bf16-streaming-8gb.json`。
-2. 在 `Picture 1` 重新选择一张商品图。
-3. 检查五个模型加载节点都不是红色。
-4. 保持：
+1. 重启 ComfyUI，使新模型和自定义节点生效。
+2. 导入检测器推荐的 NVFP4 或 INT8 工作流。
+3. 在 `Picture 1` 重新选择一张商品图。
+4. 确认所有模型节点和五个自研节点都不是红色。
+5. 保持以下首跑设置：
 
    ```text
    9:16
@@ -283,14 +350,15 @@ ComfyUI/.venv/Scripts/python.exe   # 当前实例真正运行模型的环境
    ref_image_size = match
    Turbo LoRA = true
    4 steps
-   Low VRAM profile = minimum_vram
-   block_prefetch = disable
-   VAE tile = 256
+   Adaptive profile = auto_stable
+   reserve_vram_mb = 1024
+   prefetch_mode = auto
+   H3 两个阶段 release = true
+   Video VAE tile = 256
    ```
 
-5. 关闭游戏、浏览器视频、其他 AI 软件和占用 GPU 的窗口。
-6. 打开任务管理器的 GPU、内存和磁盘页，再点击一次运行。
-7. 不要因为磁盘长时间 100% 就立即终止；流式换入阶段可能主要消耗磁盘而不是 GPU。
+6. 关闭其他 AI 软件、游戏和浏览器视频。
+7. 点击一次运行；不要并发排多个 H3 任务。
 
 输出目录：
 
@@ -298,124 +366,116 @@ ComfyUI/.venv/Scripts/python.exe   # 当前实例真正运行模型的环境
 ComfyUI-Shared/output/ecommerce/video
 ```
 
-## 10. 每个关键节点做什么
+## 13. 每个关键节点做什么
 
-| 节点 | 当前设置 | 职责 |
-|---|---|---|
-| `UNETLoader` | Ref2VA pruned BF16 | 映射约 37.46 GiB 扩散权重 |
-| `CLIPLoader` | Qwen3-VL 32B BF16 / minimax | 编码提示词和商品参考图 |
-| `MiniMaxH3LowVRAM` | 2048 token、禁预取 | 限制每个 MLP 激活峰值，不改权重 |
-| `MiniMaxH3ReferenceToVideo` | 单图、match、5 秒 | 生成参考条件和联合音视频 latent |
-| `LoraLoaderModelOnly` | Ref2V Turbo BF16 | 把采样步数降到 4 步 |
-| `SamplerCustomAdvanced` | 4 steps | 执行最耗时的逐层扩散计算 |
-| `VAEDecodeTiled` | 256/64、32/8 | 分块解码视频，降低解码峰值 |
-| `VAEDecodeAudio` | 官方 FP32 Audio VAE | 解码原生音频 |
-| `CreateVideo` | 24 fps | 合并画面和声音 |
-| `SaveVideo` | 本地目录 | 保存最终视频 |
+| 节点 | 职责 |
+|---|---|
+| `UNETLoader` | 加载 Ref2VA pruned INT8 ConvRot 扩散模型 |
+| `CLIPLoader` | 加载检测器选出的 NVFP4 或 INT8 Qwen3-VL |
+| `MiniMaxH3AdaptiveMemory` | 依据实时显存限制 MLP 激活窗口，并条件控制预取 |
+| `MiniMaxH3ReferenceToVideo` | 把提示词、商品图、视频/音频参考编码为条件与联合 latent |
+| `H3ReleaseAfterConditioning` | 条件编码完成后定向卸载 Qwen 和参考 VAE |
+| `LoraLoaderModelOnly` | 应用官方 4 步 Turbo LoRA |
+| `SamplerCustomAdvanced` | 执行四步 H3 DiT 采样 |
+| `H3ReleaseAfterSampling` | 采样完成后、VAE 解码前卸载 DiT 及其 clones |
+| `H3VAEDecodeTiledRelease` | 分块解码视频，卸载视频 VAE 后发出 `released` 屏障 |
+| `H3VAEDecodeAudioRelease` | 等待视频释放屏障，再解码音频并卸载音频 VAE |
+| `CreateVideo` / `SaveVideo` | 合并并保存本地 MP4 |
 
-## 11. OOM 或系统卡死时按顺序处理
+## 14. OOM、内存爆满或磁盘 100% 怎么处理
 
-不要同时乱改参数。按以下顺序逐项确认：
+一次只改一项：
 
-1. 用 `/system_stats` 确认进程含 `--enable-dynamic-vram --fast-disk`，且不含上一节列出的四个禁用参数。
-2. 确认没有误选 0.4/0.98 MP，也没有添加第二张参考图。
-3. 确认模型位于 NVMe，磁盘仍有至少 30 GB 空闲。
-4. 将 Low VRAM 节点改成：
+1. 确认没有误选第二张参考图，且 `ref_image_size=match`。
+2. 确认是 `0.1 MP、5 秒、4 步`。
+3. 确认两个阶段释放节点都是 `release=true`。
+4. 保持 `profile=auto_stable`，把 `max_chunk_tokens` 从 4096 降到 2048。
+5. MLP 仍 OOM 时，把 `min_chunk_tokens` 降到 512、`max_chunk_tokens` 降到 1024。
+6. Video VAE OOM 时，把 `tile_size=256` 降到 192；不要添加 `--cpu-vae`。
+7. 系统内存不足时添加 `--fast-disk`；磁盘会更忙，但避免整阶段塞进物理内存。
+8. 内存足够却长期磁盘 100% 时，关闭任务，去掉 `--fast-disk` 做同规格 A/B；不要靠扩大固定分页文件解决。
+9. 若 `prefetch=keep` 但日志写着 async stream 为 0，说明预取根本没有生效；改回 `auto`。
+10. 页面文件持续上涨几十 GB 时，检查是否误加 `--disable-mmap` 或关闭了 DynamicVRAM。
 
-   ```text
-   memory_profile = custom
-   custom_chunk_tokens = 1024
-   block_prefetch = disable
-   ```
+模型下载期间磁盘占用高与推理阶段磁盘抖动不是同一个问题，先看占用进程和 ComfyUI 日志再判断。
 
-5. 若仍在 MLP OOM，最后试 `512` token；会更慢，但仍是等价分块。
-6. 若在 VAE 解码 OOM，把 Video VAE `tile_size` 从 256 降到 192；不要加 `--cpu-vae`。
-7. 若日志打印 `49118MB Staged` 后，页面文件当前占用仍很低，这是文件切片已建立的正常现象，不等于 49 GB 已进入 RAM。
-8. 若页面文件当前占用持续上涨几十 GB，停止任务并检查是否仍有 `--disable-mmap`、`--disable-dynamic-vram` 或旧 Desktop 启动参数。
-9. 16 GB 物理内存尚未在本项目实测通过；本次成功机器实际为 32 GB。不能把 WSL 显示的 15/16 GB 误当成 Windows 物理内存，也不应承诺 16 GB 必然可跑。
+## 15. 跑通后的升级顺序
 
-## 12. 跑通后的升级顺序
-
-每次只改一项，并固定 seed：
+固定 seed，每次只改一项：
 
 1. `0.1 MP → 0.2 MP`；
-2. MLP `512/1024 → 2048`，观察是否提速；
-3. `block_prefetch=disable → keep`，观察峰值是否仍能承受；
-4. 最后才增加第二张参考图；
-5. 不建议 8GB 机器直接尝试 0.98 MP。
+2. `auto_stable → auto_balanced`；
+3. 稳定参数下比较 `--disable-async-offload` 与 `--async-offload 1`；
+4. 再增加第二张参考图；
+5. 最后才尝试 0.4MP 以上或更长视频。
 
-## 13. 验收与留痕
+不要用“成功加载模型”当验收。必须完整得到可播放、有画面和声音的 MP4。
 
-### 13.1 失败记录：为什么以前看起来需要巨大内存（2026-08-31）
-
-- MCP：`Comfy-Org/comfy-mcp 0.10.0`，`comfy-cli 1.19.0`，已注册到 Codex；
-- 工作流成功转换为 26 个 API 节点并通过服务端校验；
-- Prompt ID：`eb6b1c62-c444-4cd9-a5db-4cd04d7735ca`；
-- 失败阶段：两个 VAE 被识别后，`CLIPLoader` 加载 `qwen3vl_32b_minimax_h3_bf16.safetensors`；
-- 错误：`Windows fatal exception: access violation`，Windows WER 为 `torch_cpu.dll / c0000005`；
-- 堆栈：`torch/storage.py:471 → comfy/utils.py:136 → comfy/sd.py:1534 → nodes.py:1031`；
-- 当时页面文件：22 GB；分辨率尚未进入采样，因此降分辨率不能修复这个加载崩溃；
-- 结论：这个失败来自错误的整文件加载路线；降分辨率无法修复，因为当时尚未进入采样。
-
-### 13.2 中间失败：CPU VAE 精度不匹配（2026-09-01）
-
-- Prompt ID：`2dd862ef-c444-4d36-aeba-8b3b8e25b8dc`；
-- DynamicVRAM 已让 4 步采样完整结束，页面文件当前占用约 1.3 GB；
-- Video VAE 解码时报错：`expected m1 and m2 to have the same dtype, float != Half`；
-- 原因：`--cpu-vae` 选择 FP32 输入，而官方 Video VAE 是 FP16；
-- 修复：删除 `--cpu-vae`，让 Video VAE 和 Audio VAE 分别按各自 FP16/FP32 精度在 DynamicVRAM 路径运行。
-
-### 13.3 RTX 5060 8 GB 完整成功记录（2026-09-01）
-
-| 项目 | 实测值 |
-|---|---|
-| Prompt ID | `6a28753b-00eb-40e3-ad2f-3fce09db5dac` |
-| GPU / 内存 | RTX 5060 8 GB / Windows 32 GB |
-| 数值精度 | H3 与 Qwen BF16、Video VAE FP16、Audio VAE FP32；无量化 |
-| 输入 | 单张透明底琥珀精华瓶 |
-| 输出 | H.264 `256×416`、24 fps、124 帧；AAC 32 kHz 双声道 |
-| 时长 / 文件大小 | `5.167 秒` / `530795 字节` |
-| 采样 | 4 步，约 `54.7 秒` |
-| 总耗时 | `261.72 秒` |
-| DynamicVRAM 日志 | Qwen `49118MB Staged`；H3 `38444MB Staged`；Video VAE `4965MB Staged`；Audio VAE `576MB Staged` |
-| 页面文件 | 成功运行后 `CurrentUsage ≈ 1282 MB`；约 42 GB 的 `PeakUsage` 是此前失败遗留的本次开机历史峰值 |
-| 输出文件 | `ComfyUI-Shared\\output\\ecommerce\\video\\minimax-h3-bf16-streaming-8gb_00001_.mp4` |
-| 结果 | 完整生成音视频，服务端状态 `completed` |
-
-测试机的 Desktop `installations.json` 和 Windows-native comfy-cli `default_launch_extras` 已同步为第 7 节参数；Desktop 原配置备份为 `installations.json.bak-before-h3-dynamic`。下载脚本也已在这五个现有文件上逐一核对字节数通过。
-
-画面验收：首、中、尾帧都保留了琥珀玻璃瓶、滴管和主体轮廓，参考图确实生效；低分辨率下标签会在中途生成伪文字，装饰球存在纹理噪点，因此当前结果用于验证链路和资源策略，不作为最终商用质量。
-
-其他电脑复测时填写：
+## 16. 复测留痕模板
 
 ```text
-GPU / 显存：
-系统内存：
-页面文件：
-模型所在磁盘：
-分辨率与帧数：
-MLP chunk tokens：
-文本编码耗时：
+日期：
+ComfyUI / PyTorch / CUDA 或 ROCm：
+GPU / compute capability / 显存：
+系统内存 / 分页文件策略：
+量化组合：NVFP4 / INT8
+启动参数：
+自适应 profile / 实际日志 chunk：
+prefetch 日志及原因：
+分辨率 / 帧数 / 步数：
+Qwen 编码耗时：
 每步采样耗时：
 VAE 解码耗时：
 总耗时：
-峰值 GPU：
-峰值内存：
+峰值显存 / 内存 / 磁盘：
+输出文件：
 是否完成：
 错误原文：
 ```
 
-只有完整产出可播放的音视频，并记录上述信息，才算“实跑通过”；只看到模型加载或采样进度不算。
+## 17. 当前验证边界
 
-## 14. 来源与边界
+已确认：
 
+- Windows 32GB + NVIDIA 8GB 的旧 BF16 工作流完整生成过 `256×416、124 帧、4 步` 音视频，证明原生 H3 链路可运行；
+- 当前 ComfyUI `.venv` 能导入本项目五个新节点；
+- 自适应策略与硬件选择器已有自动化测试；
+- 三套派生工作流通过节点/链接结构校验；
+- 本机 NVFP4 组合的五个模型已完整下载，逐文件 SHA-256 与官方 LFS 身份一致；
+- 服务端预检返回 `valid=true`、`0 errors`、`0 warnings`；
+- RTX 5060 8GB + Windows 32GB 已用 NVFP4 工作流完整生成 `256×416、5.167 秒、24 fps、4 步` 的 H.264 + AAC 短片，服务端总执行 `43.96 秒`；
+- 实跑日志显示 MLP 窗口会按现场资源从 `4096` 自动缩到 `1792` token，并依次释放 Qwen/参考 VAE、DiT、视频 VAE、音频 VAE；稳定首跑禁用了异步流，所以预取按设计关闭。
+
+这证明上述一台机器的 **NVFP4 低分辨率首跑规格** 已实跑通过，不代表所有 8GB 显卡都能跑。当前开机周期仍保留旧的 `81920 MB` 分页文件分配，因此也不能据此声称“8GB 显存 + 32GB 内存且无需分页文件”。Windows 重启并由系统重新管理分页文件后、INT8 档、AMD 和其他 NVIDIA 架构仍要分别复测。
+
+本次输出位于测试机：
+
+```text
+C:\Users\lijian\AppData\Local\Comfy-Desktop\ComfyUI-Shared\output\ecommerce\video\minimax-h3-quantized-nvfp4-low-vram_00001_.mp4
+```
+
+画面和声音均可解码；0.1 MP 是“跑通链路”规格，样片仍有标签文字变形和运动拖影，不能当作最终电商质量基准。
+
+本次命令、结果与未完成项见[2026-09-01 量化自适应内存验证记录](verification/2026-09-01-minimax-h3-quantized-adaptive-memory.md)。
+
+## 18. 后续电商模型剪枝怎么做
+
+低显存运行优化与模型剪枝分两阶段：
+
+1. 先固定一个已经完整跑通的官方量化基线，保存提示词、输入图、seed、耗时与结果；
+2. 再准备覆盖瓶罐、服饰、饰品、家电等品类的电商验证集；
+3. 对 DiT block、FFN 通道或条件分支做结构敏感度评估；
+4. 剪枝后需要针对商品身份、文字布局、材质和运镜重新训练或校准；
+5. 用相同基线同时比较模型大小、速度、显存和商品一致性。
+
+没有验证集和微调就直接删层，通常只是得到更小但不可控的模型。本章目前完成的是量化权重的通用运行时调度，不宣称已经完成电商剪枝。
+
+## 19. 来源与许可
+
+- [MiniMax H3 官方项目](https://github.com/MiniMax-AI/MiniMax-H3)
+- [ComfyUI MiniMax H3 指南](https://docs.comfy.org/tutorials/video/minimax/minimax-h3)
 - [Comfy-Org MiniMax H3 R2V 模板](https://github.com/Comfy-Org/workflow_templates/blob/main/templates/video_minimax_h3_r2v.json)
 - [Comfy-Org MiniMax H3 模型文件](https://huggingface.co/Comfy-Org/MiniMax-H3)
 - [ComfyUI MiniMax H3 原生节点](https://github.com/Comfy-Org/ComfyUI/blob/master/comfy_extras/nodes_minimax_h3.py)
-- [ComfyUI #15424：Windows 大型 CLIP safetensors 访问冲突及 pread 绕过](https://github.com/Comfy-Org/ComfyUI/issues/15424)
-- [ComfyUI #15337：MiniMax H3 在 Windows/Blackwell 上禁用异步卸载和 pinned memory 的验证](https://github.com/Comfy-Org/ComfyUI/issues/15337)
-- [Comfy-Org/comfy-mcp：本地 MCP 服务](https://github.com/Comfy-Org/comfy-mcp)
-- [MiniMax H3 Low VRAM 等价 MLP 分块节点](https://github.com/lericogit/ComfyUI-MiniMaxH3-LowVRAM)
-- [MiniMax H3 官方项目](https://github.com/MiniMax-AI/MiniMax-H3)
 
-MiniMax H3 权重受其 Community License 约束。本章只确认上述 RTX 5060 8 GB + Windows 32 GB 的最低规格 BF16 工作流实跑通过；没有验证 16 GB 内存、高清输出、长视频或商用品质。
+MiniMax H3 权重受其 Community License 约束。仓库内自适应节点是运行时调度代码，不重新分发模型权重，也不改变上游模型许可。

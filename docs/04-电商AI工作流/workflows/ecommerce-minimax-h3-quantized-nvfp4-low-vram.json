@@ -37,12 +37,12 @@
         "ver": "0.33.0"
       },
       "widgets_values": [
-        "ecommerce/video/minimax-h3-bf16-streaming-8gb",
+        "ecommerce/video/minimax-h3-quantized-nvfp4-low-vram",
         "auto",
         "auto"
       ],
       "widgets_values_named": {
-        "filename_prefix": "ecommerce/video/minimax-h3-bf16-streaming-8gb",
+        "filename_prefix": "ecommerce/video/minimax-h3-quantized-nvfp4-low-vram",
         "format": "auto",
         "codec": "auto"
       },
@@ -118,10 +118,10 @@
       "title": "先读这里｜这是本地权重，不调用付费 API",
       "properties": {},
       "widgets_values": [
-        "## MiniMax H3 本地 Ref2VA｜BF16 磁盘流式实验版\n\n这条链路使用本地模型文件，不登录 Partner Node，也不按次扣 Credits。\n\n### 硬件结论\n\n- RTX 5060 8 GB + Windows 32 GB 已完成 BF16 最低规格实跑，但磁盘读取压力很高。\n- 全套权重约 93 GiB；DynamicVRAM 会大量按需读取 NVMe。\n- 扩散模型与文本编码器均为 BF16，VAE 为官方 FP16/FP32，没有使用低比特量化。\n\n### 本工作流的减负设置\n\n- Ref2VA AdaLN-pruned BF16（结构剪枝，不是数值量化）\n- Qwen3-VL 32B BF16 文本/视觉编码器\n- 4 步 Turbo LoRA 已开启\n- 9:16、约 0.1 MP、5 秒、单张商品图\n- H3 MLP 按实时显存自适应分块、关闭 block prefetch、VAE 分块解码\n- Qwen/参考 VAE 编码后定向卸载；DiT 采样后再定向卸载，避免三阶段同时驻留\n- ref_image_size=match，避免保留 2048px 参考 token\n\n模型、下载、启动和排错：docs/04-电商AI工作流/09-MiniMax-H3本地模型有限配置工作流.md"
+        "## MiniMax H3 本地 Ref2VA｜通用量化低显存首跑版\n\n这条链路使用本地模型文件，不登录 Partner Node，也不按次扣 Credits。\n\n### 硬件结论\n\n- 本配置以 8 GB 显存为保守首跑档；12/16/24 GB 可逐级提高分块和分辨率。\n- 全套必需文件约 41.38 GiB；编码器格式必须按 GPU 原生算子能力选择。\n- 扩散模型使用 INT8 ConvRot，Qwen3-VL 使用 NVFP4 AWQ；VAE 与 LoRA 保持官方精度。\n\n### 本工作流的减负设置\n\n- Ref2VA pruned int8 扩散权重\n- Qwen3-VL 32B NVFP4 AWQ 文本编码器\n- 4 步 Turbo LoRA 已开启\n- 9:16、约 0.1 MP、5 秒、单张商品图\n- H3 MLP 按实时显存自适应分块；仅在异步流、显存和内存都允许时预取\n- Qwen/参考 VAE 编码后定向卸载；DiT 采样后再定向卸载，避免三阶段同时驻留\n- ref_image_size=match，避免保留 2048px 参考 token\n\n模型、下载、启动和排错：docs/04-电商AI工作流/09-MiniMax-H3本地模型有限配置工作流.md"
       ],
       "widgets_values_named": {
-        "text": "## MiniMax H3 本地 Ref2VA｜BF16 磁盘流式实验版\n\n这条链路使用本地模型文件，不登录 Partner Node，也不按次扣 Credits。\n\n### 硬件结论\n\n- RTX 5060 8 GB + Windows 32 GB 已完成 BF16 最低规格实跑，但磁盘读取压力很高。\n- 全套权重约 93 GiB；DynamicVRAM 会大量按需读取 NVMe。\n- 扩散模型与文本编码器均为 BF16，VAE 为官方 FP16/FP32，没有使用低比特量化。\n\n### 本工作流的减负设置\n\n- Ref2VA AdaLN-pruned BF16（结构剪枝，不是数值量化）\n- Qwen3-VL 32B BF16 文本/视觉编码器\n- 4 步 Turbo LoRA 已开启\n- 9:16、约 0.1 MP、5 秒、单张商品图\n- H3 MLP 按实时显存自适应分块、关闭 block prefetch、VAE 分块解码\n- Qwen/参考 VAE 编码后定向卸载；DiT 采样后再定向卸载，避免三阶段同时驻留\n- ref_image_size=match，避免保留 2048px 参考 token\n\n模型、下载、启动和排错：docs/04-电商AI工作流/09-MiniMax-H3本地模型有限配置工作流.md"
+        "text": "## MiniMax H3 本地 Ref2VA｜通用量化低显存首跑版\n\n这条链路使用本地模型文件，不登录 Partner Node，也不按次扣 Credits。\n\n### 硬件结论\n\n- 本配置以 8 GB 显存为保守首跑档；12/16/24 GB 可逐级提高分块和分辨率。\n- 全套必需文件约 41.38 GiB；编码器格式必须按 GPU 原生算子能力选择。\n- 扩散模型使用 INT8 ConvRot，Qwen3-VL 使用 NVFP4 AWQ；VAE 与 LoRA 保持官方精度。\n\n### 本工作流的减负设置\n\n- Ref2VA pruned int8 扩散权重\n- Qwen3-VL 32B NVFP4 AWQ 文本编码器\n- 4 步 Turbo LoRA 已开启\n- 9:16、约 0.1 MP、5 秒、单张商品图\n- H3 MLP 按实时显存自适应分块；仅在异步流、显存和内存都允许时预取\n- Qwen/参考 VAE 编码后定向卸载；DiT 采样后再定向卸载，避免三阶段同时驻留\n- ref_image_size=match，避免保留 2048px 参考 token\n\n模型、下载、启动和排错：docs/04-电商AI工作流/09-MiniMax-H3本地模型有限配置工作流.md"
       },
       "color": "#222",
       "bgcolor": "#000"
@@ -142,13 +142,13 @@
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "五个 BF16/FP 权重｜约 93 GiB｜没有低比特量化",
+      "title": "五个官方量化组合文件｜约 41.38 GiB",
       "properties": {},
       "widgets_values": [
-        "## 8 GB 无量化流式版所需文件\n\n所有文件均来自 `Comfy-Org/MiniMax-H3`。扩散模型与文本编码器为 BF16，视频/音频 VAE 为 FP16/FP32。\n\n```text\nComfyUI-Shared/models/\n├── diffusion_models/minimax_h3_ref2va_pruned_bf16.safetensors\n├── text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors\n├── vae/minimax_h3_video_vae_fp16.safetensors\n├── vae/minimax_h3_audio_vae_fp32.safetensors\n└── loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\n```\n\n`pruned` 是移除一部分 AdaLN 结构权重，不是把 BF16 数值压成 INT8/FP8。若要求原始未剪枝模型，可换 `minimax_h3_ref2va_bf16.safetensors`，但文件约 61.73 GiB，当前机器更难完成。\n\n下载脚本：`scripts/download_minimax_h3_bf16_windows.cmd`"
+        "## 通用量化低显存首跑版所需文件\n\n所有文件均来自 `Comfy-Org/MiniMax-H3`，模型选择与官方 R2V 模板一致。\n\n```text\nComfyUI-Shared/models/\n├── diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors\n├── text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors\n├── vae/minimax_h3_video_vae_fp16.safetensors\n├── vae/minimax_h3_audio_vae_fp32.safetensors\n└── loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\n```\n\n扩散模型为 pruned INT8 ConvRot，文本/视觉编码器为 NVFP4 AWQ。NVFP4 只推荐给原生支持的 NVIDIA SM 10+。\n\n下载脚本：`scripts/download_minimax_h3_quantized_windows.cmd`"
       ],
       "widgets_values_named": {
-        "text": "## 8 GB 无量化流式版所需文件\n\n所有文件均来自 `Comfy-Org/MiniMax-H3`。扩散模型与文本编码器为 BF16，视频/音频 VAE 为 FP16/FP32。\n\n```text\nComfyUI-Shared/models/\n├── diffusion_models/minimax_h3_ref2va_pruned_bf16.safetensors\n├── text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors\n├── vae/minimax_h3_video_vae_fp16.safetensors\n├── vae/minimax_h3_audio_vae_fp32.safetensors\n└── loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\n```\n\n`pruned` 是移除一部分 AdaLN 结构权重，不是把 BF16 数值压成 INT8/FP8。若要求原始未剪枝模型，可换 `minimax_h3_ref2va_bf16.safetensors`，但文件约 61.73 GiB，当前机器更难完成。\n\n下载脚本：`scripts/download_minimax_h3_bf16_windows.cmd`"
+        "text": "## 通用量化低显存首跑版所需文件\n\n所有文件均来自 `Comfy-Org/MiniMax-H3`，模型选择与官方 R2V 模板一致。\n\n```text\nComfyUI-Shared/models/\n├── diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors\n├── text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors\n├── vae/minimax_h3_video_vae_fp16.safetensors\n├── vae/minimax_h3_audio_vae_fp32.safetensors\n└── loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors\n```\n\n扩散模型为 pruned INT8 ConvRot，文本/视觉编码器为 NVFP4 AWQ。NVFP4 只推荐给原生支持的 NVIDIA SM 10+。\n\n下载脚本：`scripts/download_minimax_h3_quantized_windows.cmd`"
       },
       "color": "#222",
       "bgcolor": "#000"
@@ -630,21 +630,21 @@
         "Node name for S&R": "UNETLoader",
         "models": [
           {
-            "name": "minimax_h3_ref2va_pruned_bf16.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_bf16.safetensors",
+            "name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors",
             "directory": "diffusion_models"
           }
         ]
       },
       "widgets_values": [
-        "minimax_h3_ref2va_pruned_bf16.safetensors",
+        "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
         "default"
       ],
       "widgets_values_named": {
-        "unet_name": "minimax_h3_ref2va_pruned_bf16.safetensors",
+        "unet_name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
         "weight_dtype": "default"
       },
-      "title": "8GB 流式｜Ref2VA Pruned BF16｜约 37.46 GiB｜未量化"
+      "title": "通用量化｜Ref2VA Pruned INT8 ConvRot｜约 19.53 GiB"
     },
     {
       "id": 128,
@@ -677,23 +677,23 @@
         "Node name for S&R": "CLIPLoader",
         "models": [
           {
-            "name": "qwen3vl_32b_minimax_h3_bf16.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_bf16.safetensors",
+            "name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
             "directory": "text_encoders"
           }
         ]
       },
       "widgets_values": [
-        "qwen3vl_32b_minimax_h3_bf16.safetensors",
+        "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
         "minimax",
         "default"
       ],
       "widgets_values_named": {
-        "clip_name": "qwen3vl_32b_minimax_h3_bf16.safetensors",
+        "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
         "type": "minimax",
         "device": "default"
       },
-      "title": "8GB 流式｜Qwen3-VL BF16｜约 47.97 GiB｜未量化"
+      "title": "Blackwell 优化｜Qwen3-VL NVFP4 AWQ｜约 14.61 GiB"
     },
     {
       "id": 129,
@@ -1128,10 +1128,10 @@
       "title": "通用低显存升级顺序｜0.1 MP 跑通后只升一档",
       "properties": {},
       "widgets_values": [
-        "## 9:16 尺寸参考\n\n| megapixels | 约等于 | 用途 |\n|---:|---:|---|\n| 0.1 | 约 256 × 416 | 8 GB BF16 首次验证 |\n| 0.2 | 约 352 × 608 | 首次完整成功后再试 |\n| 0.4 | 480 × 864 | 第一次验证、最低负载 |\n| 0.6 | 576 × 1056 | 链路稳定后比较 |\n| 0.98 | 768 × 1344 | 接近官方 768p 竖屏 |\n\n不要第一次就改 0.98。先确认模型、LoRA、VAE、提示词和保存链路都能运行。"
+        "## 9:16 尺寸参考\n\n| megapixels | 约等于 | 用途 |\n|---:|---:|---|\n| 0.1 | 约 256 × 416 | 8 GB 量化首跑 |\n| 0.2 | 约 352 × 608 | 首次完整成功后再试 |\n| 0.4 | 480 × 864 | 第一次验证、最低负载 |\n| 0.6 | 576 × 1056 | 链路稳定后比较 |\n| 0.98 | 768 × 1344 | 接近官方 768p 竖屏 |\n\n不要第一次就改 0.98。先确认模型、LoRA、VAE、提示词和保存链路都能运行。"
       ],
       "widgets_values_named": {
-        "text": "## 9:16 尺寸参考\n\n| megapixels | 约等于 | 用途 |\n|---:|---:|---|\n| 0.1 | 约 256 × 416 | 8 GB BF16 首次验证 |\n| 0.2 | 约 352 × 608 | 首次完整成功后再试 |\n| 0.4 | 480 × 864 | 第一次验证、最低负载 |\n| 0.6 | 576 × 1056 | 链路稳定后比较 |\n| 0.98 | 768 × 1344 | 接近官方 768p 竖屏 |\n\n不要第一次就改 0.98。先确认模型、LoRA、VAE、提示词和保存链路都能运行。"
+        "text": "## 9:16 尺寸参考\n\n| megapixels | 约等于 | 用途 |\n|---:|---:|---|\n| 0.1 | 约 256 × 416 | 8 GB 量化首跑 |\n| 0.2 | 约 352 × 608 | 首次完整成功后再试 |\n| 0.4 | 480 × 864 | 第一次验证、最低负载 |\n| 0.6 | 576 × 1056 | 链路稳定后比较 |\n| 0.98 | 768 × 1344 | 接近官方 768p 竖屏 |\n\n不要第一次就改 0.98。先确认模型、LoRA、VAE、提示词和保存链路都能运行。"
       },
       "color": "#222",
       "bgcolor": "#000"
@@ -1520,24 +1520,24 @@
       "widgets_values": [
         true,
         "auto_stable",
-        1536,
-        "disable",
-        512,
+        1024,
+        "auto",
+        1024,
+        8192,
         4096,
-        2048,
         true
       ],
       "widgets_values_named": {
         "enabled": true,
         "profile": "auto_stable",
-        "reserve_vram_mb": 1536,
-        "prefetch_mode": "disable",
-        "min_chunk_tokens": 512,
-        "max_chunk_tokens": 4096,
-        "manual_chunk_tokens": 2048,
+        "reserve_vram_mb": 1024,
+        "prefetch_mode": "auto",
+        "min_chunk_tokens": 1024,
+        "max_chunk_tokens": 8192,
+        "manual_chunk_tokens": 4096,
         "verbose": true
       },
-      "title": "自适应内存｜BF16 稳定档 + 强制关闭预取"
+      "title": "自研自适应内存｜实时分块 + 条件预取"
     },
     {
       "id": 148,
@@ -2100,9 +2100,9 @@
         "Reduced the starting input from two images to one required ecommerce product image.",
         "Changed output to portrait 9:16 at 0.1 megapixels and five seconds for a lower-load first test.",
         "Enabled the official four-step Ref2V Turbo LoRA path.",
-        "Kept BF16 diffusion/text weights and official VAE precision; added live-VRAM H3 MLP chunking, staged model release, disabled block prefetch, tiled video VAE decode, and a 0.1 MP first-run profile."
+        "Kept the official INT8 ConvRot diffusion and NVFP4 AWQ text encoder; added live-VRAM H3 MLP chunking, conditional block prefetch, staged Qwen/DiT/VAE release, tiled video VAE decode, and a conservative 0.1 MP first-run profile."
       ],
-      "profile": "bf16-streaming-8gb"
+      "profile": "quantized-nvfp4-low-vram"
     }
   },
   "version": 0.4

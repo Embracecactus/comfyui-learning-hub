@@ -14,6 +14,10 @@ and
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-local-ref2va.json`
 and
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-int8-low-vram.json`
 are derived from:
 
 ```text
@@ -54,7 +58,9 @@ Upstream license source:
 ## MiniMax H3 local model dependencies
 
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-local-ref2va.json`
-references the following local model files without redistributing them:
+and
+`docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json`
+reference the following local model files without redistributing them:
 
 ```text
 diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors
@@ -66,6 +72,14 @@ loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors
 
 The model files are hosted at:
 <https://huggingface.co/Comfy-Org/MiniMax-H3>
+
+`docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-int8-low-vram.json`
+uses the same diffusion model, VAEs, and LoRA, and replaces the text encoder
+with:
+
+```text
+text_encoders/qwen3vl_32b_minimax_h3_int8_convrot.safetensors
+```
 
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json`
 references the following non-low-bit local model files without redistributing

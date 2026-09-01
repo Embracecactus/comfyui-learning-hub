@@ -17,7 +17,7 @@
 | 6 | [通用商品自动排版](06-通用商品自动排版工作流.md) | 从遮罩自动裁边，按画布百分比缩放和定位，不绑定某个商品 | [打开](workflows/ecommerce-generic-product-layout-birefnet.json) |
 | 7 | [通用商品 2K 与确定性排版](07-通用商品2K与确定性排版.md) | RealESRGAN 4× 后精确输出 1440×2560，并添加可编辑的真实卖点和自有品牌 | [打开](workflows/ecommerce-generic-product-layout-2k-branded.json) |
 | 8 | [小白版：与参考站功能对比及阶段成果](08-与参考站功能对比及阶段成果.md) | 用生活化语言说明当前能做什么、不能做什么，以及为什么抠图排版不等于 AI 换装 | — |
-| 9 | [MiniMax H3 本地模型：RTX 5060 8GB 无量化流式工作流](09-MiniMax-H3本地模型有限配置工作流.md) | BF16 权重、DynamicVRAM 文件切片、等价 MLP 分块与 8 GB 实跑证据 | [8GB BF16](workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json) / [24GB 历史版](workflows/ecommerce-minimax-h3-local-ref2va.json) |
+| 9 | [MiniMax H3 量化模型：通用低显存自适应工作流](09-MiniMax-H3本地模型有限配置工作流.md) | 按算子选择 NVFP4/INT8、实时显存分块、Qwen→DiT→VAE 分阶段释放 | [NVFP4](workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json) / [INT8](workflows/ecommerce-minimax-h3-quantized-int8-low-vram.json) / [BF16 历史基线](workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json) |
 
 参考站登录实测、公开接口、案例观察、差异判断、技术选型和未验证事项统一记录在[2026-08-28 映海站实测与重构决策](reference-site-audit-2026-08-28.md)，后续不需要重新调查同一批信息。
 
@@ -42,7 +42,7 @@
 | 4 | 参考图驱动商品主图 | 已搭建，待本机运行 | 多参考语义编辑、商品保真、8 GB 模型卸载 |
 | 5 | 模特穿戴/换装 | 最小双参考分支已搭建，待本机实测 | 姿态、服装区域、身份与商品一致性 |
 | 6 | 详情页素材与版式 | 2K 单图与确定性文字链路已完成 | 多图叙事、价格组件、品牌模板系统 |
-| 7 | 商品广告与带货视频 | MiniMax H3 BF16 无量化链路已在 RTX 5060 8 GB + 32 GB 内存完成 256×416、5 秒、4 步实跑，总耗时约 4 分 22 秒 | 提升分辨率时的商品一致性、伪文字与总耗时 |
+| 7 | 商品广告与带货视频 | BF16 历史基线和 RTX 5060 8 GB 的 NVFP4 低分辨率基线均已实跑；INT8 与其他硬件待复测 | 不同 GPU 算子兼容、磁盘抖动、商品一致性与高分辨率耗时 |
 | 8 | 参考视频拆镜与成片 | 待学习 | 分镜、节奏、音频、字幕和镜头拼接 |
 
 先把每个模块单独跑通，再决定哪些模块需要组合。大型一体化画布同时加载多个图像和视频模型，在 8 GB 显存电脑上会更慢，也更难判断是哪一步出错。
