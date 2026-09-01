@@ -20,6 +20,10 @@ and
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-int8-low-vram.json`
 and
 `docs/04-电商AI工作流/workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-low-vram.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp-hoodie-second-half.json`
 are derived from:
 
 ```text
@@ -64,6 +68,10 @@ and
 `docs/04-电商AI工作流/workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json`
 and
 `docs/04-电商AI工作流/workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-low-vram.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp.json`
+and
+`docs/04-电商AI工作流/workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp-hoodie-second-half.json`
 reference the following local model files without redistributing them:
 
 ```text
@@ -111,6 +119,12 @@ input directory solely for reproducible feature comparison. The media remains
 third-party material and is not covered by this repository's license. Review
 the source site's current terms and obtain any required rights before reuse or
 commercial distribution.
+
+The fixed-0.2-MP hoodie content workflow also references the locally retained
+`01-product-1977-hoodie.png` from the earlier public comparison case documented
+in `docs/04-电商AI工作流/reference-site-audit-2026-08-28.md`. That image is not
+redistributed by this repository and remains third-party material under the same
+reuse restrictions.
 
 ## RealESRGAN_x4plus local model dependency
 

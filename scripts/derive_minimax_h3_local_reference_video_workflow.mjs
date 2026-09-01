@@ -7,15 +7,18 @@ const [sourcePath, outputPath, profile = "standard"] = process.argv.slice(2);
 
 if (!sourcePath || !outputPath) {
   console.error(
-    "Usage: node scripts/derive_minimax_h3_local_reference_video_workflow.mjs <official-r2v.json> <output.json> [standard|quantized-nvfp4-low-vram|quantized-int8-low-vram|bf16-streaming-8gb|yinghai-copy-hot-video-nvfp4-low-vram]",
+    "Usage: node scripts/derive_minimax_h3_local_reference_video_workflow.mjs <official-r2v.json> <output.json> [standard|quantized-nvfp4-low-vram|quantized-int8-low-vram|bf16-streaming-8gb|yinghai-copy-hot-video-nvfp4-low-vram|yinghai-copy-hot-video-nvfp4-0.2mp|yinghai-copy-hot-video-nvfp4-0.2mp-hoodie-second-half]",
   );
   process.exit(2);
 }
 
-if (!new Set(["standard", "quantized-nvfp4-low-vram", "quantized-int8-low-vram", "bf16-streaming-8gb", "yinghai-copy-hot-video-nvfp4-low-vram"]).has(profile)) {
+if (!new Set(["standard", "quantized-nvfp4-low-vram", "quantized-int8-low-vram", "bf16-streaming-8gb", "yinghai-copy-hot-video-nvfp4-low-vram", "yinghai-copy-hot-video-nvfp4-0.2mp", "yinghai-copy-hot-video-nvfp4-0.2mp-hoodie-second-half"]).has(profile)) {
   throw new Error(`Unknown profile: ${profile}`);
 }
-const yinghaiCopyHotVideo = profile === "yinghai-copy-hot-video-nvfp4-low-vram";
+const yinghaiResolutionAb = profile === "yinghai-copy-hot-video-nvfp4-0.2mp";
+const yinghaiHoodieSecondHalf = profile === "yinghai-copy-hot-video-nvfp4-0.2mp-hoodie-second-half";
+const yinghaiCopyHotVideo = profile === "yinghai-copy-hot-video-nvfp4-low-vram" || yinghaiResolutionAb || yinghaiHoodieSecondHalf;
+const yinghaiCopyHotVideo02mp = yinghaiResolutionAb || yinghaiHoodieSecondHalf;
 const quantizedNvfp4 = profile === "quantized-nvfp4-low-vram" || yinghaiCopyHotVideo;
 const quantizedInt8 = profile === "quantized-int8-low-vram";
 const quantizedLowVram = quantizedNvfp4 || quantizedInt8;
@@ -48,7 +51,14 @@ for (const [name, id] of Object.entries(requiredNodes)) {
   }
 }
 
-const prompt = yinghaiCopyHotVideo ? [
+const prompt = yinghaiHoodieSecondHalf ? [
+  "<Picture 1> (Picture1) is the only clothing product identity reference: a black pullover hoodie with long sleeves, hood, kangaroo pocket, ribbed cuffs and hem, and the exact white 1977 chest print.",
+  "<Video 1> (Video1) provides only the person's second-half actions, sunglasses-removal gesture, camera movement, pacing, body pose, and street scene. Dress the person in the hoodie from Picture1.",
+  "Create a five-second vertical ecommerce product video following Video1's close-up motion and face reveal while preserving the hoodie's black color, loose silhouette, sleeve length, pocket construction, fabric texture, and readable 1977 print as closely as possible.",
+  "Do not copy the white off-shoulder top, white belt, or upper-garment design from Video1. Use simple dark trousers only where the reference image does not define the outfit.",
+  "No subtitles, captions, extra text, extra logos, or watermarks. The 1977 chest print belongs to the product and must remain. Keep hands, sunglasses, face, hood, sleeves, and garment anatomy coherent.",
+  "Reference audio is intentionally disconnected. Generate quiet natural street ambience only; no music and no speech.",
+].join("\n") : yinghaiCopyHotVideo ? [
   "<Picture 1> (Picture1) is the clothing product identity reference: preserve its exact product color, silhouette, fit, fabric, flower positions, proportions, and construction.",
   "<Video 1> (Video1) provides only the person's actions, camera movement, pacing, and scene composition. Replace the clothing in Video1 with the clothing from Picture1.",
   "Create a five-second vertical ecommerce product video following Video1's motion, camera rhythm, and setting while keeping the clothing from Picture1 unchanged in color, cut, and flower placement.",
@@ -66,10 +76,17 @@ const prompt = yinghaiCopyHotVideo ? [
 ].join("\n");
 
 const productImage = nodesById.get(requiredNodes.productImage);
-productImage.title = "Picture 1｜商品主体（必选）";
-productImage.widgets_values = [yinghaiCopyHotVideo ? "yinghai-copy-hot-video-v2-02-product.png" : "amber-serum-transparent.png", "image"];
+const productFilename = yinghaiHoodieSecondHalf
+  ? "01-product-1977-hoodie.png"
+  : yinghaiCopyHotVideo
+    ? "yinghai-copy-hot-video-v2-02-product.png"
+    : "amber-serum-transparent.png";
+productImage.title = yinghaiHoodieSecondHalf
+  ? "Picture 1｜内容验证 B：1977 黑色卫衣"
+  : "Picture 1｜商品主体（必选）";
+productImage.widgets_values = [productFilename, "image"];
 productImage.widgets_values_named = {
-  image: yinghaiCopyHotVideo ? "yinghai-copy-hot-video-v2-02-product.png" : "amber-serum-transparent.png",
+  image: productFilename,
   upload: "image",
 };
 
@@ -114,9 +131,9 @@ if (yinghaiCopyHotVideo) {
         { name: "duration", type: "FLOAT", widget: { name: "duration" }, link: null },
         { name: "strict_duration", type: "BOOLEAN", widget: { name: "strict_duration" }, link: null },
       ], outputs: [{ name: "VIDEO", type: "VIDEO", links: [sliceLink] }],
-      properties: { "Node name for S&R": "Video Slice" }, title: "Video1｜取前 5.2 秒",
-      widgets_values: [0, 5.2, false],
-      widgets_values_named: { start_time: 0, duration: 5.2, strict_duration: false },
+      properties: { "Node name for S&R": "Video Slice" }, title: yinghaiHoodieSecondHalf ? "Video1｜内容验证 B：取 5.0–10.2 秒" : "Video1｜取前 5.2 秒",
+      widgets_values: [yinghaiHoodieSecondHalf ? 5 : 0, 5.2, false],
+      widgets_values_named: { start_time: yinghaiHoodieSecondHalf ? 5 : 0, duration: 5.2, strict_duration: false },
     },
     {
       id: componentsId, type: "GetVideoComponents", pos: [-1080, 7040], size: [320, 280], flags: {}, order: 10, mode: 0,
@@ -165,7 +182,9 @@ if (yinghaiCopyHotVideo) {
     [framesLink, framesId, 0, h3Reference.id, 6, "IMAGE"],
   );
   h3Reference.inputs.find((input) => input.name === "ref_videos.ref_video_0").link = framesLink;
-  h3Reference.title = "MiniMax H3 Ref2VA｜Picture1 商品 + Video1 动作参考";
+  h3Reference.title = yinghaiHoodieSecondHalf
+    ? "MiniMax H3 Ref2VA｜内容验证 B：卫衣 + 摘墨镜近景"
+    : "MiniMax H3 Ref2VA｜Picture1 商品 + Video1 动作参考";
   workflow.groups = [
     ...(workflow.groups || []),
     { id: 7, title: "Video 1｜对标视频预处理", bounding: [-1860, 6980, 2000, 470], color: "#3f789e", flags: {} },
@@ -178,9 +197,13 @@ promptNode.widgets_values = [prompt];
 if (promptNode.widgets_values_named) promptNode.widgets_values_named.value = prompt;
 
 const resolution = nodesById.get(requiredNodes.resolution);
-const megapixels = lowMemory8gb ? 0.1 : 0.4;
+const megapixels = yinghaiCopyHotVideo02mp ? 0.2 : lowMemory8gb ? 0.1 : 0.4;
 resolution.title = lowMemory8gb
-  ? "通用低显存首跑 9:16｜约 256×416"
+  ? yinghaiHoodieSecondHalf
+    ? "内容验证 B｜统一 0.2 MP｜1977 卫衣 + 后半段动作"
+    : yinghaiCopyHotVideo02mp
+      ? "映海单变量 A/B｜0.2 MP 输出（参考仍为 0.1 MP）"
+      : "通用低显存首跑 9:16｜约 256×416"
   : "最低负载 9:16｜约 480×864";
 resolution.widgets_values = ["9:16 (Portrait Widescreen)", megapixels, 32];
 resolution.widgets_values_named = {
@@ -223,7 +246,9 @@ saveVideo.title = "保存 5 秒竖屏商品视频";
 const outputPrefix = bf16Streaming8gb
   ? "ecommerce/video/minimax-h3-bf16-streaming-8gb"
   : yinghaiCopyHotVideo
-    ? "ecommerce/video/yinghai-copy-hot-video-h3-nvfp4-low-vram"
+    ? yinghaiHoodieSecondHalf
+      ? "ecommerce/video/yinghai-copy-hot-video-h3-nvfp4-low-vram-0.2mp-hoodie-second-half"
+      : `ecommerce/video/yinghai-copy-hot-video-h3-nvfp4-low-vram${yinghaiCopyHotVideo02mp ? "-0.2mp" : ""}`
   : quantizedNvfp4
     ? "ecommerce/video/minimax-h3-quantized-nvfp4-low-vram"
     : quantizedInt8
@@ -534,7 +559,9 @@ const overviewNote = nodesById.get(requiredNodes.overviewNote);
 overviewNote.title = "先读这里｜这是本地权重，不调用付费 API";
 const overviewText = [
     yinghaiCopyHotVideo
-      ? "## 映海公开案例｜服装热卖视频 H3 前 5 秒低分辨率验证"
+      ? yinghaiHoodieSecondHalf
+        ? "## 内容验证 B｜1977 黑色卫衣 + 对标视频后半段｜统一 0.2 MP"
+        : `## 映海公开案例｜服装热卖视频 H3 前 5 秒${yinghaiCopyHotVideo02mp ? " 0.2 MP A/B" : "低分辨率"}验证`
       : bf16Streaming8gb
       ? "## MiniMax H3 本地 Ref2VA｜BF16 磁盘流式实验版"
       : quantizedLowVram
@@ -546,7 +573,11 @@ const overviewText = [
     "### 硬件结论",
     "",
     yinghaiCopyHotVideo
-      ? "- 这是网站公开 11 秒结果的前 5 秒、0.1 MP 本地链路验证，不声称复现其私有实现。"
+      ? yinghaiHoodieSecondHalf
+        ? "- 这是固定 0.2 MP 后的内容泛化验证：同时更换商品为 1977 卫衣，并改用对标视频 5.0–10.2 秒动作。"
+        : yinghaiCopyHotVideo02mp
+        ? "- 这是与 0.1 MP 基线只改变输出分辨率的单变量 A/B 档；参考视频仍为 0.1 MP，不声称复现网站私有实现。"
+        : "- 这是网站公开 11 秒结果的前 5 秒、0.1 MP 本地链路验证，不声称复现其私有实现。"
       : bf16Streaming8gb
       ? "- RTX 5060 8 GB + Windows 32 GB 已完成 BF16 最低规格实跑，但磁盘读取压力很高。"
       : quantizedLowVram
@@ -571,7 +602,7 @@ const overviewText = [
       : "- Qwen3-VL 32B NVFP4 AWQ 文本编码器",
     "- 4 步 Turbo LoRA 已开启",
     lowMemory8gb
-      ? "- 9:16、约 0.1 MP、5 秒、单张商品图"
+      ? `- 9:16、约 ${megapixels} MP、5 秒、单张商品图`
       : "- 9:16、约 0.4 MP、5 秒、单张商品图",
     bf16Streaming8gb
       ? "- H3 MLP 按实时显存自适应分块、关闭 block prefetch、VAE 分块解码"
@@ -676,8 +707,14 @@ workflow.extra = {
       "Kept the official local MiniMax H3 ref2va loading, conditioning, sampling, audio/video decode, and mux chain.",
       "Reduced the starting input from two images to one required ecommerce product image.",
       `Changed output to portrait 9:16 at ${megapixels} megapixels and five seconds for a lower-load first test.`,
+      ...(yinghaiResolutionAb ? [
+        "Added the Yinghai 0.2 MP output A/B profile; this is the single-variable comparison against the unchanged 0.1 MP output baseline, with the reference video held at 0.1 MP.",
+      ] : []),
+      ...(yinghaiHoodieSecondHalf ? [
+        "Added a fixed-0.2-MP content-generalization case: changed Picture1 to the 1977 black hoodie and changed the benchmark slice to 5.0-10.2 seconds while retaining the same model, seed, duration, Turbo path, and 0.1 MP reference preprocessing.",
+      ] : []),
       ...(yinghaiCopyHotVideo ? [
-        "Added the public Yinghai benchmark video as a motion/camera/scene reference: LoadVideo -> Video Slice (0, 5.2, non-strict) -> GetVideoComponents -> ImageScaleToTotalPixels (0.1 MP) -> H3ReferenceVideoFrames24FPS (24 fps, 5.2 seconds) -> ref_videos.ref_video_0.",
+        `Added the public Yinghai benchmark video as a motion/camera/scene reference: LoadVideo -> Video Slice (${yinghaiHoodieSecondHalf ? "5.0, 5.2" : "0, 5.2"}, non-strict) -> GetVideoComponents -> ImageScaleToTotalPixels (0.1 MP) -> H3ReferenceVideoFrames24FPS (24 fps, 5.2 seconds) -> ref_videos.ref_video_0.`,
         "Kept reference audio disconnected because the public case specifies BGM=false; this validates only the first five seconds locally and does not claim Yinghai's private implementation.",
         "Added ImageScaleToTotalPixels (area, 0.1 MP, 32-pixel steps) before temporal resampling to bound reference-video frame memory.",
         "Used prefixed filenames in the shared input root because ComfyUI 0.33.4 media discovery did not accept the same files from a nested input directory during live validation.",
@@ -687,7 +724,7 @@ workflow.extra = {
       bf16Streaming8gb
         ? "Kept BF16 diffusion/text weights and official VAE precision; added live-VRAM H3 MLP chunking, staged model release, disabled block prefetch, tiled video VAE decode, and a 0.1 MP first-run profile."
         : quantizedLowVram
-          ? `Kept the official INT8 ConvRot diffusion and ${quantizedNvfp4 ? "NVFP4 AWQ" : "INT8 ConvRot"} text encoder; added live-VRAM H3 MLP chunking, conditional block prefetch, staged Qwen/DiT/VAE release, tiled video VAE decode, and a conservative 0.1 MP first-run profile.`
+          ? `Kept the official INT8 ConvRot diffusion and ${quantizedNvfp4 ? "NVFP4 AWQ" : "INT8 ConvRot"} text encoder; added live-VRAM H3 MLP chunking, conditional block prefetch, staged Qwen/DiT/VAE release, tiled video VAE decode, and ${yinghaiCopyHotVideo02mp ? "a conservative 0.2 MP output profile" : "a conservative 0.1 MP first-run profile"}.`
           : "Added a product-preservation prompt and explicit hardware guidance.",
     ],
     profile,

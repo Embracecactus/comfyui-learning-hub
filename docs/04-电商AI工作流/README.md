@@ -18,7 +18,7 @@
 | 7 | [通用商品 2K 与确定性排版](07-通用商品2K与确定性排版.md) | RealESRGAN 4× 后精确输出 1440×2560，并添加可编辑的真实卖点和自有品牌 | [打开](workflows/ecommerce-generic-product-layout-2k-branded.json) |
 | 8 | [小白版：与参考站功能对比及阶段成果](08-与参考站功能对比及阶段成果.md) | 用生活化语言说明当前能做什么、不能做什么，以及为什么抠图排版不等于 AI 换装 | — |
 | 9 | [MiniMax H3 量化模型：通用低显存自适应工作流](09-MiniMax-H3本地模型有限配置工作流.md) | 按算子选择 NVFP4/INT8、实时显存分块、Qwen→DiT→VAE 分阶段释放 | [NVFP4](workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json) / [INT8](workflows/ecommerce-minimax-h3-quantized-int8-low-vram.json) / [BF16 历史基线](workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json) |
-| 10 | [映海“复刻爆款带货视频”本地 H3 工作流](10-映海爆款带货视频本地复刻.md) | 商品图负责服装身份、对标视频负责人物动作/镜头/节奏；先做前 5 秒 0.1 MP 低显存验证 | [打开](workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-low-vram.json) |
+| 10 | [映海“复刻爆款带货视频”本地 H3 工作流](10-映海爆款带货视频本地复刻.md) | 0.2 MP 固定分辨率下，用白花长裙前半段与 1977 卫衣后半段验证不同商品/动作内容 | [内容 A](workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp.json) / [内容 B](workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp-hoodie-second-half.json) / [0.1 MP 排错基线](workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-low-vram.json) |
 
 参考站的图片功能记录在[2026-08-28 映海站实测与重构决策](reference-site-audit-2026-08-28.md)；“复刻爆款带货视频”的真实表单、模型选项、公开案例媒体哈希和逐帧结论记录在[2026-09-01 视频功能实测](reference-site-video-audit-2026-09-01.md)。后续不需要重新调查同一批信息。
 
@@ -44,6 +44,6 @@
 | 5 | 模特穿戴/换装 | 最小双参考分支已搭建，待本机实测 | 姿态、服装区域、身份与商品一致性 |
 | 6 | 详情页素材与版式 | 2K 单图与确定性文字链路已完成 | 多图叙事、价格组件、品牌模板系统 |
 | 7 | 商品广告与带货视频 | BF16 历史基线和 RTX 5060 8 GB 的 NVFP4 低分辨率基线均已实跑；INT8 与其他硬件待复测 | 不同 GPU 算子兼容、磁盘抖动、商品一致性与高分辨率耗时 |
-| 8 | 参考视频拆镜与成片 | 前 5 秒商品图 + 对标视频 H3 工作流已搭建，待新分支真机运行 | 分镜、节奏、音频、字幕和镜头拼接 |
+| 8 | 参考视频拆镜与成片 | 0.2 MP 的长裙前半段与卫衣后半段均已真机出片；商品泛化通过，眼镜/手部时序待优化 | 分镜、动作物体连续性、音频、字幕和镜头拼接 |
 
 先把每个模块单独跑通，再决定哪些模块需要组合。大型一体化画布同时加载多个图像和视频模型，在 8 GB 显存电脑上会更慢，也更难判断是哪一步出错。

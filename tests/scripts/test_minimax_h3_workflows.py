@@ -11,9 +11,102 @@ LOW_MEMORY_WORKFLOWS = (
     "ecommerce-minimax-h3-bf16-streaming-8gb.json",
 )
 YINGHAI_WORKFLOW = "ecommerce-yinghai-copy-hot-video-h3-nvfp4-low-vram.json"
+YINGHAI_02MP_WORKFLOW = "ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp.json"
+YINGHAI_02MP_HOODIE_WORKFLOW = (
+    "ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp-hoodie-second-half.json"
+)
 
 
 class MiniMaxH3WorkflowTopologyTests(unittest.TestCase):
+    def test_yinghai_02mp_profile_is_single_variable_and_independent(self):
+        baseline = json.loads((WORKFLOW_ROOT / YINGHAI_WORKFLOW).read_text(encoding="utf-8"))
+        upgraded = json.loads((WORKFLOW_ROOT / YINGHAI_02MP_WORKFLOW).read_text(encoding="utf-8"))
+        baseline_by_type = {node["type"]: node for node in baseline["nodes"]}
+        upgraded_by_type = {node["type"]: node for node in upgraded["nodes"]}
+        self.assertEqual(
+            baseline_by_type["ResolutionSelector"]["widgets_values_named"]["megapixels"], 0.1
+        )
+        self.assertEqual(
+            upgraded_by_type["ResolutionSelector"]["widgets_values_named"]["megapixels"], 0.2
+        )
+        for by_type in (baseline_by_type, upgraded_by_type):
+            self.assertEqual(
+                by_type["ImageScaleToTotalPixels"]["widgets_values_named"]["megapixels"], 0.1
+            )
+            self.assertEqual(by_type["PrimitiveFloat"]["widgets_values_named"]["value"], 5)
+            self.assertTrue(by_type["PrimitiveBoolean"]["widgets_values_named"]["value"])
+        self.assertEqual(
+            baseline_by_type["RandomNoise"]["widgets_values_named"],
+            upgraded_by_type["RandomNoise"]["widgets_values_named"],
+        )
+        self.assertEqual(baseline_by_type["UNETLoader"]["widgets_values_named"],
+                         upgraded_by_type["UNETLoader"]["widgets_values_named"])
+        self.assertEqual(baseline_by_type["CLIPLoader"]["widgets_values_named"],
+                         upgraded_by_type["CLIPLoader"]["widgets_values_named"])
+        self.assertEqual(baseline["links"], upgraded["links"])
+        self.assertEqual(
+            upgraded_by_type["SaveVideo"]["widgets_values_named"]["filename_prefix"],
+            "ecommerce/video/yinghai-copy-hot-video-h3-nvfp4-low-vram-0.2mp",
+        )
+        self.assertEqual(upgraded["extra"]["audit"]["profile"],
+                         "yinghai-copy-hot-video-nvfp4-0.2mp")
+        overview = next(
+            node for node in upgraded["nodes"]
+            if node["type"] == "MarkdownNote" and node["id"] == 116
+        )["widgets_values_named"]["text"]
+        self.assertIn("0.2 MP A/B", overview)
+        self.assertIn("9:16、约 0.2 MP、5 秒", overview)
+        self.assertNotIn("9:16、约 0.1 MP、5 秒", overview)
+        self.assertIn(
+            "conservative 0.2 MP output profile",
+            "\n".join(upgraded["extra"]["audit"]["modifications"]),
+        )
+
+    def test_yinghai_02mp_content_case_changes_content_not_resolution(self):
+        dress = json.loads((WORKFLOW_ROOT / YINGHAI_02MP_WORKFLOW).read_text(encoding="utf-8"))
+        hoodie = json.loads(
+            (WORKFLOW_ROOT / YINGHAI_02MP_HOODIE_WORKFLOW).read_text(encoding="utf-8")
+        )
+        dress_by_type = {node["type"]: node for node in dress["nodes"]}
+        hoodie_by_type = {node["type"]: node for node in hoodie["nodes"]}
+
+        for by_type in (dress_by_type, hoodie_by_type):
+            self.assertEqual(
+                by_type["ResolutionSelector"]["widgets_values_named"]["megapixels"], 0.2
+            )
+            self.assertEqual(
+                by_type["ImageScaleToTotalPixels"]["widgets_values_named"]["megapixels"],
+                0.1,
+            )
+            self.assertEqual(by_type["PrimitiveFloat"]["widgets_values_named"]["value"], 5)
+            self.assertTrue(by_type["PrimitiveBoolean"]["widgets_values_named"]["value"])
+
+        for node_type in ("RandomNoise", "UNETLoader", "CLIPLoader"):
+            self.assertEqual(
+                dress_by_type[node_type]["widgets_values_named"],
+                hoodie_by_type[node_type]["widgets_values_named"],
+            )
+        self.assertEqual(dress["links"], hoodie["links"])
+        self.assertEqual(
+            hoodie_by_type["LoadImage"]["widgets_values_named"]["image"],
+            "01-product-1977-hoodie.png",
+        )
+        self.assertEqual(
+            hoodie_by_type["Video Slice"]["widgets_values_named"],
+            {"start_time": 5, "duration": 5.2, "strict_duration": False},
+        )
+        prompt = hoodie_by_type["PrimitiveStringMultiline"]["widgets_values_named"]["value"]
+        for term in ("1977", "hoodie", "sunglasses-removal", "white off-shoulder"):
+            self.assertIn(term, prompt)
+        self.assertEqual(
+            hoodie_by_type["SaveVideo"]["widgets_values_named"]["filename_prefix"],
+            "ecommerce/video/yinghai-copy-hot-video-h3-nvfp4-low-vram-0.2mp-hoodie-second-half",
+        )
+        self.assertEqual(
+            hoodie["extra"]["audit"]["profile"],
+            "yinghai-copy-hot-video-nvfp4-0.2mp-hoodie-second-half",
+        )
+
     def test_low_memory_workflows_have_explicit_video_to_audio_release_barrier(self):
         for filename in LOW_MEMORY_WORKFLOWS:
             with self.subTest(filename=filename):
