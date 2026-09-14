@@ -1,0 +1,29 @@
+{
+  "capability": "h3-r2v-vertical",
+  "title": "H3 商品图+动作参考 → 带音频竖屏视频（R2V）",
+  "output": "video",
+  "workflowFile": "output/runninghub/api/rh-h3-hoodie-v3-api-format.json",
+  "workflowDerivation": "由 docs/04-电商AI工作流/workflows/rh-h3-hoodie-v3.json 经 scripts 旧路径 output/runninghub/api/convert_ui_to_api.py 生成；基础工作流变更后需重新转换",
+  "outputNodes": ["92"],
+  "params": {
+    "prompt": {"node": "138", "field": "value", "type": "string", "required": true},
+    "image": {"node": "137", "field": "image", "type": "image", "required": true},
+    "video": {"node": "147", "field": "file", "type": "video", "required": true},
+    "ratio": {
+      "node": "115", "field": "aspect_ratio", "type": "enum", "default": "9:16",
+      "values": {
+        "1:1": "1:1 (Square)",
+        "2:3": "2:3 (Portrait Photo)",
+        "3:2": "3:2 (Photo)",
+        "3:4": "3:4 (Portrait Standard)",
+        "4:3": "4:3 (Standard)",
+        "9:16": "9:16 (Portrait Widescreen)",
+        "16:9": "16:9 (Widescreen)",
+        "21:9": "21:9 (Ultrawide)"
+      }
+    },
+    "megapixels": {"node": "115", "field": "megapixels", "type": "number", "default": 0.2},
+    "duration": {"node": "132", "field": "value", "type": "number", "default": 5},
+    "turbo": {"node": "146", "field": "value", "type": "boolean", "default": true}
+  }
+}

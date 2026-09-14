@@ -19,6 +19,12 @@
 | 8 | [小白版：与参考站功能对比及阶段成果](08-与参考站功能对比及阶段成果.md) | 用生活化语言说明当前能做什么、不能做什么，以及为什么抠图排版不等于 AI 换装 | — |
 | 9 | [MiniMax H3 量化模型：通用低显存自适应工作流](09-MiniMax-H3本地模型有限配置工作流.md) | 按算子选择 NVFP4/INT8、实时显存分块、Qwen→DiT→VAE 分阶段释放 | [NVFP4](workflows/ecommerce-minimax-h3-quantized-nvfp4-low-vram.json) / [INT8](workflows/ecommerce-minimax-h3-quantized-int8-low-vram.json) / [BF16 历史基线](workflows/ecommerce-minimax-h3-bf16-streaming-8gb.json) |
 | 10 | [映海“复刻爆款带货视频”本地 H3 工作流](10-映海爆款带货视频本地复刻.md) | 0.2 MP 固定分辨率下，用白花长裙前半段与 1977 卫衣后半段验证不同商品/动作内容 | [内容 A](workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp.json) / [内容 B](workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-0.2mp-hoodie-second-half.json) / [0.1 MP 排错基线](workflows/ecommerce-yinghai-copy-hot-video-h3-nvfp4-low-vram.json) |
+| 11 | [RunningHub MiniMax H3 导入与首跑](11-RunningHub-MiniMax-H3导入与首跑.md) | 去除本地私有低显存节点后的平台兼容基线；已证实能运行，但商品服装没有替换原视频服装 | [失败对照](workflows/yinghai-h3-runninghub-0.2mp.json) |
+| 12 | [RunningHub Wan 视频换装 V2 失败复盘](12-RunningHub视频换装V2.md) | 实跑证明平铺卫衣不能直接充当 Wan Animate 的完整角色参考图；保留作失败与遮罩排错记录 | [失败对照](workflows/rh-video-tryon-v2.json) |
+| 13 | [RunningHub H3 卫衣等条件复跑](13-RunningHub-H3卫衣等条件复跑.md) | 严格保留本地已通过的后半段、24 FPS、卫衣专用提示词、0.2 MP 与 124 帧；**2026-09-09 云端 API 实跑四项验收全部通过** | [✅ 已通过](13-RunningHub-H3卫衣等条件复跑.md) |
+| 14 | [RunningHub H3 视频能力单元 API 调研](14-RunningHub-H3视频能力单元API调研.md) | OpenAPI 异步任务形态、wan3.0 风格契约、错误码映射与三方成本；**个人 Key 全链路已跑通，热实例单条 ≈¥0.28** | — |
+| 15 | [通用能力单元 API 服务](15-通用能力单元API服务.md) | **工作流无关**的清单式封装：新增工作流只需加 manifest；HTTP+CLI 双形态，首批 sd15-t2i 与 h3-r2v-vertical 两能力同引擎实跑通过 | [代码](../scripts/rh_capability_api) |
+| 16 | [实施计划问题答复](16-实施计划问题答复.md) | 对原实施计划的逐条答复：能力单元实测形态、三选项成本定论、内测缺口清单、2000 元小闭环的账 | — |
 
 参考站的图片功能记录在[2026-08-28 映海站实测与重构决策](reference-site-audit-2026-08-28.md)；“复刻爆款带货视频”的真实表单、模型选项、公开案例媒体哈希和逐帧结论记录在[2026-09-01 视频功能实测](reference-site-video-audit-2026-09-01.md)。后续不需要重新调查同一批信息。
 
