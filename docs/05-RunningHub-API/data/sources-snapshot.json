@@ -1,0 +1,54 @@
+{
+ "collected_at": "2026-09-13",
+ "sources": [
+  {
+   "id": "official-model-registry",
+   "url": "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
+   "repo": "https://github.com/HM-RunningHub/ComfyUI_RH_OpenAPI",
+   "repo_last_commit": "8f9c858 2026-09-10",
+   "file": "/tmp/rh-survey/models_registry_current.json",
+   "sha256": "73b109c96bb802d7f2ac0d2e25cdb9cd70f4d8987d0041cc045a93b444b409d7",
+   "model_count": 422,
+   "role": "422 个标准模型端点定义(官方组织维护, Apache-2.0)"
+  },
+  {
+   "id": "official-kit-pricing",
+   "url": "https://github.com/HM-RunningHub/ComfyUI_RH_OpenAPI/tree/main/developer-kit",
+   "file": "/tmp/rh-survey/ComfyUI_RH_OpenAPI/developer-kit/pricing.public.json",
+   "sha256": "c7b1163e578515f8380d4ff0b41a9ea83ec8815d4b80cb3ab3ab31b6f6d5d5dd",
+   "version": "public-2026-04-29",
+   "pricing_count": 353,
+   "role": "353 条公开安全定价(快照 2026-04-29, 不含 H3)"
+  },
+  {
+   "id": "official-docs-cn",
+   "url": "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334",
+   "role": "API 总览/Key 类型/调用流程(当日核对)"
+  },
+  {
+   "id": "official-docs-h3-regen",
+   "url": "https://www.runninghub.ai/runninghub-api-doc-en/api-498427804",
+   "role": "H3 Regeneration 768P→2K 端点契约(当日核对)"
+  },
+  {
+   "id": "minimax-cny-pricing",
+   "url": "https://platform.minimax.cn/docs/guides/pricing-paygo",
+   "role": "H3 官方原厂人民币价(锚点)"
+  },
+  {
+   "id": "minimax-usd-pricing",
+   "url": "https://platform.minimax.io/docs/guides/pricing-paygo",
+   "role": "H3 官方原厂美元价(锚点)"
+  },
+  {
+   "id": "local-run-records",
+   "role": "本仓库实跑费用证据",
+   "files": [
+    "output/runninghub/api/h3_standard_app_runs/20260912T113649Z-d0a65f81/run.json",
+    "output/runninghub/api/h3_personal_app_runs/20260912T093142Z-1eb2579a/run.json",
+    "output/runninghub/api/h3_t2v_runs/20260912T085951Z-56e33ed8/run.json",
+    "docs/04-电商AI工作流/14-RunningHub-H3视频能力单元API调研.md §6"
+   ]
+  }
+ ]
+}
