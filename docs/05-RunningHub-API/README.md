@@ -1,7 +1,39 @@
 # RunningHub API 调研与接入资料(docs/05)
 
 2026-09-13 完成的 RunningHub 全量公开 API 盘点、可复用接入方案,
-以及从头生成 768P / 2K 视频的完整费用核验。
+以及从头生成 768P / 2K 视频的完整费用核验;**2026-09-14/15 复验**:
+客户端修复(任务恢复/付费闸门/下载归档)、注册表证据范围收窄、
+官方快照 SHA256 复检一致、账户余额阻塞记录(见下表)。
+
+## 渠道验证状态(截至 2026-09-15,个人消费级 Key,站点点 .cn)
+
+| 渠道 | 状态 | 证据 |
+| --- | --- | --- |
+| `/openapi/v2/query` 查询 | ✅ 已验证 | 2026-09-13/14 实测,usage 费用字段完整 |
+| `resume`/`outputs`(续查/下载/费用归因) | ✅ 已验证 | 2026-09-14,下载文件 sha256 与 09-12 归档一致 |
+| `/api/webapp/apiCallDemo` 应用参数 | ✅ 已验证 | 2026-09-14;注意:响应会回显 apiKey,勿外传原文 |
+| AI 应用生成(官方应用 2083105376052006914,2K/5s) | ✅ 2026-09-12 一次成功(¥3.85+7 币);**2026-09-14 起被 414 拒** | 账户算力值/余额耗尽,任务未创建、零扣费 |
+| 工作流 API 生成(直传 RH_ 节点,768P) | ⛔ 2026-09-14 创建闸门 414(未测得真实链路) | 预估 ≤¥3 的任务未创建;平台是否原生接管 RH_ 节点鉴权仍未验证 |
+| 标准模型 API(含 768P/2K/regeneration 直调、price-preview) | ⛔ 仅企业级-共享 Key | 个人 Key 实测 1014(09-07/09-12/09-13 三次) |
+| C 路线(768P→2K regeneration) | ⛔ 未实测 | 需标准模型 API(企业 Key)或已验证的应用/工作流渠道;**没有 A 的 768P 源视频前也无法执行** |
+
+**恢复付费验证的最小待执行命令**(前提:账户充值或获得含算力值的授权;
+按序执行,A 的产物供 C 复用):
+
+```bash
+export RH_API_KEY=<个人或企业 Key>
+CLIENT=docs/05-RunningHub-API/examples/python/rh_min_client.py
+# A. 768P 文生视频(工作流直传路线,含付费闸门,预估 ≤¥3+币)
+python3 $CLIENT run-workflow - \
+  --inline docs/05-RunningHub-API/examples/workflows/h3-t2v-768p-cloud.json \
+  --execute
+# B. 2K 直出(AI 应用路线,与 2026-09-12 成功样本同参数,预估 ¥3.85+7 币)
+python3 $CLIENT run-ai-app 2083105376052006914 \
+  '[{"nodeId":"1","fieldName":"prompt","fieldValue":"一只橙色猫在雨后的城市屋顶上缓慢行走，电影感镜头，光线自然。","description":"prompt"},{"nodeId":"1","fieldName":"resolution","fieldValue":"2K","description":"resolution 分辨率"},{"nodeId":"1","fieldName":"duration","fieldValue":"5","description":"duration 时长（秒）"},{"nodeId":"1","fieldName":"ratio","fieldValue":"16:9","description":"ratio 比例"}]' \
+  --execute
+# C. 768P→2K(需 A 成功产出源视频;上传源视频后按 02-费用报告 §2 C 行执行,
+#    标准模型 API 需企业级-共享 Key)
+```
 
 ## 文档
 

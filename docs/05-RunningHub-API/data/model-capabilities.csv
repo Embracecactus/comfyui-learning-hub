@@ -364,9 +364,9 @@ bytedance/doubao-seed-tts-2.0,Doubao-语音合成-2.0,string,RunningHub/Seedance
 youchuan/text-to-image-v82,悠船文生图-v8.2预览版,image,RunningHub/Midjourney,,,未声明,否,否,CNY 按参数 /次,schema_verified
 seedream-v5-pro/text-to-image,seedream-v5-pro-文生图,image,RunningHub/Seedream,empty|1k|2k,,未声明,否,是,CNY 按参数 /次,schema_verified
 seedream-v5-pro/image-to-image,seedream-v5-pro-图生图,image,RunningHub/Seedream,empty|1k|2k,,未声明,否,是,CNY 按参数 /次,schema_verified
-minimax/hailuo-h3/multimodal-to-video,MiniMax-H3 多模态参考生视频,video,RunningHub/MiniMax,2K|768P,5|6|7|8|9|10|11|12|13|14|15,支持音频参考输入,是,是,无公开价,schema_verified+real_run_via_ai_app_2k
-minimax/hailuo-h3/text-to-video,MiniMax-H3 文生视频,video,RunningHub/MiniMax,2K|768P,5|6|7|8|9|10|11|12|13|14|15,未声明,是,是,无公开价,schema_verified+real_run_via_ai_app_2k
-minimax/hailuo-h3/image-to-video,MiniMax-H3 图生视频（首尾帧）,video,RunningHub/MiniMax,2K|768P,5|6|7|8|9|10|11|12|13|14|15,未声明,是,是,无公开价,schema_verified+real_run_via_ai_app_2k
+minimax/hailuo-h3/multimodal-to-video,MiniMax-H3 多模态参考生视频,video,RunningHub/MiniMax,2K|768P,5|6|7|8|9|10|11|12|13|14|15,支持音频参考输入,是,是,无公开价,schema_verified
+minimax/hailuo-h3/text-to-video,MiniMax-H3 文生视频,video,RunningHub/MiniMax,2K|768P,5|6|7|8|9|10|11|12|13|14|15,未声明,是,是,无公开价,schema_verified+real_run_2k_via_ai_app_t2v_only
+minimax/hailuo-h3/image-to-video,MiniMax-H3 图生视频（首尾帧）,video,RunningHub/MiniMax,2K|768P,5|6|7|8|9|10|11|12|13|14|15,未声明,是,是,无公开价,schema_verified
 topazlabs/image-upscale-high-fidelity-v3,topazlabs图像放大High Fidelity V3,image,RunningHub/TopazLabs,,,未声明,否,否,无公开价,schema_verified
 topazlabs/image-upscale-detail-faces,topazlabs图像放大Detail Faces,image,RunningHub/TopazLabs,,,未声明,否,否,无公开价,schema_verified
 topazlabs/image-upscale-transparent,topazlabs图像放大Transparent,image,RunningHub/TopazLabs,,,未声明,否,否,无公开价,schema_verified

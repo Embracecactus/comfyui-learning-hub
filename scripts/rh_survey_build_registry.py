@@ -45,6 +45,9 @@ MODELS_URL = "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI
 REPO_URL = "https://github.com/HM-RunningHub/ComfyUI_RH_OpenAPI"
 KIT_URL = REPO_URL + "/tree/main/developer-kit"
 COLLECTED_AT = "2026-09-13"
+# 2026-09-14 复检:重新下载官方注册表,SHA256 与 09-13 快照一致(未变化)。
+REVERIFIED_AT = "2026-09-14"
+REGISTRY_SHA256 = "73b109c96bb802d7f2ac0d2e25cdb9cd70f4d8987d0041cc045a93b444b409d7"
 
 DOC_CN = "https://www.runninghub.cn/runninghub-api-doc-cn"
 DOC_EN = "https://www.runninghub.ai/runninghub-api-doc-en"
@@ -201,7 +204,7 @@ ENDPOINT_FAMILIES = [
         "instances": 1,
         "sources": [f"{DOC_CN}/doc-8287334"],
         "verification": "doc_verified",
-        "notes": "",
+        "notes": "2026-09-15 复查官方文档站与官方仓库客户端代码:未发现\"按 taskId 查询 webhook 事件记录/事件详情\"的公开接口;事件详情只能由回调接收方自行落库。已记入 gaps。",
     },
     {
         "id": "ai-app-run",
@@ -323,9 +326,33 @@ RUN_EVIDENCE = [
         "verification": "real_run_success+cost_verified",
         "notes": "工作流按运行秒计币 ≈0.21 币/秒;此为工作流算力费,不是 768P 模型档价格",
     },
+    {
+        "record": "output/runninghub/api/matrix_runs/20260914T143052Z-5925ed-wf-inline/task_record.json",
+        "route": "workflow-api(直传 RH_MinimaxHailuoH3TextToVideo 节点, 768P/5s/16:9)",
+        "request": {"resolution": "768P", "duration": "5", "ratio": "16:9"},
+        "status": "SUBMIT_REJECTED(414 TASK_CREATE_FAILED_BY_NOT_ENOUGH_POWER_VALUE)",
+        "usage": None,
+        "cost_cny": 0,
+        "collected_at": "2026-09-14",
+        "verification": "channel_gate_observed",
+        "notes": "工作流 API 创建在计费闸门被拒,任务未创建、未扣费;经 docs/05 examples/python/rh_min_client.py run-workflow 入口执行",
+    },
+    {
+        "record": "output/runninghub/api/matrix_runs/20260914T143223Z-4f0ea9-aiapp-2083105376052006914/task_record.json",
+        "route": "ai-app(官方应用 2083105376052006914, 2K/5s/16:9)",
+        "request": {"resolution": "2K", "duration": "5", "ratio": "16:9"},
+        "status": "SUBMIT_REJECTED(414 TASK_CREATE_FAILED_BY_NOT_ENOUGH_POWER_VALUE)",
+        "usage": None,
+        "cost_cny": 0,
+        "collected_at": "2026-09-14",
+        "verification": "account_state_observed",
+        "notes": "同应用同类参数 2026-09-12 成功(taskId 2098737586251202562),2026-09-14 被 414:账户算力值/余额耗尽(账户状态变化,非渠道关闭或应用下架);经 rh_min_client.py run-ai-app 入口执行",
+    },
 ]
 
 GAPS = [
+    {"id": "account-balance-exhausted", "severity": "blocker",
+     "detail": "2026-09-14 起账户算力值/余额耗尽:工作流 API(414)与官方 AI 应用(同码)均在创建闸门被拒,任务未创建、零扣费。三个关键成片任务(A 768P / B 2K 直出 / C 768P→2K)全部受阻,直至充值或获得新授权额度。恢复后最小待执行命令见 docs/05-RunningHub-API/README.md。"},
     {"id": "h3-rh-price", "severity": "high",
      "detail": "RunningHub 标准模型 API 的 H3 端点(含 768P/2K/regeneration)在官方公开定价文件(pricing.public.json, 353 条, 2026-04-29)中零条目;price-preview 接口个人 Key 返回 1014。需企业级-共享 Key 调 price-preview 或实跑一条任务才能得到平台侧官方价。"},
     {"id": "coin-cny-rate", "severity": "high",
@@ -393,8 +420,7 @@ def build_capabilities(models: list[dict], pricing_by_ep: dict) -> list[dict]:
     schema comes from the official registry (doc_verified); nothing is marked
     real-run unless this workspace actually ran it (only via app/workflow
     routes, never the standard model API directly)."""
-    h3_family = {"minimax/hailuo-h3/text-to-video", "minimax/hailuo-h3/image-to-video",
-                 "minimax/hailuo-h3/multimodal-to-video"}
+    h3_t2v = "minimax/hailuo-h3/text-to-video"
     out = []
     for m in models:
         ep = m.get("endpoint", "")
@@ -433,11 +459,20 @@ def build_capabilities(models: list[dict], pricing_by_ep: dict) -> list[dict]:
             "verification_notes": [],
             "sources": [MODELS_URL, f"{DOC_CN}/doc-8287334"],
         }
-        if ep in h3_family:
-            entry["verification_status"] = "schema_verified+real_run_via_ai_app_2k"
+        if ep == h3_t2v:
+            # 证据范围严格限定:仅文生视频端点、仅 2K 档、仅官方 AI 应用渠道、
+            # 2026-09-12 一次成功样本。不给 i2v/多模态/768P/标准模型 API 外推。
+            entry["verification_status"] = "schema_verified+real_run_2k_via_ai_app_t2v_only"
             entry["verification_notes"] = [
-                "768P 档未实测(个人 Key 1014, 企业 Key 才可提交)",
-                "2K 档经官方 AI 应用(工作流封装)真实生成成功并核验费用(2026-09-12, taskId 2098737586251202562)",
+                "实测范围:endpoint=minimax/hailuo-h3/text-to-video, resolution=2K, duration=5s, ratio=16:9",
+                "渠道=官方 AI 应用(webappId 2083105376052006914, 非标准模型 API 直调), 2026-09-12 一次成功",
+                "768P 档未实测;标准模型 API 直调未实测(个人 Key 1014)",
+                "2026-09-14 同应用同参数重跑被 414(账户算力值耗尽), 见 run_evidence",
+            ]
+        elif ep.startswith("minimax/hailuo-h3"):
+            entry["verification_status"] = "schema_verified"
+            entry["verification_notes"] = [
+                "未实测;2K 成功证据仅覆盖 t2v 端点的 AI 应用渠道,不外推到本端点",
             ]
         out.append(entry)
     return out
@@ -467,28 +502,62 @@ def main() -> int:
     v768 = [c for c in vid if c["supports_768p"]]
     v2k = [c for c in vid if c["supports_2k"]]
 
+    # 显式覆盖清单(不做总数相减):官方仓库根注册表 vs 官方 kit 快照的差异,
+    # 以及无公开价格条目的端点全集;重复端点检测。
+    kit_path = args.models_registry.parent / "ComfyUI_RH_OpenAPI/developer-kit/model-registry.public.json"
+    if not kit_path.exists():
+        kit_path = Path("/tmp/rh-survey/ComfyUI_RH_OpenAPI/developer-kit/model-registry.public.json")
+    added_vs_kit = []
+    if kit_path.exists():
+        kit_models = json.loads(kit_path.read_text(encoding="utf-8"))
+        if isinstance(kit_models, dict):
+            kit_models = kit_models["models"]
+        kit_eps = {m["endpoint"] for m in kit_models}
+        added_vs_kit = sorted({m["endpoint"] for m in models} - kit_eps)
+    missing_price = sorted(c["id"] for c in capabilities
+                           if c["pricing"]["status"] != "official_listed_price")
+    dup_check = {}
+    for m in models:
+        dup_check[m["endpoint"]] = dup_check.get(m["endpoint"], 0) + 1
+    duplicates = sorted(e for e, n in dup_check.items() if n > 1)
+
     registry = {
         "meta": {
             "name": "RunningHub 公开 API 能力注册表",
             "scope": "RunningHub 平台正式开放且公开可访问的 API(中国大陆站 runninghub.cn 为主,国际站 runninghub.ai 并行)",
             "collected_at": COLLECTED_AT,
+            "reverified_at": REVERIFIED_AT,
+            "freshness": {
+                "official_registry_sha256": REGISTRY_SHA256,
+                "note": f"{REVERIFIED_AT} 重新下载官方注册表,SHA256 与 {COLLECTED_AT} 快照一致(内容未变化);缓存可信复用",
+            },
             "region": "CN(primary)/intl(mirror)",
             "dedup_rule": "模型端点以官方 models_registry.json 的 endpoint 字段唯一键去重;一个通用提交接口承载全部模型端点,接口数按接口族统计而非按模型数",
             "excluded": ["私人/未公开工作流与 AI 应用实例(动态无界, 以通用调用机制覆盖)",
                           "本地部署、GPU 租赁、其他云平台"],
+            "coverage_lists": {
+                "added_vs_kit_snapshot": added_vs_kit,
+                "added_vs_kit_source": str(kit_path) + " (public-2026-04-29)",
+                "missing_public_price": missing_price,
+                "duplicate_endpoints": duplicates,
+                "note": "missing_public_price 不含工作流/AI 应用/素材族;模型端点缺价=官方定价文件(快照 2026-04-29)无该 endpoint 条目",
+            },
             "counts": {
                 "http_endpoint_families": len(ENDPOINT_FAMILIES),
                 "http_endpoint_instances_curated": fam_instances,
                 "model_capabilities": model_count,
                 "model_capabilities_with_public_price": priced,
+                "model_capabilities_missing_public_price": len(missing_price),
                 "video_capabilities": len(vid),
                 "video_supports_768p": len(v768),
                 "video_supports_2k": len(v2k),
+                "duplicate_endpoints": len(duplicates),
                 "verified_live_this_workspace": [
                     "/openapi/v2/query (个人 Key, 2026-09-13)",
                     "/openapi/v2/price-preview/* (个人 Key → 1014, 2026-09-13)",
                     "/openapi/v2/assets/query (个人 Key, 业务校验可达, 2026-09-13)",
-                    "/task/openapi/* 工作流+AI 应用(个人 Key, 2026-09-09~12 实跑)",
+                    "/task/openapi/* 工作流+AI 应用(个人 Key, 2026-09-09~12 实跑;2026-09-14 起 414 账户算力值耗尽)",
+                    "/api/webapp/apiCallDemo (个人 Key, 2026-09-14 实测)",
                 ],
             },
             "key_types": {
@@ -539,6 +608,16 @@ def main() -> int:
     # sources snapshot with hashes
     sources = {
         "collected_at": COLLECTED_AT,
+        "reverified_at": REVERIFIED_AT,
+        "freshness_audit": {
+            "method": "重新下载官方 raw 文件并与快照做 SHA256 对比;不一致才视为内容更新",
+            "models_registry": {
+                "snapshot_sha256_0913": REGISTRY_SHA256,
+                "redownloaded_sha256_0914": REGISTRY_SHA256,
+                "result": "identical(缓存可信,标注为快照+复检日期,不标注为当日新采集)",
+                "warning": "raw.githubusercontent 偶发截断响应(2026-09-14 首次重下 1.09MB/完整 1.43MB),必须以 JSON 可解析+SHA256 对比为准",
+            },
+        },
         "sources": [
             {"id": "official-model-registry", "url": MODELS_URL,
              "repo": REPO_URL, "repo_last_commit": "8f9c858 2026-09-10",

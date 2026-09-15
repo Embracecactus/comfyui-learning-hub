@@ -1,0 +1,29 @@
+{
+  "1": {
+    "class_type": "RHSettingsNode",
+    "inputs": {
+      "base_url": "https://www.runninghub.cn/openapi/v2",
+      "apiKey": "PLACEHOLDER_INJECTED_BY_PLATFORM"
+    },
+    "_meta": {"title": "RH OpenAPI Settings(平台执行 RH_ 节点时由平台接管鉴权)"}
+  },
+  "2": {
+    "class_type": "RH_MinimaxHailuoH3TextToVideo",
+    "inputs": {
+      "api_config": ["1", 0],
+      "prompt": "一只橙色猫在雨后的城市屋顶上缓慢行走，电影感镜头，光线自然。",
+      "resolution": "768P",
+      "duration": "5",
+      "ratio": "16:9"
+    },
+    "_meta": {"title": "MiniMax-H3 文生视频 768P"}
+  },
+  "3": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": ["2", 0],
+      "codec": "auto"
+    },
+    "_meta": {"title": "SaveVideo"}
+  }
+}

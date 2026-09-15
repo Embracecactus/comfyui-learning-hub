@@ -1,5 +1,15 @@
 {
  "collected_at": "2026-09-13",
+ "reverified_at": "2026-09-14",
+ "freshness_audit": {
+  "method": "重新下载官方 raw 文件并与快照做 SHA256 对比;不一致才视为内容更新",
+  "models_registry": {
+   "snapshot_sha256_0913": "73b109c96bb802d7f2ac0d2e25cdb9cd70f4d8987d0041cc045a93b444b409d7",
+   "redownloaded_sha256_0914": "73b109c96bb802d7f2ac0d2e25cdb9cd70f4d8987d0041cc045a93b444b409d7",
+   "result": "identical(缓存可信,标注为快照+复检日期,不标注为当日新采集)",
+   "warning": "raw.githubusercontent 偶发截断响应(2026-09-14 首次重下 1.09MB/完整 1.43MB),必须以 JSON 可解析+SHA256 对比为准"
+  }
+ },
  "sources": [
   {
    "id": "official-model-registry",
@@ -47,7 +57,9 @@
     "output/runninghub/api/h3_standard_app_runs/20260912T113649Z-d0a65f81/run.json",
     "output/runninghub/api/h3_personal_app_runs/20260912T093142Z-1eb2579a/run.json",
     "output/runninghub/api/h3_t2v_runs/20260912T085951Z-56e33ed8/run.json",
-    "docs/04-电商AI工作流/14-RunningHub-H3视频能力单元API调研.md §6"
+    "docs/04-电商AI工作流/14-RunningHub-H3视频能力单元API调研.md §6",
+    "output/runninghub/api/matrix_runs/20260914T143052Z-5925ed-wf-inline/task_record.json",
+    "output/runninghub/api/matrix_runs/20260914T143223Z-4f0ea9-aiapp-2083105376052006914/task_record.json"
    ]
   }
  ]
