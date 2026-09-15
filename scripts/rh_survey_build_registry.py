@@ -346,13 +346,13 @@ RUN_EVIDENCE = [
         "cost_cny": 0,
         "collected_at": "2026-09-14",
         "verification": "account_state_observed",
-        "notes": "同应用同类参数 2026-09-12 成功(taskId 2098737586251202562),2026-09-14 被 414:账户算力值/余额耗尽(账户状态变化,非渠道关闭或应用下架);经 rh_min_client.py run-ai-app 入口执行",
+        "notes": "同应用同类参数 2026-09-12 成功(taskId 2098737586251202562);2026-09-14 与 2026-09-15 两次重试均被 414:账户算力值/余额耗尽且无按日刷新(持续账户状态,非渠道关闭或应用下架);经 rh_min_client.py run-ai-app 入口执行",
     },
 ]
 
 GAPS = [
     {"id": "account-balance-exhausted", "severity": "blocker",
-     "detail": "2026-09-14 起账户算力值/余额耗尽:工作流 API(414)与官方 AI 应用(同码)均在创建闸门被拒,任务未创建、零扣费。三个关键成片任务(A 768P / B 2K 直出 / C 768P→2K)全部受阻,直至充值或获得新授权额度。恢复后最小待执行命令见 docs/05-RunningHub-API/README.md。"},
+     "detail": "2026-09-14 起账户算力值/余额耗尽(2026-09-15 复测仍 414,无按日刷新):工作流 API(414)与官方 AI 应用(同码)均在创建闸门被拒,任务未创建、零扣费。三个关键成片任务(A 768P / B 2K 直出 / C 768P→2K)全部受阻,直至充值或获得新授权额度。恢复后最小待执行命令见 docs/05-RunningHub-API/README.md。"},
     {"id": "h3-rh-price", "severity": "high",
      "detail": "RunningHub 标准模型 API 的 H3 端点(含 768P/2K/regeneration)在官方公开定价文件(pricing.public.json, 353 条, 2026-04-29)中零条目;price-preview 接口个人 Key 返回 1014。需企业级-共享 Key 调 price-preview 或实跑一条任务才能得到平台侧官方价。"},
     {"id": "coin-cny-rate", "severity": "high",

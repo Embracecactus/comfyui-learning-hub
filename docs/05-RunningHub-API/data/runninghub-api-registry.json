@@ -62991,14 +62991,14 @@
    "cost_cny": 0,
    "collected_at": "2026-09-14",
    "verification": "account_state_observed",
-   "notes": "同应用同类参数 2026-09-12 成功(taskId 2098737586251202562),2026-09-14 被 414:账户算力值/余额耗尽(账户状态变化,非渠道关闭或应用下架);经 rh_min_client.py run-ai-app 入口执行"
+   "notes": "同应用同类参数 2026-09-12 成功(taskId 2098737586251202562);2026-09-14 与 2026-09-15 两次重试均被 414:账户算力值/余额耗尽且无按日刷新(持续账户状态,非渠道关闭或应用下架);经 rh_min_client.py run-ai-app 入口执行"
   }
  ],
  "gaps": [
   {
    "id": "account-balance-exhausted",
    "severity": "blocker",
-   "detail": "2026-09-14 起账户算力值/余额耗尽:工作流 API(414)与官方 AI 应用(同码)均在创建闸门被拒,任务未创建、零扣费。三个关键成片任务(A 768P / B 2K 直出 / C 768P→2K)全部受阻,直至充值或获得新授权额度。恢复后最小待执行命令见 docs/05-RunningHub-API/README.md。"
+   "detail": "2026-09-14 起账户算力值/余额耗尽(2026-09-15 复测仍 414,无按日刷新):工作流 API(414)与官方 AI 应用(同码)均在创建闸门被拒,任务未创建、零扣费。三个关键成片任务(A 768P / B 2K 直出 / C 768P→2K)全部受阻,直至充值或获得新授权额度。恢复后最小待执行命令见 docs/05-RunningHub-API/README.md。"
   },
   {
    "id": "h3-rh-price",
