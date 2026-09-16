@@ -12,8 +12,9 @@
 | `/openapi/v2/query` 查询 | ✅ 已验证 | 2026-09-13/14 实测,usage 费用字段完整 |
 | `resume`/`outputs`(续查/下载/费用归因) | ✅ 已验证 | 2026-09-14,下载文件 sha256 与 09-12 归档一致 |
 | `/api/webapp/apiCallDemo` 应用参数 | ✅ 已验证 | 2026-09-14;注意:响应会回显 apiKey,勿外传原文 |
-| AI 应用生成(官方应用 2083105376052006914,2K/5s) | ✅ 2026-09-12 一次成功(¥3.85+7 币);**2026-09-14 起被 414 拒(09-15 复测仍拒)** | 账户算力值/余额耗尽且无按日刷新,任务未创建、零扣费 |
-| 工作流 API 生成(直传 RH_ 节点,768P) | ⛔ 2026-09-14 创建闸门 414(未测得真实链路) | 预估 ≤¥3 的任务未创建;平台是否原生接管 RH_ 节点鉴权仍未验证 |
+| AI 应用生成(官方应用 2083105376052006914,2K/5s) | ✅ 2026-09-12 一次成功(¥3.85+7 币);**2026-09-14 起被 414 拒(09-15 复测仍拒)** | "算力值"钱包耗尽且无按日刷新,任务未创建、零扣费;同应用同参数 09-12 曾成功(账户状态,非渠道关闭) |
+| 工作流 API 生成(普通节点) | ✅ **已验证**(2026-09-15/16) | SD1.5 诊断成功(3 币/12s);**开源 H3 768P 文生视频成功(taskId 2100021717924806657,78 币/195s,1344×768@24fps 带音轨)** |
+| 工作流 API 生成(RH_ 闭源模型节点) | ⛔ 2026-09-14 创建闸门 414 | 平台是否原生接管 RH_ 节点鉴权未验证;"算力值"闸门挡在内容校验之前 |
 | 标准模型 API(含 768P/2K/regeneration 直调、price-preview) | ⛔ 仅企业级-共享 Key | 个人 Key 实测 1014(09-07/09-12/09-13 三次) |
 | C 路线(768P→2K regeneration) | ⛔ 未实测 | 需标准模型 API(企业 Key)或已验证的应用/工作流渠道;**没有 A 的 768P 源视频前也无法执行** |
 
@@ -23,10 +24,10 @@
 ```bash
 export RH_API_KEY=<个人或企业 Key>
 CLIENT=docs/05-RunningHub-API/examples/python/rh_min_client.py
-# A. 768P 文生视频(工作流直传路线,含付费闸门,预估 ≤¥3+币)
+# A. 768P 文生视频(开源 H3 权重工作流,已实测成功路线;plus=48G 实例)
 python3 $CLIENT run-workflow - \
-  --inline docs/05-RunningHub-API/examples/workflows/h3-t2v-768p-cloud.json \
-  --execute
+  --inline docs/05-RunningHub-API/examples/workflows/h3-t2v-open-768p-cloud.json \
+  --instance-type plus --execute
 # B. 2K 直出(AI 应用路线,与 2026-09-12 成功样本同参数,预估 ¥3.85+7 币)
 python3 $CLIENT run-ai-app 2083105376052006914 \
   '[{"nodeId":"1","fieldName":"prompt","fieldValue":"一只橙色猫在雨后的城市屋顶上缓慢行走，电影感镜头，光线自然。","description":"prompt"},{"nodeId":"1","fieldName":"resolution","fieldValue":"2K","description":"resolution 分辨率"},{"nodeId":"1","fieldName":"duration","fieldValue":"5","description":"duration 时长（秒）"},{"nodeId":"1","fieldName":"ratio","fieldValue":"16:9","description":"ratio 比例"}]' \

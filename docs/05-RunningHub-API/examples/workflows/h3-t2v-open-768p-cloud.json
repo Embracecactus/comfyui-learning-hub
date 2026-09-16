@@ -1,0 +1,232 @@
+{
+ "92": {
+  "class_type": "SaveVideo",
+  "inputs": {
+   "video": [
+    "130",
+    0
+   ],
+   "filename_prefix": "runninghub/api/rh-h3-t2v-768p",
+   "format": "auto",
+   "codec": "auto"
+  },
+  "_meta": {
+   "title": "SaveVideo"
+  }
+ },
+ "115": {
+  "class_type": "ResolutionSelector",
+  "inputs": {
+   "aspect_ratio": "16:9 (Widescreen)",
+   "megapixels": 0.98,
+   "multiple": 32
+  },
+  "_meta": {
+   "title": "0.98MP@16:9 = 1344x768 官方768p"
+  }
+ },
+ "119": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+  }
+ },
+ "120": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+  }
+ },
+ "121": {
+  "class_type": "VAEDecodeAudio",
+  "inputs": {
+   "samples": [
+    "125",
+    0
+   ],
+   "vae": [
+    "120",
+    0
+   ]
+  }
+ },
+ "122": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "125",
+    0
+   ],
+   "vae": [
+    "119",
+    0
+   ]
+  }
+ },
+ "123": {
+  "class_type": "KSamplerSelect",
+  "inputs": {
+   "sampler_name": "res_multistep"
+  }
+ },
+ "124": {
+  "class_type": "BasicScheduler",
+  "inputs": {
+   "model": [
+    "145",
+    0
+   ],
+   "steps": [
+    "144",
+    0
+   ],
+   "scheduler": "simple",
+   "denoise": 1
+  }
+ },
+ "125": {
+  "class_type": "SamplerCustomAdvanced",
+  "inputs": {
+   "noise": [
+    "129",
+    0
+   ],
+   "guider": [
+    "126",
+    0
+   ],
+   "sampler": [
+    "123",
+    0
+   ],
+   "sigmas": [
+    "124",
+    0
+   ],
+   "latent_image": [
+    "136",
+    1
+   ]
+  }
+ },
+ "126": {
+  "class_type": "BasicGuider",
+  "inputs": {
+   "model": [
+    "145",
+    0
+   ],
+   "conditioning": [
+    "136",
+    0
+   ]
+  }
+ },
+ "127": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "128": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+   "type": "minimax",
+   "device": "default"
+  }
+ },
+ "129": {
+  "class_type": "RandomNoise",
+  "inputs": {
+   "noise_seed": 110842470181239
+  }
+ },
+ "130": {
+  "class_type": "CreateVideo",
+  "inputs": {
+   "images": [
+    "122",
+    0
+   ],
+   "audio": [
+    "121",
+    0
+   ],
+   "fps": 24,
+   "bit_depth": 8
+  }
+ },
+ "131": {
+  "class_type": "ComfyMathExpression",
+  "inputs": {
+   "values.a": [
+    "132",
+    0
+   ],
+   "expression": "max(5, round(a * 24)) + (5 - (max(5, round(a * 24)) % 17)) % 17"
+  }
+ },
+ "132": {
+  "class_type": "PrimitiveFloat",
+  "inputs": {
+   "value": 5
+  }
+ },
+ "136": {
+  "class_type": "MiniMaxH3ImageToVideo",
+  "inputs": {
+   "clip": [
+    "128",
+    0
+   ],
+   "vae": [
+    "119",
+    0
+   ],
+   "prompt": [
+    "138",
+    0
+   ],
+   "width": [
+    "115",
+    0
+   ],
+   "height": [
+    "115",
+    1
+   ],
+   "length": [
+    "131",
+    1
+   ]
+  },
+  "_meta": {
+   "title": "t2va: 无首尾帧即纯文生视频(带原生音频)"
+  }
+ },
+ "138": {
+  "class_type": "PrimitiveStringMultiline",
+  "inputs": {
+   "value": "一只橙色猫在雨后的城市屋顶上缓慢行走，电影感镜头，光线自然。"
+  }
+ },
+ "144": {
+  "class_type": "PrimitiveInt",
+  "inputs": {
+   "value": 8
+  }
+ },
+ "145": {
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "model": [
+    "127",
+    0
+   ],
+   "lora_name": "minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors",
+   "strength_model": 1
+  }
+ }
+}

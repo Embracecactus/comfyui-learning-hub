@@ -327,6 +327,33 @@ RUN_EVIDENCE = [
         "notes": "工作流按运行秒计币 ≈0.21 币/秒;此为工作流算力费,不是 768P 模型档价格",
     },
     {
+        "record": "output/runninghub/api/matrix_runs/20260916T003929Z-94d031-wf-inline/task_record.json",
+        "route": "workflow-api(开源 H3 权重工作流 h3-t2v-open-768p-cloud.json, plus 实例)",
+        "task_id": "2100021717924806657",
+        "request": {"prompt": "与 09-12 2K 实测同一提示词", "megapixels": 0.98,
+                     "aspect_ratio": "16:9 (Widescreen)", "duration_s": 5, "steps": 8},
+        "status": "SUCCESS",
+        "output_measured": {"width": 1344, "height": 768, "fps": 24,
+                             "duration_seconds": 5.167, "has_audio": True,
+                             "video_codec": "h264", "audio_codec": "aac",
+                             "sha256_12": "f5176d6b99d9"},
+        "usage": {"consumeCoins": 78, "taskCostTime": 195, "thirdPartyConsumeMoney": None},
+        "collected_at": "2026-09-16",
+        "verification": "real_run_success+cost_verified",
+        "notes": "渠道=平台工作流托管开源 H3 权重(fl2va int8+8步turbo LoRA), 按运行秒计币(78/195=0.4 币/秒, plus 档);非标准模型 API 的 768P 档, 分辨率由工作流 ResolutionSelector 控制(megapixels 0.98=1344x768, 与官方 768p 标注一致)",
+    },
+    {
+        "record": "output/runninghub/api/matrix_runs/20260915T134805Z-174788-wf-inline/task_record.json",
+        "route": "workflow-api(SD1.5 最小文生图诊断, 判别 414 闸门范围)",
+        "task_id": "2099857788745515009",
+        "status": "SUCCESS",
+        "output_measured": {"note": "512x512 image"},
+        "usage": {"consumeCoins": 3, "taskCostTime": 12},
+        "collected_at": "2026-09-15",
+        "verification": "real_run_success+cost_verified",
+        "notes": "证明工作流 API 钱包计费正常;414 仅挡 RH_ 闭源模型节点与 AI 应用(算力值闸门), 不挡普通工作流",
+    },
+    {
         "record": "output/runninghub/api/matrix_runs/20260914T143052Z-5925ed-wf-inline/task_record.json",
         "route": "workflow-api(直传 RH_MinimaxHailuoH3TextToVideo 节点, 768P/5s/16:9)",
         "request": {"resolution": "768P", "duration": "5", "ratio": "16:9"},
@@ -462,12 +489,11 @@ def build_capabilities(models: list[dict], pricing_by_ep: dict) -> list[dict]:
         if ep == h3_t2v:
             # 证据范围严格限定:仅文生视频端点、仅 2K 档、仅官方 AI 应用渠道、
             # 2026-09-12 一次成功样本。不给 i2v/多模态/768P/标准模型 API 外推。
-            entry["verification_status"] = "schema_verified+real_run_2k_via_ai_app_t2v_only"
+            entry["verification_status"] = "schema_verified+real_run_2k_via_ai_app+real_run_768p_via_open_workflow"
             entry["verification_notes"] = [
-                "实测范围:endpoint=minimax/hailuo-h3/text-to-video, resolution=2K, duration=5s, ratio=16:9",
-                "渠道=官方 AI 应用(webappId 2083105376052006914, 非标准模型 API 直调), 2026-09-12 一次成功",
-                "768P 档未实测;标准模型 API 直调未实测(个人 Key 1014)",
-                "2026-09-14 同应用同参数重跑被 414(账户算力值耗尽), 见 run_evidence",
+                "闭源模型证据:2K 档经官方 AI 应用(2083105376052006914)2026-09-12 一次成功;09-14/15 复跑被 414(算力值闸门)",
+                "开源权重证据:768P(1344x768)经平台工作流托管开源 H3 权重 2026-09-16 实测成功(78 币/195s, plus 0.4 币/秒), 见 run_evidence;此路线分辨率由工作流参数控制, 不等于标准模型 API 的 resolution=768P 档",
+                "标准模型 API 直调(768P/2K)均未实测(个人 Key 1014;企业 Key 才可)",
             ]
         elif ep.startswith("minimax/hailuo-h3"):
             entry["verification_status"] = "schema_verified"
