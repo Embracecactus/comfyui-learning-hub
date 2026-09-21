@@ -7,6 +7,7 @@ on:
       - 'scripts/rh_survey_*.py'
       - 'scripts/runninghub_h3_t2v.py'
       - 'tests/scripts/test_rh_handoff*.py'
+      - 'tests/scripts/test_rh_public*.py'
       - '.github/workflows/runninghub-handoff-check.yml'
   pull_request:
     paths:
@@ -14,6 +15,7 @@ on:
       - 'scripts/rh_survey_*.py'
       - 'scripts/runninghub_h3_t2v.py'
       - 'tests/scripts/test_rh_handoff*.py'
+      - 'tests/scripts/test_rh_public*.py'
       - '.github/workflows/runninghub-handoff-check.yml'
 permissions:
   contents: read
