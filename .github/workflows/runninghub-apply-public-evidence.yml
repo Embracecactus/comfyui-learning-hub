@@ -1,0 +1,90 @@
+name: Apply verified public cost evidence
+on:
+  push:
+    branches: [fix/runninghub-cost-reconciliation-20260921]
+    paths: [.github/workflows/runninghub-apply-public-evidence.yml]
+permissions:
+  contents: write
+  actions: read
+jobs:
+  apply:
+    if: github.repository == 'Embracecactus/comfyui-learning-hub' && github.ref == 'refs/heads/fix/runninghub-cost-reconciliation-20260921'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover verified source patch and public-only research artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64,gzip,hashlib,json,os,subprocess,urllib.request,zipfile,io
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          repo='Embracecactus/comfyui-learning-hub'
+          base='https://api.github.com/repos/'+repo
+          expected='1e732a0eaf9eeb2c7e02041e7e45bfc183b3db81'
+          assert subprocess.check_output(['git','rev-parse','HEAD^'],text=True).strip()==expected, 'Unexpected source base'
+          class SafeRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,req,fp,code,msg,headers,newurl):
+              redirected=super().redirect_request(req,fp,code,msg,headers,newurl)
+              if redirected and urlsplit(req.full_url).netloc!=urlsplit(newurl).netloc:
+                redirected.remove_header('Authorization')
+              return redirected
+          opener=urllib.request.build_opener(SafeRedirect())
+          def get(path):
+            req=urllib.request.Request(base+path,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','User-Agent':'verified-public-evidence-import'})
+            return opener.open(req,timeout=90).read()
+          shas=['7cac38060aef708bf21b9de1b2fce43091a6f902','daad72d000d9cba14eb4637c731e27709df4373f','25715b75bdcec61bceec789bdd48d5f8272e411a','c920700226dca54df5974bf2d4ad13820348e3e9']
+          chunks=[]
+          for i,sha in enumerate(shas):
+            record=json.loads(get('/git/blobs/'+sha));chunk=base64.b64decode(record['content'])
+            if i==2:
+              # Correct one identified base64 transport insertion; validate original bytes.
+              encoded=base64.b64encode(chunk).decode()
+              assert encoded.count('QjFKPryjptrQ')==1
+              encoded=encoded.replace('QjFKPryjptrQ','QjFKPryptrQ',1)+'7'
+              chunk=base64.b64decode(encoded,validate=True)
+              assert hashlib.sha1(('blob '+str(len(chunk))+'\0').encode()+chunk).hexdigest()=='f44c7d225a3cb0a9fdc10d3eaa42d61951465a41'
+            chunks.append(chunk)
+          compressed=b''.join(chunks)
+          assert hashlib.sha256(compressed).hexdigest()=='ff8238a84d1b5ea22ecf9a82e4ae92356e13a63763d6e93d17c6eec0d5bd88d3'
+          patch=gzip.decompress(compressed)
+          subprocess.run(['git','apply','--check','-'],input=patch,check=True)
+          subprocess.run(['git','apply','-'],input=patch,check=True)
+          temp=Path(os.environ['RUNNER_TEMP'])
+          for name,artifact,digest in [('current',10626612821,'871bad89391d77006f553464096f1574524655800743d0812216a19f1bfa0bd6'),('initial',10625924964,'b168f85ebc8aae4fba87fa14c4c710b9845091c2bf599577a075950b5e8a294d')]:
+            raw=get('/actions/artifacts/'+str(artifact)+'/zip')
+            assert hashlib.sha256(raw).hexdigest()==digest,'Artifact hash mismatch'
+            target=temp/name;target.mkdir()
+            with zipfile.ZipFile(io.BytesIO(raw)) as z:
+              for info in z.infolist():
+                assert (target/info.filename).resolve().is_relative_to(target.resolve()), 'Unsafe archive path'
+              z.extractall(target)
+          print('Source patch and two official-public research artifacts verified.')
+          PY
+      - name: Import current evidence, generate and verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/rh_survey_import_public_snapshot.py --research-dir "$RUNNER_TEMP/current" --initial-dir "$RUNNER_TEMP/initial"
+          python scripts/rh_survey_build_registry.py
+          python -m unittest discover -s tests/scripts -p 'test_*.py' -v
+          python -m unittest discover -s tests/custom_nodes -p 'test_*.py' -v
+          python scripts/rh_survey_build_registry.py --check
+          python scripts/rh_survey_build_cost_tables.py --check
+          for f in docs/05-RunningHub-API/examples/curl/*.sh; do bash -n "$f"; done
+          git diff --check
+      - name: Commit only reviewed deliverables
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add README.md .github/workflows/runninghub-handoff-check.yml .github/workflows/runninghub-public-evidence.yml docs/05-RunningHub-API scripts/rh_public_price_probe.py scripts/rh_survey_handoff.py scripts/rh_survey_import_public_snapshot.py scripts/rh_survey_public.py tests/scripts/test_rh_public_evidence.py
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix: publish current official 2K prices and stage billing evidence'
+          git push origin HEAD:refs/heads/fix/runninghub-cost-reconciliation-20260921
