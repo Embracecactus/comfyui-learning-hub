@@ -1,0 +1,39 @@
+name: RunningHub handoff validation
+
+on:
+  push:
+    branches: [fix/runninghub-cost-reconciliation-20260921]
+  pull_request:
+    paths:
+      - 'docs/05-RunningHub-API/**'
+      - 'scripts/rh_survey_*.py'
+      - 'tests/scripts/test_rh_handoff*.py'
+      - '.github/workflows/runninghub-handoff-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test -f tests/scripts/test_rh_handoff.py; then
+            python3 -m unittest discover -s tests/scripts -p 'test_rh_handoff*.py' -v
+          fi
+      - name: Archive exact source revision
+        shell: bash
+        run: git archive --format=zip --output="$RUNNER_TEMP/runninghub-source.zip" HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runninghub-source-${{ github.sha }}
+          path: ${{ runner.temp }}/runninghub-source.zip
+          retention-days: 3
+          if-no-files-found: error
