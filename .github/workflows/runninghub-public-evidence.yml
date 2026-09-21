@@ -1,0 +1,115 @@
+name: RunningHub public evidence
+on:
+  push:
+    branches: [fix/runninghub-cost-reconciliation-20260921]
+    paths: [.github/workflows/runninghub-public-evidence.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install 'playwright==1.55.0'
+      - run: python -m playwright install --with-deps chromium
+      - name: Read anonymous official pages and model snapshots
+        shell: bash
+        run: |
+          python - <<'PY'
+          import asyncio, hashlib, json, re, urllib.request
+          from pathlib import Path
+          from datetime import datetime, timezone
+          from playwright.async_api import async_playwright
+          out=Path('output/public-evidence'); out.mkdir(parents=True,exist_ok=True)
+          index={'collected_at':datetime.now(timezone.utc).isoformat(),'paid_requests':0,'sources':[]}
+          urls={
+            'models':'https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json',
+            'pricing-kit':'https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/developer-kit/pricing.public.json',
+            'kit-models':'https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/developer-kit/model-registry.public.json',
+          }
+          for name,url in urls.items():
+            try:
+              raw=urllib.request.urlopen(url,timeout=40).read(); obj=json.loads(raw)
+              (out/(name+'.json')).write_bytes(raw)
+              index['sources'].append({'id':name,'url':url,'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw),'json_valid':True})
+            except Exception as e:index['sources'].append({'id':name,'url':url,'error':type(e).__name__+': '+str(e)[:150]})
+          def redact(x):
+            if isinstance(x,dict):
+              return {k:('[REDACTED]' if any(w in k.lower() for w in ('token','apikey','api_key','cookie','password','authorization','secret')) else redact(v)) for k,v in x.items()}
+            if isinstance(x,list):return [redact(v) for v in x]
+            return x
+          pages=[
+            ('h3','https://www.runninghub.cn/call-api/api-detail/2133100000000504202'),
+            ('shared','https://www.runninghub.cn/enterprise-api/sharedApi'),
+            ('exclusive','https://www.runninghub.cn/call-api/bill-task?tab=keys&type=exclusive'),
+            ('membership','https://www.runninghub.cn/enterprise-api/consumerApi'),
+            ('models-page','https://www.runninghub.cn/call-api'),
+            ('docs','https://www.runninghub.cn/runninghub-api-doc-cn/'),
+          ]
+          async def main():
+            async with async_playwright() as p:
+              browser=await p.chromium.launch()
+              context=await browser.new_context(locale='zh-CN',viewport={'width':1440,'height':1000})
+              for name,url in pages:
+                page=await context.new_page(); responses=[]; pending=[]
+                async def capture(r):
+                  u=r.url
+                  if not re.match(r'https://([^/]+\.)?runninghub\.(cn|ai)/',u):return
+                  if any(w in u.lower() for w in ('accountstatus','token','login','userinfo','profile')):return
+                  ct=r.headers.get('content-type','')
+                  if 'json' not in ct:return
+                  try:
+                    body=await r.json()
+                    if len(json.dumps(body))>3000000:return
+                    responses.append({'url':u.split('?')[0],'method':r.request.method,'status':r.status,'request':redact(r.request.post_data_json) if r.request.post_data else None,'body':redact(body)})
+                  except Exception:pass
+                def schedule(r):pending.append(asyncio.create_task(capture(r)))
+                page.on('response',schedule)
+                item={'id':name,'url':url}
+                try:
+                  res=await page.goto(url,wait_until='domcontentloaded',timeout=60000)
+                  await page.wait_for_timeout(7000)
+                  item['status']=res.status if res else None; item['resolved_url']=page.url
+                  text=await page.locator('body').inner_text()
+                  (out/(name+'.txt')).write_text(text,encoding='utf-8')
+                  await page.screenshot(path=str(out/(name+'.png')),full_page=True)
+                  item['text_sha256']=hashlib.sha256(text.encode()).hexdigest()
+                  item['links']=await page.locator('a[href]').evaluate_all('(els)=>els.map(e=>({text:e.innerText,url:e.href})).filter(e=>/会员|充值|钱包|机器|独占|价格|Price|Pricing|Enterprise/.test(e.text))')
+                  if pending:await asyncio.gather(*pending,return_exceptions=True)
+                  (out/(name+'-responses.json')).write_text(json.dumps(responses,ensure_ascii=False,indent=2),encoding='utf-8')
+                  item['response_urls']=[r['url'] for r in responses]
+                  print(name,item['status'],len(text),'bytes',len(responses),'json responses')
+                  print(text[:4500])
+                  print('ENDPOINTS',json.dumps(item['response_urls'],ensure_ascii=False))
+                except Exception as e:item['error']=type(e).__name__+': '+str(e)[:250]
+                index['sources'].append(item);await page.close()
+              await browser.close()
+          asyncio.run(main())
+          (out/'index.json').write_text(json.dumps(index,ensure_ascii=False,indent=2),encoding='utf-8')
+          PY
+      - name: Detect configured task-query credentials without disclosing them
+        env:
+          RH_API_KEY: ${{ secrets.RH_API_KEY }}
+          RH_ENTERPRISE_API_KEY: ${{ secrets.RH_ENTERPRISE_API_KEY }}
+        run: |
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          state={'RH_API_KEY_configured':bool(os.environ.get('RH_API_KEY')),'RH_ENTERPRISE_API_KEY_configured':bool(os.environ.get('RH_ENTERPRISE_API_KEY')),'paid_requests':0,'private_api_requests':0}
+          Path('output/public-evidence/credential-availability.json').write_text(json.dumps(state,indent=2))
+          print(json.dumps(state))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runninghub-public-evidence-${{ github.sha }}
+          path: output/public-evidence
+          retention-days: 7
+          if-no-files-found: error
