@@ -84,3 +84,7 @@ scripts/
 python3 scripts/rh_survey_build_cost_tables.py --check
 python3 -m unittest discover -s tests/scripts -p 'test_rh_handoff*.py' -v
 ```
+
+### RunningHub 当天公开价格与目录
+
+[2026-09-21 公开取证结果](docs/05-RunningHub-API/06-公开报价与目录复核.md)：中国站匿名标准模型目录244项、26/26显式2K视频价表，以及H3 768P/2K六组报价。公开报价与账户实扣分开；企业与两阶段真实账单仍以授权验证为准。

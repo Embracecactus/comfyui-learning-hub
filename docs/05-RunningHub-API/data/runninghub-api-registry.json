@@ -77,18 +77,9 @@
     "kling-v3-turbo-pro/text-to-video",
     "kling-v3-turbo-std/image-to-video",
     "kling-v3.0-4k/motion-control",
-    "minimax/h3-max-turbo/image-to-video",
-    "minimax/h3-max-turbo/text-to-video",
-    "minimax/hailuo-h3-max/image-to-video",
-    "minimax/hailuo-h3-max/text-to-video",
     "minimax/hailuo-h3/context-ir-image",
     "minimax/hailuo-h3/context-ir-multimodal",
     "minimax/hailuo-h3/context-ir-text",
-    "minimax/hailuo-h3/image-to-video",
-    "minimax/hailuo-h3/multimodal-to-video",
-    "minimax/hailuo-h3/regeneration-image-to-video",
-    "minimax/hailuo-h3/regeneration-multimodal-to-video",
-    "minimax/hailuo-h3/regeneration-text-to-video",
     "mureka-o2/instrumental-generate",
     "pixverse-v6/effects",
     "rhart-image-g-2.5-official-token/flare/edit",
@@ -135,17 +126,17 @@
    "http_endpoint_instances_curated": 22,
    "model_capabilities": 422,
    "model_capabilities_with_public_price": 353,
-   "model_capabilities_missing_public_price": 68,
+   "model_capabilities_missing_public_price": 59,
    "video_capabilities": 228,
    "video_supports_768p": 7,
    "video_supports_2k": 22,
    "duplicate_endpoints": 0,
    "verified_live_this_workspace": [
-    "Historical records only; no new paid/API task verification in this handoff revision."
+    "Current anonymous official price tables and six H3 web calculations verified; no new private task queries or paid tasks."
    ],
    "single_prompt_2k_direct": 5,
    "reported_personal_2k_runs": 3,
-   "additional_endpoints_with_reported_page_price": 1
+   "additional_endpoints_with_reported_page_price": 10
   },
   "key_types": {
    "consumer-member": [
@@ -174,7 +165,23 @@
   "schema_version": 2,
   "handoff_maintained_at": "2026-09-21",
   "coverage_statement": "模型覆盖以保留快照为界；HTTP接口族为已整理清单，不声称当前全平台全量。",
-  "account_owner_vs_key_type": "个人/团队为结算主体，消费级/企业共享/独占为Key类型，不混同。"
+  "account_owner_vs_key_type": "个人/团队为结算主体，消费级/企业共享/独占为Key类型，不混同。",
+  "public_cn_catalogue": {
+   "source_url": "https://www.runninghub.cn/call-api/search-api/standard-model",
+   "request_cache_key": "api-list-search-STANDARD_MODEL-{\"categoryType\":\"STANDARD_MODEL\",\"tagIds\":[],\"search\":\"\",\"categoryTagIds\":[],\"owners\":[],\"isCollected\":false,\"region\":\"\",\"isWhitelist\":false,\"pageNum\":1,\"pageSize\":999}",
+   "pagination": {
+    "size": "999",
+    "current": "1",
+    "total": "244",
+    "pages": "1",
+    "hasNext": false,
+    "hasPrevious": false,
+    "nextCursor": null
+   },
+   "record_count": 244,
+   "scope": "Anonymous CN STANDARD_MODEL view; not all regions, LLM channels, private/dynamic applications or all historical endpoints. Missing from this view does not mean discontinued."
+  },
+  "public_price_observed_at": "2026-09-21T07:33:02.180428+00:00"
  },
  "endpoint_families": [
   {
@@ -11343,7 +11350,88 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "excluded_no_2k",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "vidu/text-to-video-q3-pro",
+     "sku_id": "2017148354741735426",
+     "resolution": "360p",
+     "rate_cny": "0.31",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017148354741735426",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "vidu/text-to-video-q3-pro",
+     "sku_id": "2017148354741735426",
+     "resolution": "540p",
+     "rate_cny": "0.31",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017148354741735426",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "vidu/text-to-video-q3-pro",
+     "sku_id": "2017148354741735426",
+     "resolution": "720p",
+     "rate_cny": "0.66",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017148354741735426",
+     "source_table_row": 2,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "vidu/text-to-video-q3-pro",
+     "sku_id": "2017148354741735426",
+     "resolution": "1080p",
+     "rate_cny": "0.7",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017148354741735426",
+     "source_table_row": 3,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "vidu/image-to-video-q3-pro",
@@ -11559,7 +11647,108 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "required_media",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "vidu/image-to-video-q3-pro",
+     "sku_id": "2017174622010937346",
+     "resolution": "360p",
+     "rate_cny": "0.31",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "vidu/image-to-video-q3-pro",
+     "sku_id": "2017174622010937346",
+     "resolution": "540p",
+     "rate_cny": "0.31",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "vidu/image-to-video-q3-pro",
+     "sku_id": "2017174622010937346",
+     "resolution": "720p",
+     "rate_cny": "0.66",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+     "source_table_row": 2,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "vidu/image-to-video-q3-pro",
+     "sku_id": "2017174622010937346",
+     "resolution": "1080p",
+     "rate_cny": "0.7",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+     "source_table_row": 3,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "vidu/image-to-video-q3-pro",
+     "sku_id": "2017174622010937346",
+     "resolution": "2k",
+     "rate_cny": "1.09",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+     "source_table_row": 4,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "rhart-video-v3.1-pro/start-end-to-video",
@@ -24261,7 +24450,108 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "direct_text",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+     "sku_id": "2034917373414539273",
+     "resolution": "480p",
+     "rate_cny": "0.6",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+     "sku_id": "2034917373414539273",
+     "resolution": "720p",
+     "rate_cny": "1.2",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+     "sku_id": "2034917373414539273",
+     "resolution": "1080p",
+     "rate_cny": "1.48",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+     "source_table_row": 4,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+     "sku_id": "2034917373414539273",
+     "resolution": "2k",
+     "rate_cny": "1.62",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+     "source_table_row": 5,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+     "sku_id": "2034917373414539273",
+     "resolution": "4k",
+     "rate_cny": "1.83",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+     "source_table_row": 6,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "rhart-video/sparkvideo-2.0-fast/text-to-video",
@@ -24530,7 +24820,108 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "direct_text",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+     "sku_id": "2034917373414539274",
+     "resolution": "480p",
+     "rate_cny": "0.5",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+     "sku_id": "2034917373414539274",
+     "resolution": "720p",
+     "rate_cny": "1",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+     "sku_id": "2034917373414539274",
+     "resolution": "1080p",
+     "rate_cny": "1.28",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+     "source_table_row": 2,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+     "sku_id": "2034917373414539274",
+     "resolution": "2k",
+     "rate_cny": "1.42",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+     "source_table_row": 3,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+     "sku_id": "2034917373414539274",
+     "resolution": "4k",
+     "rate_cny": "1.63",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+     "source_table_row": 4,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "rhart-video/sparkvideo-2.0/image-to-video",
@@ -24825,7 +25216,108 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "required_media",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+     "sku_id": "2034917373414539275",
+     "resolution": "480p",
+     "rate_cny": "0.6",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+     "sku_id": "2034917373414539275",
+     "resolution": "720p",
+     "rate_cny": "1.2",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+     "sku_id": "2034917373414539275",
+     "resolution": "1080p",
+     "rate_cny": "1.48",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+     "source_table_row": 4,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+     "sku_id": "2034917373414539275",
+     "resolution": "2k",
+     "rate_cny": "1.62",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+     "source_table_row": 5,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+     "sku_id": "2034917373414539275",
+     "resolution": "4k",
+     "rate_cny": "1.83",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+     "source_table_row": 6,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "rhart-video/sparkvideo-2.0-fast/image-to-video",
@@ -25102,7 +25594,108 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "required_media",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+     "sku_id": "2034917373414539276",
+     "resolution": "480p",
+     "rate_cny": "0.5",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+     "sku_id": "2034917373414539276",
+     "resolution": "720p",
+     "rate_cny": "1",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+     "sku_id": "2034917373414539276",
+     "resolution": "1080p",
+     "rate_cny": "1.28",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+     "source_table_row": 2,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+     "sku_id": "2034917373414539276",
+     "resolution": "2k",
+     "rate_cny": "1.42",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+     "source_table_row": 3,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+     "sku_id": "2034917373414539276",
+     "resolution": "4k",
+     "rate_cny": "1.63",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+     "source_table_row": 4,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "rhart-video/sparkvideo-2.0/multimodal-video",
@@ -29295,7 +29888,88 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "upscaler",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "rhart-video/video-upscaler",
+     "sku_id": "2038503362263322627",
+     "resolution": "720p",
+     "rate_cny": "0.14",
+     "unit": "CNY/input_seconds_ceil_min5",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2038503362263322627",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "按秒计费。\n计费秒数 = max(向上取整(输入视频时长), 5)；\n总价 = 单价 × 计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/video-upscaler",
+     "sku_id": "2038503362263322627",
+     "resolution": "1080p",
+     "rate_cny": "0.21",
+     "unit": "CNY/input_seconds_ceil_min5",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2038503362263322627",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "按秒计费。\n计费秒数 = max(向上取整(输入视频时长), 5)；\n总价 = 单价 × 计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/video-upscaler",
+     "sku_id": "2038503362263322627",
+     "resolution": "2k",
+     "rate_cny": "0.35",
+     "unit": "CNY/input_seconds_ceil_min5",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2038503362263322627",
+     "source_table_row": 2,
+     "constraints": {
+      "note": "按秒计费。\n计费秒数 = max(向上取整(输入视频时长), 5)；\n总价 = 单价 × 计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/video-upscaler",
+     "sku_id": "2038503362263322627",
+     "resolution": "4k",
+     "rate_cny": "0.56",
+     "unit": "CNY/input_seconds_ceil_min5",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2038503362263322627",
+     "source_table_row": 3,
+     "constraints": {
+      "note": "按秒计费。\n计费秒数 = max(向上取整(输入视频时长), 5)；\n总价 = 单价 × 计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "rhart-video/video-fps-increaser",
@@ -50566,7 +51240,108 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "direct_text",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+     "sku_id": "2133000000000504041",
+     "resolution": "480p",
+     "rate_cny": "0.3",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+     "sku_id": "2133000000000504041",
+     "resolution": "720p",
+     "rate_cny": "0.6",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+     "sku_id": "2133000000000504041",
+     "resolution": "1080p",
+     "rate_cny": "0.88",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+     "source_table_row": 2,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+     "sku_id": "2133000000000504041",
+     "resolution": "2k",
+     "rate_cny": "1.02",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+     "source_table_row": 3,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+     "sku_id": "2133000000000504041",
+     "resolution": "4k",
+     "rate_cny": "1.23",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+     "source_table_row": 4,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "rhart-video/sparkvideo-2.0-mini/image-to-video",
@@ -50881,7 +51656,108 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "required_media",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+     "sku_id": "2133000000000504042",
+     "resolution": "480p",
+     "rate_cny": "0.3",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+     "sku_id": "2133000000000504042",
+     "resolution": "720p",
+     "rate_cny": "0.6",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+     "sku_id": "2133000000000504042",
+     "resolution": "1080p",
+     "rate_cny": "0.88",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+     "source_table_row": 2,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+     "sku_id": "2133000000000504042",
+     "resolution": "2k",
+     "rate_cny": "1.02",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+     "source_table_row": 3,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+     "sku_id": "2133000000000504042",
+     "resolution": "4k",
+     "rate_cny": "1.23",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+     "source_table_row": 4,
+     "constraints": {
+      "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "rhart-video/sparkvideo-2.0-mini/multimodal-video",
@@ -53747,7 +54623,86 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "optional_media",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/hailuo-h3/multimodal-to-video",
+     "sku_id": "2133100000000504201",
+     "resolution": "2K",
+     "rate_cny": "0.77",
+     "unit": "CNY/billable_output_second",
+     "unconditional": false,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504201",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": [
+       {
+        "cells": [
+         "视频",
+         "按输入视频秒数及输出视频分辨率计费：2K 为 ¥0.77/秒，768P 为 ¥0.48/秒"
+        ]
+       },
+       {
+        "cells": [
+         "图片",
+         "5 张以内免费；超过 5 张的部分，统一按 ¥0.2/张收费"
+        ]
+       },
+       {
+        "cells": [
+         "音频",
+         "免费"
+        ]
+       }
+      ],
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "minimax/hailuo-h3/multimodal-to-video",
+     "sku_id": "2133100000000504201",
+     "resolution": "768P",
+     "rate_cny": "0.48",
+     "unit": "CNY/billable_output_second",
+     "unconditional": false,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504201",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": [
+       {
+        "cells": [
+         "视频",
+         "按输入视频秒数及输出视频分辨率计费：2K 为 ¥0.77/秒，768P 为 ¥0.48/秒"
+        ]
+       },
+       {
+        "cells": [
+         "图片",
+         "5 张以内免费；超过 5 张的部分，统一按 ¥0.2/张收费"
+        ]
+       },
+       {
+        "cells": [
+         "音频",
+         "免费"
+        ]
+       }
+      ],
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "minimax/hailuo-h3/text-to-video",
@@ -53935,25 +54890,43 @@
    "platform_price_evidence": [
     {
      "endpoint": "minimax/hailuo-h3/text-to-video",
+     "sku_id": "2133100000000504202",
      "resolution": "2K",
      "rate_cny": "0.77",
      "unit": "CNY/billable_output_second",
-     "source_id": "h3-price-page-20260917",
-     "observed_at": "2026-09-17",
-     "verification": "reported_public_page_not_refetched",
-     "applies_to": "enterprise-shared standard-model-api",
-     "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504202",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
     },
     {
      "endpoint": "minimax/hailuo-h3/text-to-video",
+     "sku_id": "2133100000000504202",
      "resolution": "768P",
      "rate_cny": "0.48",
      "unit": "CNY/billable_output_second",
-     "source_id": "h3-price-page-20260917",
-     "observed_at": "2026-09-17",
-     "verification": "reported_public_page_not_refetched",
-     "applies_to": "enterprise-shared standard-model-api",
-     "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504202",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
     }
    ]
   },
@@ -54115,7 +55088,48 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "optional_media",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/hailuo-h3/image-to-video",
+     "sku_id": "2133100000000504203",
+     "resolution": "2K",
+     "rate_cny": "0.77",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504203",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "minimax/hailuo-h3/image-to-video",
+     "sku_id": "2133100000000504203",
+     "resolution": "768P",
+     "rate_cny": "0.48",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504203",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "topazlabs/image-upscale-high-fidelity-v3",
@@ -57438,7 +58452,28 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "regeneration",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/hailuo-h3/regeneration-text-to-video",
+     "sku_id": "2133100000000504211",
+     "resolution": "2K",
+     "rate_cny": "0.3",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504211",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": "将已生成的 768P 视频进一步生成为 2K 视频，按视频再生成输出秒数计费。"
+     }
+    }
+   ]
   },
   {
    "id": "minimax/hailuo-h3/regeneration-image-to-video",
@@ -57517,7 +58552,28 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "regeneration",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/hailuo-h3/regeneration-image-to-video",
+     "sku_id": "2133100000000504212",
+     "resolution": "2K",
+     "rate_cny": "0.3",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504212",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": "将已生成的 768P 视频进一步生成为 2K 视频，按视频再生成输出秒数计费。"
+     }
+    }
+   ]
   },
   {
    "id": "minimax/hailuo-h3/regeneration-multimodal-to-video",
@@ -57604,7 +58660,47 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "regeneration",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/hailuo-h3/regeneration-multimodal-to-video",
+     "sku_id": "2133100000000504213",
+     "resolution": "2K",
+     "rate_cny": "0.3",
+     "unit": "CNY/billable_output_second",
+     "unconditional": false,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504213",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": [
+       {
+        "cells": [
+         "视频",
+         "按原 768P 生成任务中输入视频的秒数计费：¥0.3/秒"
+        ]
+       },
+       {
+        "cells": [
+         "图片",
+         "5 张以内免费；超过 5 张的部分，统一按 ¥0.15/张收费"
+        ]
+       },
+       {
+        "cells": [
+         "音频",
+         "免费"
+        ]
+       }
+      ],
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": "将已生成的 768P 视频进一步生成为 2K 视频，按视频再生成输出秒数计费。"
+     }
+    }
+   ]
   },
   {
    "id": "minimax/hailuo-h3/context-ir-multimodal",
@@ -61632,7 +62728,48 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "excluded_no_2k",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/hailuo-h3-max/text-to-video",
+     "sku_id": "2133100000000504204",
+     "resolution": "480P",
+     "rate_cny": "0.41",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504204",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "minimax/hailuo-h3-max/text-to-video",
+     "sku_id": "2133100000000504204",
+     "resolution": "768P",
+     "rate_cny": "0.63",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504204",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "minimax/hailuo-h3-max/image-to-video",
@@ -61785,7 +62922,48 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "excluded_no_2k",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/hailuo-h3-max/image-to-video",
+     "sku_id": "2133100000000504205",
+     "resolution": "480P",
+     "rate_cny": "0.41",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504205",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "minimax/hailuo-h3-max/image-to-video",
+     "sku_id": "2133100000000504205",
+     "resolution": "768P",
+     "rate_cny": "0.63",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504205",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "minimax/h3-max-turbo/text-to-video",
@@ -61959,7 +63137,48 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "excluded_no_2k",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/h3-max-turbo/text-to-video",
+     "sku_id": "2133100000000504401",
+     "resolution": "480p",
+     "rate_cny": "0.22",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504401",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "minimax/h3-max-turbo/text-to-video",
+     "sku_id": "2133100000000504401",
+     "resolution": "768p",
+     "rate_cny": "0.34",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504401",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "minimax/h3-max-turbo/image-to-video",
@@ -62110,7 +63329,48 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "single_prompt_2k": "excluded_no_2k",
-   "platform_price_evidence": []
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/h3-max-turbo/image-to-video",
+     "sku_id": "2133100000000504402",
+     "resolution": "480p",
+     "rate_cny": "0.22",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504402",
+     "source_table_row": 0,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    },
+    {
+     "endpoint": "minimax/h3-max-turbo/image-to-video",
+     "sku_id": "2133100000000504402",
+     "resolution": "768p",
+     "rate_cny": "0.34",
+     "unit": "CNY/billable_output_second",
+     "unconditional": true,
+     "verification": "official_public_table_retrieved_not_live_bill",
+     "source_id": "runninghub-public-cn-20260921",
+     "observed_at": "2026-09-21",
+     "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504402",
+     "source_table_row": 1,
+     "constraints": {
+      "note": "",
+      "condition_rows": null,
+      "condition_prices": null,
+      "floor_table": null,
+      "base_subtitle": null
+     }
+    }
+   ]
   },
   {
    "id": "google/gemini-omni-1.1-flash/video-edit",
@@ -63763,26 +65023,1261 @@
  "pricing_anchors": {
   "platform_exact_endpoint_records": [
    {
-    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "endpoint": "minimax/h3-max-turbo/image-to-video",
+    "sku_id": "2133100000000504402",
+    "resolution": "480p",
+    "rate_cny": "0.22",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504402",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/h3-max-turbo/image-to-video",
+    "sku_id": "2133100000000504402",
+    "resolution": "768p",
+    "rate_cny": "0.34",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504402",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/h3-max-turbo/text-to-video",
+    "sku_id": "2133100000000504401",
+    "resolution": "480p",
+    "rate_cny": "0.22",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504401",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/h3-max-turbo/text-to-video",
+    "sku_id": "2133100000000504401",
+    "resolution": "768p",
+    "rate_cny": "0.34",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504401",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3-max/image-to-video",
+    "sku_id": "2133100000000504205",
+    "resolution": "480P",
+    "rate_cny": "0.41",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504205",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3-max/image-to-video",
+    "sku_id": "2133100000000504205",
+    "resolution": "768P",
+    "rate_cny": "0.63",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504205",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3-max/text-to-video",
+    "sku_id": "2133100000000504204",
+    "resolution": "480P",
+    "rate_cny": "0.41",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504204",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3-max/text-to-video",
+    "sku_id": "2133100000000504204",
+    "resolution": "768P",
+    "rate_cny": "0.63",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504204",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/image-to-video",
+    "sku_id": "2133100000000504203",
     "resolution": "2K",
     "rate_cny": "0.77",
     "unit": "CNY/billable_output_second",
-    "source_id": "h3-price-page-20260917",
-    "observed_at": "2026-09-17",
-    "verification": "reported_public_page_not_refetched",
-    "applies_to": "enterprise-shared standard-model-api",
-    "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504203",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
    },
    {
-    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "endpoint": "minimax/hailuo-h3/image-to-video",
+    "sku_id": "2133100000000504203",
     "resolution": "768P",
     "rate_cny": "0.48",
     "unit": "CNY/billable_output_second",
-    "source_id": "h3-price-page-20260917",
-    "observed_at": "2026-09-17",
-    "verification": "reported_public_page_not_refetched",
-    "applies_to": "enterprise-shared standard-model-api",
-    "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504203",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/multimodal-to-video",
+    "sku_id": "2133100000000504201",
+    "resolution": "2K",
+    "rate_cny": "0.77",
+    "unit": "CNY/billable_output_second",
+    "unconditional": false,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504201",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": [
+      {
+       "cells": [
+        "视频",
+        "按输入视频秒数及输出视频分辨率计费：2K 为 ¥0.77/秒，768P 为 ¥0.48/秒"
+       ]
+      },
+      {
+       "cells": [
+        "图片",
+        "5 张以内免费；超过 5 张的部分，统一按 ¥0.2/张收费"
+       ]
+      },
+      {
+       "cells": [
+        "音频",
+        "免费"
+       ]
+      }
+     ],
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/multimodal-to-video",
+    "sku_id": "2133100000000504201",
+    "resolution": "768P",
+    "rate_cny": "0.48",
+    "unit": "CNY/billable_output_second",
+    "unconditional": false,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504201",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": [
+      {
+       "cells": [
+        "视频",
+        "按输入视频秒数及输出视频分辨率计费：2K 为 ¥0.77/秒，768P 为 ¥0.48/秒"
+       ]
+      },
+      {
+       "cells": [
+        "图片",
+        "5 张以内免费；超过 5 张的部分，统一按 ¥0.2/张收费"
+       ]
+      },
+      {
+       "cells": [
+        "音频",
+        "免费"
+       ]
+      }
+     ],
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/regeneration-image-to-video",
+    "sku_id": "2133100000000504212",
+    "resolution": "2K",
+    "rate_cny": "0.3",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504212",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": "将已生成的 768P 视频进一步生成为 2K 视频，按视频再生成输出秒数计费。"
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/regeneration-multimodal-to-video",
+    "sku_id": "2133100000000504213",
+    "resolution": "2K",
+    "rate_cny": "0.3",
+    "unit": "CNY/billable_output_second",
+    "unconditional": false,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504213",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": [
+      {
+       "cells": [
+        "视频",
+        "按原 768P 生成任务中输入视频的秒数计费：¥0.3/秒"
+       ]
+      },
+      {
+       "cells": [
+        "图片",
+        "5 张以内免费；超过 5 张的部分，统一按 ¥0.15/张收费"
+       ]
+      },
+      {
+       "cells": [
+        "音频",
+        "免费"
+       ]
+      }
+     ],
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": "将已生成的 768P 视频进一步生成为 2K 视频，按视频再生成输出秒数计费。"
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/regeneration-text-to-video",
+    "sku_id": "2133100000000504211",
+    "resolution": "2K",
+    "rate_cny": "0.3",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504211",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": "将已生成的 768P 视频进一步生成为 2K 视频，按视频再生成输出秒数计费。"
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "sku_id": "2133100000000504202",
+    "resolution": "2K",
+    "rate_cny": "0.77",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504202",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "sku_id": "2133100000000504202",
+    "resolution": "768P",
+    "rate_cny": "0.48",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504202",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+    "sku_id": "2034917373414539276",
+    "resolution": "480p",
+    "rate_cny": "0.5",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+    "sku_id": "2034917373414539276",
+    "resolution": "720p",
+    "rate_cny": "1",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+    "sku_id": "2034917373414539276",
+    "resolution": "1080p",
+    "rate_cny": "1.28",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+    "source_table_row": 2,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+    "sku_id": "2034917373414539276",
+    "resolution": "2k",
+    "rate_cny": "1.42",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+    "source_table_row": 3,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/image-to-video",
+    "sku_id": "2034917373414539276",
+    "resolution": "4k",
+    "rate_cny": "1.63",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539276",
+    "source_table_row": 4,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+    "sku_id": "2034917373414539274",
+    "resolution": "480p",
+    "rate_cny": "0.5",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+    "sku_id": "2034917373414539274",
+    "resolution": "720p",
+    "rate_cny": "1",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+    "sku_id": "2034917373414539274",
+    "resolution": "1080p",
+    "rate_cny": "1.28",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+    "source_table_row": 2,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+    "sku_id": "2034917373414539274",
+    "resolution": "2k",
+    "rate_cny": "1.42",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+    "source_table_row": 3,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-fast/text-to-video",
+    "sku_id": "2034917373414539274",
+    "resolution": "4k",
+    "rate_cny": "1.63",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539274",
+    "source_table_row": 4,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+    "sku_id": "2133000000000504042",
+    "resolution": "480p",
+    "rate_cny": "0.3",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+    "sku_id": "2133000000000504042",
+    "resolution": "720p",
+    "rate_cny": "0.6",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+    "sku_id": "2133000000000504042",
+    "resolution": "1080p",
+    "rate_cny": "0.88",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+    "source_table_row": 2,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+    "sku_id": "2133000000000504042",
+    "resolution": "2k",
+    "rate_cny": "1.02",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+    "source_table_row": 3,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/image-to-video",
+    "sku_id": "2133000000000504042",
+    "resolution": "4k",
+    "rate_cny": "1.23",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504042",
+    "source_table_row": 4,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+    "sku_id": "2133000000000504041",
+    "resolution": "480p",
+    "rate_cny": "0.3",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+    "sku_id": "2133000000000504041",
+    "resolution": "720p",
+    "rate_cny": "0.6",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+    "sku_id": "2133000000000504041",
+    "resolution": "1080p",
+    "rate_cny": "0.88",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+    "source_table_row": 2,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+    "sku_id": "2133000000000504041",
+    "resolution": "2k",
+    "rate_cny": "1.02",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+    "source_table_row": 3,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0-mini/text-to-video",
+    "sku_id": "2133000000000504041",
+    "resolution": "4k",
+    "rate_cny": "1.23",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2133000000000504041",
+    "source_table_row": 4,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行超分补帧。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+    "sku_id": "2034917373414539275",
+    "resolution": "480p",
+    "rate_cny": "0.6",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+    "sku_id": "2034917373414539275",
+    "resolution": "720p",
+    "rate_cny": "1.2",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+    "sku_id": "2034917373414539275",
+    "resolution": "1080p",
+    "rate_cny": "1.48",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+    "source_table_row": 4,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+    "sku_id": "2034917373414539275",
+    "resolution": "2k",
+    "rate_cny": "1.62",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+    "source_table_row": 5,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/image-to-video",
+    "sku_id": "2034917373414539275",
+    "resolution": "4k",
+    "rate_cny": "1.83",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539275",
+    "source_table_row": 6,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+    "sku_id": "2034917373414539273",
+    "resolution": "480p",
+    "rate_cny": "0.6",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+    "sku_id": "2034917373414539273",
+    "resolution": "720p",
+    "rate_cny": "1.2",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "模型原生直出的分辨率。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+    "sku_id": "2034917373414539273",
+    "resolution": "1080p",
+    "rate_cny": "1.48",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+    "source_table_row": 4,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+    "sku_id": "2034917373414539273",
+    "resolution": "2k",
+    "rate_cny": "1.62",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+    "source_table_row": 5,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/sparkvideo-2.0/text-to-video",
+    "sku_id": "2034917373414539273",
+    "resolution": "4k",
+    "rate_cny": "1.83",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2034917373414539273",
+    "source_table_row": 6,
+    "constraints": {
+     "note": "基于 720p 原生生成后进行画质放大。\n按秒计费。计费秒数=生成视频时长；总价=单价×计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/video-upscaler",
+    "sku_id": "2038503362263322627",
+    "resolution": "720p",
+    "rate_cny": "0.14",
+    "unit": "CNY/input_seconds_ceil_min5",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2038503362263322627",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "按秒计费。\n计费秒数 = max(向上取整(输入视频时长), 5)；\n总价 = 单价 × 计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/video-upscaler",
+    "sku_id": "2038503362263322627",
+    "resolution": "1080p",
+    "rate_cny": "0.21",
+    "unit": "CNY/input_seconds_ceil_min5",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2038503362263322627",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "按秒计费。\n计费秒数 = max(向上取整(输入视频时长), 5)；\n总价 = 单价 × 计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/video-upscaler",
+    "sku_id": "2038503362263322627",
+    "resolution": "2k",
+    "rate_cny": "0.35",
+    "unit": "CNY/input_seconds_ceil_min5",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2038503362263322627",
+    "source_table_row": 2,
+    "constraints": {
+     "note": "按秒计费。\n计费秒数 = max(向上取整(输入视频时长), 5)；\n总价 = 单价 × 计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "rhart-video/video-upscaler",
+    "sku_id": "2038503362263322627",
+    "resolution": "4k",
+    "rate_cny": "0.56",
+    "unit": "CNY/input_seconds_ceil_min5",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2038503362263322627",
+    "source_table_row": 3,
+    "constraints": {
+     "note": "按秒计费。\n计费秒数 = max(向上取整(输入视频时长), 5)；\n总价 = 单价 × 计费秒数。",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/image-to-video-q3-pro",
+    "sku_id": "2017174622010937346",
+    "resolution": "360p",
+    "rate_cny": "0.31",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/image-to-video-q3-pro",
+    "sku_id": "2017174622010937346",
+    "resolution": "540p",
+    "rate_cny": "0.31",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/image-to-video-q3-pro",
+    "sku_id": "2017174622010937346",
+    "resolution": "720p",
+    "rate_cny": "0.66",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+    "source_table_row": 2,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/image-to-video-q3-pro",
+    "sku_id": "2017174622010937346",
+    "resolution": "1080p",
+    "rate_cny": "0.7",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+    "source_table_row": 3,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/image-to-video-q3-pro",
+    "sku_id": "2017174622010937346",
+    "resolution": "2k",
+    "rate_cny": "1.09",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017174622010937346",
+    "source_table_row": 4,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/text-to-video-q3-pro",
+    "sku_id": "2017148354741735426",
+    "resolution": "360p",
+    "rate_cny": "0.31",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017148354741735426",
+    "source_table_row": 0,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/text-to-video-q3-pro",
+    "sku_id": "2017148354741735426",
+    "resolution": "540p",
+    "rate_cny": "0.31",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017148354741735426",
+    "source_table_row": 1,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/text-to-video-q3-pro",
+    "sku_id": "2017148354741735426",
+    "resolution": "720p",
+    "rate_cny": "0.66",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017148354741735426",
+    "source_table_row": 2,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
+   },
+   {
+    "endpoint": "vidu/text-to-video-q3-pro",
+    "sku_id": "2017148354741735426",
+    "resolution": "1080p",
+    "rate_cny": "0.7",
+    "unit": "CNY/billable_output_second",
+    "unconditional": true,
+    "verification": "official_public_table_retrieved_not_live_bill",
+    "source_id": "runninghub-public-cn-20260921",
+    "observed_at": "2026-09-21",
+    "source_url": "https://www.runninghub.cn/call-api/api-detail/2017148354741735426",
+    "source_table_row": 3,
+    "constraints": {
+     "note": "",
+     "condition_rows": null,
+     "condition_prices": null,
+     "floor_table": null,
+     "base_subtitle": null
+    }
    }
   ],
   "note": "原厂参考价不作为RunningHub报价；旧引用保留在Git历史。"
@@ -63929,43 +66424,43 @@
   {
    "id": "current-h3-price",
    "severity": "high",
-   "status": "open",
-   "detail": "2K/768P 文生价已从 09-17 页面报告统一；尚无本轮 price-preview。仅作用于精确文生端点。",
-   "closure_evidence": "企业共享 Key 免费 price-preview 或重新留存官方价格页。"
+   "status": "closed_public_evidence",
+   "detail": "09-21已取得精确SKU官方价表，并完成768P/2K×5/10/15秒六组匿名报价；不是企业实扣。",
+   "closure_evidence": "已保存原始公开响应、请求、来源、时间和哈希；企业账单由独立缺口跟踪。"
   },
   {
    "id": "regeneration-platform-cost",
    "severity": "high",
-   "status": "open",
-   "detail": "768P→2K 平台再生成价、输入是否另计费及完整双任务账单未知；不再用原厂 ¥1.10/秒充当平台总价。",
+   "status": "public_pricing_verified_live_chain_blocked",
+   "detail": "文生regeneration公开价为¥0.30/再生成输出秒，文生768P为¥0.48/计费秒；多模态参考素材收费另列。双任务实扣、真实计费秒及舍入仍未知。",
    "closure_evidence": "同一源链路的两个 taskId、对应 preview/usage、最终提示词哈希、媒体检查和去重对账。"
   },
   {
    "id": "enterprise-live-billing",
    "severity": "high",
-   "status": "open",
+   "status": "blocked_missing_credentials_and_paid_budget",
    "detail": "企业共享有公开资料历史记录，没有企业 Key 实际成片与扣费证据。",
    "closure_evidence": "代表性企业任务报价、创建响应、终态 usage 与媒体元数据；不得用个人 Key 样本替代。"
   },
   {
    "id": "coin-cny-rate",
    "severity": "high",
-   "status": "open",
-   "detail": "RH 币→人民币及会员固定费分摊未知，个人混合单位支出不能冒充人民币总成本。",
+   "status": "blocked_authenticated_portal",
+   "detail": "本轮点击官方会员入口实际跳转SSO；完整节点费页亦要求登录。未取得币购买/会员账单，不采用代充值比例；赠币与付费币不能混成唯一汇率。",
    "closure_evidence": "账户自身正规充值/会员账单、币种定义与明确分摊周期；不采用第三方代充值。"
   },
   {
    "id": "personal-long-duration",
    "severity": "medium",
-   "status": "open",
+   "status": "blocked_missing_credentials_and_paid_budget",
    "detail": "只有 5 秒个人应用三次历史记录；10/15 秒附加币未知。",
    "closure_evidence": "分别保存较长时长 usage，不按 5 秒平台币线性外推。"
   },
   {
    "id": "dedicated-rental",
    "severity": "medium",
-   "status": "open",
-   "detail": "独占 GPU 当前租金、利用率与单条摊销未知。",
+   "status": "blocked_authenticated_portal",
+   "detail": "本轮官方独占密钥/机器相关控制台跳转SSO，未取得当前GPU租价；保留机器租金与产量摊销，不视为0。",
    "closure_evidence": "官方租价及周期、接受成片数、失败任务成本分摊。"
   },
   {
@@ -63985,14 +66480,14 @@
   {
    "id": "catalogue-freshness",
    "severity": "medium",
-   "status": "open",
-   "detail": "模型集合仍是 09-13 官方注册表快照（09-14复检），不是 09-21 全平台实时穷举。",
-   "closure_evidence": "显式 --refresh 或指定新官方快照；记录实际下载时间和 SHA256。"
+   "status": "closed_public_evidence",
+   "detail": "09-21重下官方GitHub文件哈希不变；另取得中国站匿名STANDARD_MODEL完整244项、逐项详情244/244和26/26显式2K视频价表。范围明确，不声称覆盖私人/其他地区目录。",
+   "closure_evidence": "目录分页元数据、唯一SKU集合、逐项详情与GitHub差集已保存。"
   },
   {
    "id": "historical-raw-evidence",
    "severity": "medium",
-   "status": "open",
+   "status": "blocked_missing_credentials_and_paid_budget",
    "detail": "新增三次个人样本从仓库已有页面迁入；原始 API 响应/媒体未全部入库，本轮未复查私人任务。",
    "closure_evidence": "用环境变量凭据只读重查既有任务，并保存脱敏摘录。"
   },

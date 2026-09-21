@@ -63,8 +63,12 @@ async def main():
                     for item in data:
                         if not isinstance(item,dict):continue
                         for key,index in item.items():
-                            if key.startswith('api-list-search-STANDARD_MODEL-'):
+                            if key.startswith('api-list-search-STANDARD_MODEL-') and isinstance(index, int) and index >= 0:
                                 value=decode_nuxt(data,index)
+                                if not isinstance(value,dict) or not isinstance(value.get('page'),dict):
+                                    continue
+                                if catalogues:
+                                    continue
                                 cat={'cache_key':key,'url':page.url,**value};catalogues.append(cat)
                                 records=cat['page']['records']
                                 if len(records)!=int(cat['page']['total']) or cat['page'].get('hasNext'):

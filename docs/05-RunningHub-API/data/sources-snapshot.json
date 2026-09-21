@@ -137,7 +137,51 @@
    "observed_at": "2026-09-21",
    "evidence_level": "official_document_read",
    "note": "Price preview is not task creation; preserve raw units and parameters; failure is not a zero quote."
+  },
+  {
+   "id": "runninghub-public-cn-20260921",
+   "url": "https://www.runninghub.cn/call-api/search-api/standard-model",
+   "observed_at": "2026-09-21",
+   "evidence_level": "anonymous_public_catalog_and_price_tables_retrieved",
+   "local_evidence": "data/public-pricing-20260921.json",
+   "note": "244/244 SKU details; all 26 explicit 2K video tables; anonymous public quote is not an enterprise account bill."
   }
  ],
- "note": "原始collected_at/reverified_at仅描述保留快照；本轮维护日期不冒充重新采集日期。"
+ "note": "原始collected_at/reverified_at仅描述保留快照；本轮维护日期不冒充重新采集日期。",
+ "public_cn_evidence": {
+  "workflow_run": "https://github.com/Embracecactus/comfyui-learning-hub/actions/runs/35573305171",
+  "artifact_id": 10626612821,
+  "artifact_sha256": "871bad89391d77006f553464096f1574524655800743d0812216a19f1bfa0bd6",
+  "collector_commit": "1e732a0eaf9eeb2c7e02041e7e45bfc183b3db81",
+  "raw_files_sha256": {
+   "catalogues.json": "1375494908816b8019775009bdc2f561fdb439ebad41e7185c9364f2fcb2b073",
+   "sku-details.json": "705dba92fd16ce2de8cb1c97493a77da8b5b2f3fbb0be3e30de59b5c5bfdecc2",
+   "price-tables.json": "14becb85ee2741d0856587c03bf0907a1ac0fb15a5018993b55d26784e7f54ad",
+   "h3-quotes.json": "27b84cb71eccc42c2ef9f22125a7e0a4d876a9e481c20ef1b6076a7c2445dffd"
+  },
+  "collector_warning": "After decoding the valid complete SSR page, an additional null SSR cache entry caused a rendering-only error. The saved page total=244, hasNext=false, 244 unique records and all 244 successful detail responses were independently reconciled; no rows were inferred."
+ },
+ "official_repository_files_rechecked": [
+  {
+   "id": "models",
+   "url": "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
+   "sha256": "73b109c96bb802d7f2ac0d2e25cdb9cd70f4d8987d0041cc045a93b444b409d7",
+   "bytes": 1425954,
+   "json_valid": true
+  },
+  {
+   "id": "pricing-kit",
+   "url": "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/developer-kit/pricing.public.json",
+   "sha256": "c7b1163e578515f8380d4ff0b41a9ea83ec8815d4b80cb3ab3ab31b6f6d5d5dd",
+   "bytes": 290980,
+   "json_valid": true
+  },
+  {
+   "id": "kit-models",
+   "url": "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/developer-kit/model-registry.public.json",
+   "sha256": "61b682b097fdf8766a70c774464b3682ca2494b0f2a0d8de105bd0a77c825a1a",
+   "bytes": 1313131,
+   "json_valid": true
+  }
+ ]
 }
