@@ -1,10 +1,5 @@
 name: RunningHub public evidence
 on:
-  push:
-    branches: [fix/runninghub-cost-reconciliation-20260921]
-    paths:
-      - .github/workflows/runninghub-public-evidence.yml
-      - scripts/rh_public_price_probe.py
   workflow_dispatch:
 permissions:
   contents: read
