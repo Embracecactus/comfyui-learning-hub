@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Read anonymous RunningHub pages. Never submit models, orders or private APIs.
-Requires Playwright only for this explicit research command (not normal clients).
-Raw research output is gitignored; curate public evidence before publishing.
+"""Read anonymous RunningHub price pages without tasks, orders or account APIs.
+Playwright is an optional research dependency, not required by normal clients.
+Outputs are gitignored. Publication must retain source/scope and redact private data.
 """
 import asyncio
 import hashlib
@@ -22,9 +22,21 @@ def save(name,obj):
     (OUT/name).write_bytes(raw)
     return hashlib.sha256(raw).hexdigest()
 
+def decode_nuxt(data,index):
+    """Decode the public SSR devalue reference table; reject unknown wrappers."""
+    if index<0:return None
+    value=data[index]
+    if isinstance(value,dict):return {k:decode_nuxt(data,v) for k,v in value.items()}
+    if isinstance(value,list):
+        if value and isinstance(value[0],str):
+            if value[0] in ('Reactive','ShallowReactive','Ref','ShallowRef') and len(value)==2:return decode_nuxt(data,value[1])
+            raise ValueError('Unsupported SSR wrapper: '+str(value[0]))
+        return [decode_nuxt(data,v) for v in value]
+    return value
+
 async def main():
     OUT.mkdir(parents=True,exist_ok=True)
-    captured=[]; pending=[]; ids=set(); pages=[]
+    captured=[]; pending=[]; ids=set(); pages=[]; catalogues=[]
     async with async_playwright() as p:
         browser=await p.chromium.launch()
         ctx=await browser.new_context(locale='zh-CN',viewport={'width':1440,'height':1000})
@@ -38,76 +50,77 @@ async def main():
                 body=await resp.json()
                 if path=='/api/sku/detail' and isinstance(body.get('data'),dict):
                     body={**body,'data':{k:v for k,v in body['data'].items() if k in DETAIL_KEYS}}
-                request=resp.request.post_data_json if resp.request.post_data else None
-                item={'url':resp.url,'method':resp.request.method,'status':resp.status,'request':request,'body':body}
-                captured.append(item)
+                captured.append({'url':resp.url,'method':resp.request.method,'status':resp.status,'request':resp.request.post_data_json if resp.request.post_data else None,'body':body})
             except Exception:pass
         ctx.on('response',lambda r:pending.append(asyncio.create_task(record(r))))
         for name,path in [('fees','/third-party-fees'),('catalog','/call-api/search-api/standard-model'),('h3-price','/call-api/api-detail/2133100000000504202')]:
             page=await ctx.new_page();entry={'name':name,'url':ORIGIN+path}
             try:
                 await page.goto(entry['url'],wait_until='domcontentloaded',timeout=65000)
-                await page.wait_for_timeout(5000)
+                await page.wait_for_timeout(4000)
+                if name=='catalog':
+                    data=json.loads(await page.locator('#__NUXT_DATA__').inner_text())
+                    for item in data:
+                        if not isinstance(item,dict):continue
+                        for key,index in item.items():
+                            if key.startswith('api-list-search-STANDARD_MODEL-'):
+                                value=decode_nuxt(data,index)
+                                cat={'cache_key':key,'url':page.url,**value};catalogues.append(cat)
+                                records=cat['page']['records']
+                                if len(records)!=int(cat['page']['total']) or cat['page'].get('hasNext'):
+                                    raise ValueError('Incomplete catalog; no full coverage claim allowed')
+                                ids.update(str(r['id']) for r in records)
+                                print('CATALOG',len(records),'total',cat['page']['total'],'hasNext',cat['page'].get('hasNext'))
                 if name=='h3-price':
                     tab=page.get_by_text('价格',exact=True)
-                    if await tab.count()>1:
-                        await tab.last.click(timeout=5000);await page.wait_for_timeout(2000)
-                if name=='catalog':
-                    unchanged=0;last=0
-                    for n in range(45):
-                        await page.mouse.wheel(0,2500);await page.wait_for_timeout(800)
-                        links=await page.locator('a[href]').evaluate_all('(e)=>e.map(x=>x.href)')
-                        for u in links:
-                            m=re.search(r'/api-detail/(\d+)',u)
-                            if m:ids.add(m.group(1))
-                        if len(ids)==last:unchanged+=1
-                        else:unchanged=0
-                        last=len(ids)
-                        if unchanged>=6:break
-                    entry['buttons']=await page.locator('button').all_text_contents()
+                    if await tab.count()>1:await tab.last.click(timeout=5000);await page.wait_for_timeout(1500)
                 text=await page.locator('body').inner_text()
                 (OUT/(name+'.txt')).write_text(text,encoding='utf-8')
                 (OUT/(name+'.html')).write_text(await page.content(),encoding='utf-8')
-                entry['text_sha256']=hashlib.sha256(text.encode()).hexdigest()
-                entry['resolved_url']=page.url
+                entry['text_sha256']=hashlib.sha256(text.encode()).hexdigest();entry['resolved_url']=page.url
                 entry['links']=await page.locator('a[href]').evaluate_all('(e)=>e.map(x=>({text:x.innerText,url:x.href}))')
-                for link in entry['links']:
-                    m=re.search(r'/api-detail/(\d+)',link['url'])
-                    if m:ids.add(m.group(1))
                 await page.screenshot(path=str(OUT/(name+'.png')),full_page=True)
-                print(name,'text bytes',len(text),'IDs',len(ids));print(text[:6500])
+                print(name,len(text),'text chars')
                 if name=='h3-price':
                     member=page.get_by_text('开通会员',exact=True)
                     if await member.count():
-                        await member.first.click(timeout=5000);await page.wait_for_timeout(4000)
-                        (OUT/'member-dialog.txt').write_text(await page.locator('body').inner_text(),encoding='utf-8')
-                        (OUT/'member-dialog.html').write_text(await page.content(),encoding='utf-8')
-                        await page.screenshot(path=str(OUT/'member-dialog.png'),full_page=True)
+                        old=set(ctx.pages)
+                        await member.first.click(timeout=5000);await page.wait_for_timeout(5000)
+                        targets=[x for x in ctx.pages if x not in old] or [page]
+                        for i,target in enumerate(targets):
+                            await target.wait_for_load_state('domcontentloaded',timeout=30000);await target.wait_for_timeout(5000)
+                            name2=f'member-{i}';text=await target.locator('body').inner_text()
+                            (OUT/(name2+'.txt')).write_text(text,encoding='utf-8')
+                            (OUT/(name2+'.html')).write_text(await target.content(),encoding='utf-8')
+                            await target.screenshot(path=str(OUT/(name2+'.png')),full_page=True)
+                            pages.append({'name':name2,'url':target.url,'text_sha256':hashlib.sha256(text.encode()).hexdigest()})
+                            print('MEMBER PAGE',target.url,text[:7000])
+                            if target!=page:await target.close()
             except Exception as e:entry['error']=str(e)[:200]
             pages.append(entry);await page.close()
         if pending:await asyncio.gather(*pending,return_exceptions=True)
-        save('observed-responses.json',captured)
-        save('pages.json',pages)
+        save('observed-responses.json',captured);save('pages.json',pages);save('catalogues.json',catalogues)
         print('Observed paths',sorted({urlsplit(x['url']).path for x in captured}))
         ids.add('2133100000000504202')
-        # Read only observed public frontend endpoints; no model submission path.
         async def post(path,payload):
-            if path not in READ_PATHS:raise ValueError('not a read-only allowlisted endpoint')
+            if path not in READ_PATHS:raise ValueError('Not an allowlisted read endpoint')
             resp=await ctx.request.post(ORIGIN+path,data=payload,timeout=30000)
-            body=await resp.json()
-            return {'url':ORIGIN+path,'request':payload,'status':resp.status,'body':body}
-        details=[];tables=[]
-        for sku in sorted(ids)[:800]:
-            try:
-                detail=await post('/api/sku/detail',{'id':sku})
-                obj=detail['body'].get('data') or {}
-                detail['body']['data']={k:v for k,v in obj.items() if k in DETAIL_KEYS}
-                details.append(detail)
-                desc=json.dumps(detail['body'],ensure_ascii=False).lower()
-                if any(w in desc for w in ('2k','768p','hailuo-h3','h3-max','video-upscaler')):
-                    tables.append(await post('/api/area/price/table',{'skuId':sku}))
-                await asyncio.sleep(.12)
-            except Exception as e:details.append({'sku_id':sku,'error':str(e)[:160]})
+            return {'url':ORIGIN+path,'request':payload,'status':resp.status,'observed_at':datetime.now(timezone.utc).isoformat(),'body':await resp.json()}
+        details=[];tables=[];sem=asyncio.Semaphore(3)
+        async def inspect(sku):
+            async with sem:
+                try:
+                    detail=await post('/api/sku/detail',{'id':sku})
+                    obj=detail['body'].get('data') or {}
+                    detail['body']['data']={k:v for k,v in obj.items() if k in DETAIL_KEYS}
+                    details.append(detail)
+                    desc=json.dumps(detail['body'],ensure_ascii=False).lower()
+                    if any(w in desc for w in ('2k','768p','hailuo-h3','h3-max','video-upscaler')):
+                        tables.append(await post('/api/area/price/table',{'skuId':sku}))
+                    await asyncio.sleep(.2)
+                except Exception as e:details.append({'sku_id':sku,'error':type(e).__name__+': '+str(e)[:160]})
+        await asyncio.gather(*(inspect(sku) for sku in sorted(ids)))
+        details.sort(key=lambda x:str(x.get('request',{}).get('id',x.get('sku_id'))));tables.sort(key=lambda x:x['request']['skuId'])
         save('sku-details.json',details);save('price-tables.json',tables)
         quotes=[]
         for resolution in ('768P','2K'):
@@ -116,8 +129,8 @@ async def main():
                 try:quotes.append(await post('/api/area/price/calculate',payload))
                 except Exception as e:quotes.append({'request':payload,'error':str(e)[:160]})
         save('h3-quotes.json',quotes)
-        save('index.json',{'collected_at':datetime.now(timezone.utc).isoformat(),'authenticated':False,'paid_requests':0,'sku_ids':sorted(ids),'detail_count':len(details),'price_table_count':len(tables),'coverage':'anonymous rendered catalog; pagination must be audited before calling it complete','files':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in OUT.iterdir() if f.is_file() and f.name!='index.json'}})
-        print('RESULT',len(ids),'IDs',len(tables),'price tables',len(quotes),'quotes')
+        save('index.json',{'collected_at':datetime.now(timezone.utc).isoformat(),'authenticated':False,'paid_requests':0,'sku_ids':sorted(ids),'detail_count':len(details),'price_table_count':len(tables),'coverage':'CN anonymous STANDARD_MODEL listing only; SSR total/hasNext validated; not private/community apps, other regions or all historical endpoints','files':{f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in OUT.iterdir() if f.is_file() and f.name!='index.json'}})
+        print('RESULT',len(ids),'IDs',len(tables),'tables',len(quotes),'quotes')
         await browser.close()
 
 if __name__=='__main__':asyncio.run(main())
