@@ -1,0 +1,424 @@
+{
+  "schema_version": 1,
+  "maintained_at": "2026-09-21",
+  "scope": "RunningHub CN only; retained public model snapshot + dated evidence. No local GPU costs, no upstream MiniMax tariffs substituted for platform prices.",
+  "new_paid_tasks_in_this_revision": 0,
+  "sources": [
+    {
+      "id": "h3-price-page-20260917",
+      "url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504202",
+      "observed_at": "2026-09-17",
+      "evidence_level": "repository_report_of_official_page",
+      "retained_record": "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/runninghub-h3-2k-api.html",
+      "retained_record_sha256": "8ce23b234405660e9640f4e241b729239527c1b69ab686c50ebe480ea90f519b",
+      "last_retrieval_attempt": "2026-09-21",
+      "retrieval_result": "Price page not retrievable through review browser; no fresh price-preview. Historical reported price only."
+    },
+    {
+      "id": "key-entitlements-20260917",
+      "url": "https://www.runninghub.cn/enterprise-api/sharedApi",
+      "observed_at": "2026-09-17",
+      "evidence_level": "repository_report_of_official_page",
+      "retained_record": "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/runninghub-h3-2k-api.html",
+      "last_retrieval_attempt": "2026-09-21",
+      "retrieval_result": "Redirects to account console; price/concurrency table not independently retrieved in this revision."
+    },
+    {
+      "id": "personal-runs-20260917",
+      "url": "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/runninghub-h3-2k-api.html",
+      "observed_at": "2026-09-17",
+      "evidence_level": "repository_report_of_live_run",
+      "raw_responses_retained_in_git": false,
+      "note": "Imported historical task summaries; not queried again in this revision. No invented raw responses or balance statements."
+    },
+    {
+      "id": "registry-snapshot-20260913",
+      "url": "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/data/runninghub-api-registry.json",
+      "observed_at": "2026-09-13",
+      "reverified_at": "2026-09-14",
+      "evidence_level": "retained_registry_snapshot",
+      "upstream_url": "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
+      "upstream_sha256": "73b109c96bb802d7f2ac0d2e25cdb9cd70f4d8987d0041cc045a93b444b409d7"
+    },
+    {
+      "id": "developer-kit-pricing-20260429",
+      "url": "https://github.com/HM-RunningHub/ComfyUI_RH_OpenAPI/tree/main/developer-kit",
+      "observed_at": "2026-04-29",
+      "evidence_level": "retained_official_price_snapshot",
+      "note": "353 historical endpoint price entries embedded in the registry; not a 2026-09-21 current quote."
+    },
+    {
+      "id": "h3-t2v-contract-20260921",
+      "url": "https://www.runninghub.cn/runninghub-api-doc-cn/api-495380674",
+      "observed_at": "2026-09-21",
+      "evidence_level": "official_document_read",
+      "note": "POST /openapi/v2/minimax/hailuo-h3/text-to-video; flat taskId/status response; example duration is a string."
+    },
+    {
+      "id": "h3-regen-contract-20260921",
+      "url": "https://www.runninghub.cn/runninghub-api-doc-cn/api-498427811",
+      "observed_at": "2026-09-21",
+      "evidence_level": "official_document_read",
+      "note": "regeneration-text-to-video: prompt must equal final model prompt of the source task; baseVideoUrl required. Contract confirmation is not a price or successful run."
+    },
+    {
+      "id": "api-access-contract-20260921",
+      "url": "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334",
+      "observed_at": "2026-09-21",
+      "evidence_level": "official_document_read",
+      "note": "Account owner type and API Key type are separate dimensions."
+    },
+    {
+      "id": "price-preview-contract-20260921",
+      "url": "https://www.runninghub.cn/runninghub-api-doc-cn/api-454850620",
+      "observed_at": "2026-09-21",
+      "evidence_level": "official_document_read",
+      "note": "Price preview is not task creation; preserve raw units and parameters; failure is not a zero quote."
+    }
+  ],
+  "platform_prices": [
+    {
+      "endpoint": "minimax/hailuo-h3/text-to-video",
+      "resolution": "2K",
+      "rate_cny": "0.77",
+      "unit": "CNY/billable_output_second",
+      "source_id": "h3-price-page-20260917",
+      "observed_at": "2026-09-17",
+      "verification": "reported_public_page_not_refetched",
+      "applies_to": "enterprise-shared standard-model-api",
+      "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+    },
+    {
+      "endpoint": "minimax/hailuo-h3/text-to-video",
+      "resolution": "768P",
+      "rate_cny": "0.48",
+      "unit": "CNY/billable_output_second",
+      "source_id": "h3-price-page-20260917",
+      "observed_at": "2026-09-17",
+      "verification": "reported_public_page_not_refetched",
+      "applies_to": "enterprise-shared standard-model-api",
+      "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+    }
+  ],
+  "reported_runs": [
+    {
+      "id": "personal-2k-2026-09-12",
+      "date": "2026-09-12",
+      "task_id": "2098737586251202562",
+      "route": "personal-ai-app",
+      "key_type": "consumer-member",
+      "endpoint": "minimax/hailuo-h3/text-to-video",
+      "webapp_id": "2083105376052006914",
+      "request": {
+        "resolution": "2K",
+        "duration": "5",
+        "ratio": "16:9"
+      },
+      "status": "SUCCESS",
+      "usage": {
+        "consumeCoins": "7",
+        "thirdPartyConsumeMoney": "3.85",
+        "consumeMoney": null,
+        "taskCostTime": "309",
+        "output_seconds": "5"
+      },
+      "media": {
+        "width": 2560,
+        "height": 1440,
+        "fps": "24",
+        "duration_seconds": "5.167",
+        "has_audio": true,
+        "sha256": null
+      },
+      "evidence_source": "personal-runs-20260917",
+      "evidence_level": "reported_live_run_not_requeried",
+      "child_task_id": "2098737633676382210",
+      "usage_scope": "Reported reconciled chain total. Do not sum parent/child aggregate fields again."
+    },
+    {
+      "id": "personal-2k-2026-09-16",
+      "date": "2026-09-16",
+      "task_id": "2100124158796193794",
+      "route": "personal-ai-app",
+      "key_type": "consumer-member",
+      "endpoint": "minimax/hailuo-h3/text-to-video",
+      "webapp_id": "2083105376052006914",
+      "request": {
+        "resolution": "2K",
+        "duration": "5",
+        "ratio": "16:9"
+      },
+      "status": "SUCCESS",
+      "usage": {
+        "consumeCoins": "6",
+        "thirdPartyConsumeMoney": "3.85",
+        "consumeMoney": null,
+        "taskCostTime": "252",
+        "output_seconds": "5"
+      },
+      "media": {
+        "width": 2560,
+        "height": 1440,
+        "fps": "24",
+        "duration_seconds": "5.167",
+        "has_audio": true,
+        "sha256": "2bf506c614dd067813ee65787a221ef1e18b5dd3733f3367ccb3c8c70a47bef5"
+      },
+      "evidence_source": "personal-runs-20260917",
+      "evidence_level": "reported_live_run_not_requeried",
+      "child_task_id": null,
+      "usage_scope": "Reported reconciled chain total. Do not sum parent/child aggregate fields again."
+    },
+    {
+      "id": "personal-2k-2026-09-17",
+      "date": "2026-09-17",
+      "task_id": "2100427462658981891",
+      "route": "personal-ai-app",
+      "key_type": "consumer-member",
+      "endpoint": "minimax/hailuo-h3/text-to-video",
+      "webapp_id": "2083105376052006914",
+      "request": {
+        "resolution": "2K",
+        "duration": "5",
+        "ratio": "16:9"
+      },
+      "status": "SUCCESS",
+      "usage": {
+        "consumeCoins": "5",
+        "thirdPartyConsumeMoney": "3.85",
+        "consumeMoney": null,
+        "taskCostTime": "220",
+        "output_seconds": "5"
+      },
+      "media": {
+        "width": 2560,
+        "height": 1440,
+        "fps": "24",
+        "duration_seconds": "5.167",
+        "has_audio": true,
+        "sha256": "2502953651b5fd009f5a1903174c4374598f4557ddb15fb17f5d57e044983684"
+      },
+      "evidence_source": "personal-runs-20260917",
+      "evidence_level": "reported_live_run_not_requeried",
+      "child_task_id": null,
+      "usage_scope": "Reported reconciled chain total. Do not sum parent/child aggregate fields again."
+    },
+    {
+      "id": "personal-open-768p-20260916",
+      "date": "2026-09-16",
+      "task_id": "2100021717924806657",
+      "route": "personal-open-workflow",
+      "key_type": "consumer-member",
+      "endpoint": null,
+      "request": {
+        "prompt": "与 09-12 2K 实测同一提示词",
+        "megapixels": 0.98,
+        "aspect_ratio": "16:9 (Widescreen)",
+        "duration_s": 5,
+        "steps": 8
+      },
+      "status": "SUCCESS",
+      "usage": {
+        "consumeCoins": 78,
+        "taskCostTime": 195,
+        "thirdPartyConsumeMoney": null
+      },
+      "media": {
+        "width": 1344,
+        "height": 768,
+        "fps": 24,
+        "duration_seconds": 5.167,
+        "has_audio": true,
+        "video_codec": "h264",
+        "audio_codec": "aac",
+        "sha256_12": "f5176d6b99d9"
+      },
+      "evidence_source": "registry-snapshot-20260913",
+      "evidence_level": "reported_live_run_not_requeried",
+      "note": "Report added 2026-09-16; hosted on RunningHub, not a local H3 deployment. No extrapolation to standard-model API. Runtime cost is not linear in output duration."
+    }
+  ],
+  "plans": [
+    {
+      "id": "consumer-member",
+      "key_type": "consumer-member",
+      "apis": [
+        "ai-app",
+        "workflow"
+      ],
+      "denied_apis": [
+        "model",
+        "llm"
+      ],
+      "concurrency": {
+        "free_light_lightplus_basic": 1,
+        "basicplus_pro": 3,
+        "proplus_max": 5
+      },
+      "instance_rates": {
+        "lite": "0.02",
+        "standard": "0.2",
+        "plus": "0.4"
+      },
+      "rate_unit": "RH_coin/runtime_second",
+      "subscription_cny": null,
+      "coin_to_cny": null,
+      "model_node_fee": "additional_wallet_charge",
+      "source_id": "key-entitlements-20260917",
+      "verification": "reported_public_page_not_refetched"
+    },
+    {
+      "id": "enterprise-shared",
+      "key_type": "enterprise-shared",
+      "apis": [
+        "model",
+        "llm",
+        "ai-app",
+        "workflow"
+      ],
+      "default_concurrency": 100,
+      "instance_rates": {
+        "lite": "0.4",
+        "standard": "4",
+        "plus": "6",
+        "ultra": "9"
+      },
+      "rate_unit": "CNY/instance_hour",
+      "model_api_instance_fee": "not_applicable_to_direct_model_api",
+      "retention": "Include billable retainSeconds for workflow/app routes; avoid double counting if included in runtime.",
+      "concurrency_above_default_price": null,
+      "source_id": "key-entitlements-20260917",
+      "verification": "reported_public_page_not_refetched"
+    },
+    {
+      "id": "enterprise-dedicated",
+      "key_type": "enterprise-dedicated",
+      "apis": [
+        "ai-app",
+        "workflow"
+      ],
+      "denied_apis": [
+        "model",
+        "llm"
+      ],
+      "concurrency": "purchased_GPU_count",
+      "rental_cny": null,
+      "incremental_runtime_fee_during_rental": "0",
+      "model_node_fee": "additional_wallet_charge",
+      "amortization": "(rental + model fees + failed-task fees + other verified charges) / accepted_output_count",
+      "source_id": "key-entitlements-20260917",
+      "verification": "reported_public_page_not_refetched"
+    }
+  ],
+  "channel_history": [
+    {
+      "date": "2026-09-14/15",
+      "code": "414",
+      "status": "historical_rejection",
+      "root_cause": "unconfirmed",
+      "note": "Specific RH-node/app submissions rejected. Does not establish exhausted balance, daily quota behavior or root cause."
+    },
+    {
+      "date": "2026-09-16/17",
+      "status": "reported_recovery",
+      "task_ids": [
+        "2100124158796193794",
+        "2100427462658981891"
+      ],
+      "note": "Same application later succeeded. Does not establish why earlier requests failed."
+    },
+    {
+      "date": "2026-09-17",
+      "code": "421",
+      "status": "reported_concurrency_rejection",
+      "scope": "one consumer NORMAL key on tested AI application",
+      "note": "Second overlapping request rejected; not a universal limit for all plans."
+    }
+  ],
+  "gaps": [
+    {
+      "id": "current-h3-price",
+      "severity": "high",
+      "status": "open",
+      "detail": "2K/768P 文生价已从 09-17 页面报告统一；尚无本轮 price-preview。仅作用于精确文生端点。",
+      "closure_evidence": "企业共享 Key 免费 price-preview 或重新留存官方价格页。"
+    },
+    {
+      "id": "regeneration-platform-cost",
+      "severity": "high",
+      "status": "open",
+      "detail": "768P→2K 平台再生成价、输入是否另计费及完整双任务账单未知；不再用原厂 ¥1.10/秒充当平台总价。",
+      "closure_evidence": "同一源链路的两个 taskId、对应 preview/usage、最终提示词哈希、媒体检查和去重对账。"
+    },
+    {
+      "id": "enterprise-live-billing",
+      "severity": "high",
+      "status": "open",
+      "detail": "企业共享有公开资料历史记录，没有企业 Key 实际成片与扣费证据。",
+      "closure_evidence": "代表性企业任务报价、创建响应、终态 usage 与媒体元数据；不得用个人 Key 样本替代。"
+    },
+    {
+      "id": "coin-cny-rate",
+      "severity": "high",
+      "status": "open",
+      "detail": "RH 币→人民币及会员固定费分摊未知，个人混合单位支出不能冒充人民币总成本。",
+      "closure_evidence": "账户自身正规充值/会员账单、币种定义与明确分摊周期；不采用第三方代充值。"
+    },
+    {
+      "id": "personal-long-duration",
+      "severity": "medium",
+      "status": "open",
+      "detail": "只有 5 秒个人应用三次历史记录；10/15 秒附加币未知。",
+      "closure_evidence": "分别保存较长时长 usage，不按 5 秒平台币线性外推。"
+    },
+    {
+      "id": "dedicated-rental",
+      "severity": "medium",
+      "status": "open",
+      "detail": "独占 GPU 当前租金、利用率与单条摊销未知。",
+      "closure_evidence": "官方租价及周期、接受成片数、失败任务成本分摊。"
+    },
+    {
+      "id": "extended-concurrency",
+      "severity": "medium",
+      "status": "open",
+      "detail": "企业共享默认额度以外扩容价格未知。",
+      "closure_evidence": "官方书面扩容报价。"
+    },
+    {
+      "id": "conditional-route-inputs",
+      "severity": "medium",
+      "status": "open",
+      "detail": "图生/多模态/模板/超分不等于仅输入提示词；部分输入参数虽可选，仍需运行验证。",
+      "closure_evidence": "固定前置图片/视频生成路线及费用，或验证无媒体输入确实成功。"
+    },
+    {
+      "id": "catalogue-freshness",
+      "severity": "medium",
+      "status": "open",
+      "detail": "模型集合仍是 09-13 官方注册表快照（09-14复检），不是 09-21 全平台实时穷举。",
+      "closure_evidence": "显式 --refresh 或指定新官方快照；记录实际下载时间和 SHA256。"
+    },
+    {
+      "id": "historical-raw-evidence",
+      "severity": "medium",
+      "status": "open",
+      "detail": "新增三次个人样本从仓库已有页面迁入；原始 API 响应/媒体未全部入库，本轮未复查私人任务。",
+      "closure_evidence": "用环境变量凭据只读重查既有任务，并保存脱敏摘录。"
+    },
+    {
+      "id": "refund-and-bills",
+      "severity": "medium",
+      "status": "open",
+      "detail": "失败/取消/保留实例与退款规则、完整账单 API 未逐项核验。账户状态 API 不等于账单明细。",
+      "closure_evidence": "独立规则来源及费用字段范围；未知/空值不得当0。"
+    },
+    {
+      "id": "dynamic-instances",
+      "severity": "info",
+      "status": "open",
+      "detail": "私人和动态社区应用无法以当前公开模型快照穷举。",
+      "closure_evidence": "交付通用调用机制及已验证实例，明确集合边界。"
+    }
+  ]
+}

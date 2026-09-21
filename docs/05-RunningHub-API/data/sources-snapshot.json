@@ -64,5 +64,80 @@
     "output/runninghub/api/matrix_runs/20260914T143223Z-4f0ea9-aiapp-2083105376052006914/task_record.json"
    ]
   }
- ]
+ ],
+ "handoff_maintained_at": "2026-09-21",
+ "handoff_evidence_sources": [
+  {
+   "id": "h3-price-page-20260917",
+   "url": "https://www.runninghub.cn/call-api/api-detail/2133100000000504202",
+   "observed_at": "2026-09-17",
+   "evidence_level": "repository_report_of_official_page",
+   "retained_record": "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/runninghub-h3-2k-api.html",
+   "retained_record_sha256": "8ce23b234405660e9640f4e241b729239527c1b69ab686c50ebe480ea90f519b",
+   "last_retrieval_attempt": "2026-09-21",
+   "retrieval_result": "Price page not retrievable through review browser; no fresh price-preview. Historical reported price only."
+  },
+  {
+   "id": "key-entitlements-20260917",
+   "url": "https://www.runninghub.cn/enterprise-api/sharedApi",
+   "observed_at": "2026-09-17",
+   "evidence_level": "repository_report_of_official_page",
+   "retained_record": "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/runninghub-h3-2k-api.html",
+   "last_retrieval_attempt": "2026-09-21",
+   "retrieval_result": "Redirects to account console; price/concurrency table not independently retrieved in this revision."
+  },
+  {
+   "id": "personal-runs-20260917",
+   "url": "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/runninghub-h3-2k-api.html",
+   "observed_at": "2026-09-17",
+   "evidence_level": "repository_report_of_live_run",
+   "raw_responses_retained_in_git": false,
+   "note": "Imported historical task summaries; not queried again in this revision. No invented raw responses or balance statements."
+  },
+  {
+   "id": "registry-snapshot-20260913",
+   "url": "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/data/runninghub-api-registry.json",
+   "observed_at": "2026-09-13",
+   "reverified_at": "2026-09-14",
+   "evidence_level": "retained_registry_snapshot",
+   "upstream_url": "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
+   "upstream_sha256": "73b109c96bb802d7f2ac0d2e25cdb9cd70f4d8987d0041cc045a93b444b409d7"
+  },
+  {
+   "id": "developer-kit-pricing-20260429",
+   "url": "https://github.com/HM-RunningHub/ComfyUI_RH_OpenAPI/tree/main/developer-kit",
+   "observed_at": "2026-04-29",
+   "evidence_level": "retained_official_price_snapshot",
+   "note": "353 historical endpoint price entries embedded in the registry; not a 2026-09-21 current quote."
+  },
+  {
+   "id": "h3-t2v-contract-20260921",
+   "url": "https://www.runninghub.cn/runninghub-api-doc-cn/api-495380674",
+   "observed_at": "2026-09-21",
+   "evidence_level": "official_document_read",
+   "note": "POST /openapi/v2/minimax/hailuo-h3/text-to-video; flat taskId/status response; example duration is a string."
+  },
+  {
+   "id": "h3-regen-contract-20260921",
+   "url": "https://www.runninghub.cn/runninghub-api-doc-cn/api-498427811",
+   "observed_at": "2026-09-21",
+   "evidence_level": "official_document_read",
+   "note": "regeneration-text-to-video: prompt must equal final model prompt of the source task; baseVideoUrl required. Contract confirmation is not a price or successful run."
+  },
+  {
+   "id": "api-access-contract-20260921",
+   "url": "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334",
+   "observed_at": "2026-09-21",
+   "evidence_level": "official_document_read",
+   "note": "Account owner type and API Key type are separate dimensions."
+  },
+  {
+   "id": "price-preview-contract-20260921",
+   "url": "https://www.runninghub.cn/runninghub-api-doc-cn/api-454850620",
+   "observed_at": "2026-09-21",
+   "evidence_level": "official_document_read",
+   "note": "Price preview is not task creation; preserve raw units and parameters; failure is not a zero quote."
+  }
+ ],
+ "note": "原始collected_at/reverified_at仅描述保留快照；本轮维护日期不冒充重新采集日期。"
 }

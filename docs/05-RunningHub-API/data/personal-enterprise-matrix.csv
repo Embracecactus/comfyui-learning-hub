@@ -1,0 +1,13 @@
+﻿key_type,api_type,allowed,concurrency,rates,rate_unit,rental_or_membership_cny,source_id,verification
+consumer-member,model,False,"{""free_light_lightplus_basic"": 1, ""basicplus_pro"": 3, ""proplus_max"": 5}","{""lite"": ""0.02"", ""standard"": ""0.2"", ""plus"": ""0.4""}",RH_coin/runtime_second,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+consumer-member,llm,False,"{""free_light_lightplus_basic"": 1, ""basicplus_pro"": 3, ""proplus_max"": 5}","{""lite"": ""0.02"", ""standard"": ""0.2"", ""plus"": ""0.4""}",RH_coin/runtime_second,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+consumer-member,ai-app,True,"{""free_light_lightplus_basic"": 1, ""basicplus_pro"": 3, ""proplus_max"": 5}","{""lite"": ""0.02"", ""standard"": ""0.2"", ""plus"": ""0.4""}",RH_coin/runtime_second,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+consumer-member,workflow,True,"{""free_light_lightplus_basic"": 1, ""basicplus_pro"": 3, ""proplus_max"": 5}","{""lite"": ""0.02"", ""standard"": ""0.2"", ""plus"": ""0.4""}",RH_coin/runtime_second,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+enterprise-shared,model,True,100,"{""lite"": ""0.4"", ""standard"": ""4"", ""plus"": ""6"", ""ultra"": ""9""}",CNY/instance_hour,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+enterprise-shared,llm,True,100,"{""lite"": ""0.4"", ""standard"": ""4"", ""plus"": ""6"", ""ultra"": ""9""}",CNY/instance_hour,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+enterprise-shared,ai-app,True,100,"{""lite"": ""0.4"", ""standard"": ""4"", ""plus"": ""6"", ""ultra"": ""9""}",CNY/instance_hour,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+enterprise-shared,workflow,True,100,"{""lite"": ""0.4"", ""standard"": ""4"", ""plus"": ""6"", ""ultra"": ""9""}",CNY/instance_hour,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+enterprise-dedicated,model,False,"""purchased_GPU_count""",{},rental + model node fee,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+enterprise-dedicated,llm,False,"""purchased_GPU_count""",{},rental + model node fee,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+enterprise-dedicated,ai-app,True,"""purchased_GPU_count""",{},rental + model node fee,unknown,key-entitlements-20260917,reported_public_page_not_refetched
+enterprise-dedicated,workflow,True,"""purchased_GPU_count""",{},rental + model node fee,unknown,key-entitlements-20260917,reported_public_page_not_refetched

@@ -89,7 +89,6 @@
     "minimax/hailuo-h3/regeneration-image-to-video",
     "minimax/hailuo-h3/regeneration-multimodal-to-video",
     "minimax/hailuo-h3/regeneration-text-to-video",
-    "minimax/hailuo-h3/text-to-video",
     "mureka-o2/instrumental-generate",
     "pixverse-v6/effects",
     "rhart-image-g-2.5-official-token/flare/edit",
@@ -129,39 +128,53 @@
     "volc-drama/serial-video-translate"
    ],
    "duplicate_endpoints": [],
-   "note": "missing_public_price 不含工作流/AI 应用/素材族;模型端点缺价=官方定价文件(快照 2026-04-29)无该 endpoint 条目"
+   "note": "历史定价快照与有日期的页面报告分列；目录不等于实跑或当前价格验证。"
   },
   "counts": {
-   "http_endpoint_families": 14,
-   "http_endpoint_instances_curated": 21,
+   "http_endpoint_families": 15,
+   "http_endpoint_instances_curated": 22,
    "model_capabilities": 422,
    "model_capabilities_with_public_price": 353,
-   "model_capabilities_missing_public_price": 69,
+   "model_capabilities_missing_public_price": 68,
    "video_capabilities": 228,
    "video_supports_768p": 7,
    "video_supports_2k": 22,
    "duplicate_endpoints": 0,
    "verified_live_this_workspace": [
-    "/openapi/v2/query (个人 Key, 2026-09-13)",
-    "/openapi/v2/price-preview/* (个人 Key → 1014, 2026-09-13)",
-    "/openapi/v2/assets/query (个人 Key, 业务校验可达, 2026-09-13)",
-    "/task/openapi/* 工作流+AI 应用(个人 Key, 2026-09-09~12 实跑;2026-09-14 起 414 账户算力值耗尽)",
-    "/api/webapp/apiCallDemo (个人 Key, 2026-09-14 实测)"
-   ]
+    "Historical records only; no new paid/API task verification in this handoff revision."
+   ],
+   "single_prompt_2k_direct": 5,
+   "reported_personal_2k_runs": 3,
+   "additional_endpoints_with_reported_page_price": 1
   },
   "key_types": {
-   "consumer-member": "消费级-会员(个人):AI 应用 API、工作流 API",
-   "enterprise-shared": "企业级-共享:全部四种 API(模型/LLM/AI 应用/工作流)",
-   "enterprise-dedicated": "企业级-独占:AI 应用 API、工作流 API(需购买独占机器)"
+   "consumer-member": [
+    "ai-app",
+    "workflow"
+   ],
+   "enterprise-shared": [
+    "model",
+    "llm",
+    "ai-app",
+    "workflow"
+   ],
+   "enterprise-dedicated": [
+    "ai-app",
+    "workflow"
+   ]
   },
   "lifecycle_conventions": {
    "poll_interval_seconds": "官方示例 5 秒;视频任务上限建议 20 分钟(本地超时≠平台任务失败,保留 taskId 可续查)",
    "output_url_validity": "产物位于平台 COS(rh-images-*.cos.ap-beijing.myqcloud.com / rh-images.xiaoyaoyou.com),URL 有时效,官方建议及时转存;具体有效时长未在公开文档列明(见 gaps)",
    "retry": "仅瞬态错误(网络/429/5xx)指数退避重试;参数错误/余额/内容审核等确定性错误不重试;提交失败但结果不确定时禁止盲重试(可能重复扣费)",
-   "concurrency": "共享 Key 有并发上限(超限 421 TASK_QUEUE_MAXED,退避重试);独占机器不足 415;独占 Key 可用 usePersonalQueue(上限 1000);企业共享 Key 可用 retainSeconds 保留实例复用(按保留时长另计费)",
+   "concurrency": "权益见handoff-evidence.json；任务提交结果不确定时严禁盲重试。",
    "seed": "API 调用强制重置 seed,同参数两次运行结果不同(官方文档)",
-   "error_codes": "全表见官方 doc-8287338;高频码:301 参数错/414 算力或余额不足/416 余额不足/421 并发上限/802 Key 失效/805 任务失败含节点级 failedReason/807 任务不存在/808-809 上传失败/1014 模型与 LLM API 限企业共享 Key/1501 内容审核/1505 禁止真人/1006 执行超时"
-  }
+   "error_codes": "1014权限拒绝；421并发拒绝；414历史未明原因拒绝，不推断余额或自动重试。"
+  },
+  "schema_version": 2,
+  "handoff_maintained_at": "2026-09-21",
+  "coverage_statement": "模型覆盖以保留快照为界；HTTP接口族为已整理清单，不声称当前全平台全量。",
+  "account_owner_vs_key_type": "个人/团队为结算主体，消费级/企业共享/独占为Key类型，不混同。"
  },
  "endpoint_families": [
   {
@@ -406,7 +419,7 @@
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
    ],
    "verification": "doc_verified",
-   "notes": "2026-09-15 复查官方文档站与官方仓库客户端代码:未发现\"按 taskId 查询 webhook 事件记录/事件详情\"的公开接口;事件详情只能由回调接收方自行落库。已记入 gaps。"
+   "notes": "事件详情/重发接口已出现在09-21官方文档导航；旧版未发现的结论不再适用。当前清单不声称HTTP全量。"
   },
   {
    "id": "ai-app-run",
@@ -475,6 +488,27 @@
    ],
    "verification": "doc_verified",
    "notes": "个人 Key 未实测(文档标注企业共享 Key 限定);Anthropic/Gemini 协议端点路径未在公开文档列明"
+  },
+  {
+   "id": "account-status",
+   "family": "账户状态",
+   "method": "POST",
+   "path": "/uc/openapi/accountStatus",
+   "auth": {
+    "type": "bearer+body",
+    "body_key": "apikey"
+   },
+   "key_types_allowed": [
+    "consumer-member",
+    "enterprise-shared",
+    "enterprise-dedicated"
+   ],
+   "instances": 1,
+   "verification": "documented+offline_contract_tested",
+   "sources": [
+    "https://github.com/Embracecactus/comfyui-learning-hub/blob/3e2e4c43e778e41a9bc577edd8ee3d25ad095471/docs/05-RunningHub-API/runninghub-h3-2k-api.html"
+   ],
+   "notes": "仅账户状态，不是完整账单接口。本轮不查询私人余额。"
   }
  ],
  "model_capabilities": [
@@ -570,7 +604,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-v1/edit",
@@ -688,7 +724,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-v1/text-to-image",
@@ -793,7 +831,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-pro/edit",
@@ -955,7 +995,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-pro/text-to-image",
@@ -1104,7 +1146,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-pro-official/edit",
@@ -1266,7 +1310,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-pro-official/text-to-image",
@@ -1415,7 +1461,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-fast/text-to-video",
@@ -1534,7 +1582,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-pro/text-to-video",
@@ -1653,7 +1703,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-fast/image-to-video",
@@ -1786,7 +1838,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s/sora-upload-character",
@@ -1827,7 +1881,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.6/text-to-video",
@@ -2034,7 +2090,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.6/image-to-video",
@@ -2196,7 +2254,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.5-turbo-pro/text-to-video",
@@ -2307,7 +2367,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.5-turbo-pro/image-to-video",
@@ -2415,7 +2477,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.5-turbo-std/image-to-video",
@@ -2515,7 +2579,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/text-to-video",
@@ -2926,7 +2992,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/start-end-to-video-q2-pro",
@@ -3262,7 +3330,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/start-end-to-video-q2-turbo",
@@ -3598,7 +3668,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s-official/text-to-video",
@@ -3701,7 +3773,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v4.5/text-to-image",
@@ -3803,7 +3877,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-02/t2v-standard",
@@ -3886,7 +3962,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-2.3/t2v-standard",
@@ -3969,7 +4047,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-02/i2v-standard",
@@ -4068,7 +4148,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-2.3/i2v-standard",
@@ -4159,7 +4241,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-2.3-fast/image-to-video",
@@ -4250,7 +4334,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-2.3-fast-pro/image-to-video",
@@ -4321,7 +4407,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v4.5/image-to-image",
@@ -4431,7 +4519,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-2.3/image-to-video-pro",
@@ -4487,7 +4577,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-2.3/t2v-pro",
@@ -4535,7 +4627,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o1/text-to-video",
@@ -4666,7 +4760,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-02/i2v-pro",
@@ -4730,7 +4826,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o1/image-to-video",
@@ -4869,7 +4967,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-02/t2v-pro",
@@ -4917,7 +5017,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-02/standard",
@@ -5016,7 +5118,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-02/pro",
@@ -5095,7 +5199,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-02/fast",
@@ -5186,7 +5292,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o1/start-to-end",
@@ -5333,7 +5441,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s-official/image-to-video",
@@ -5427,7 +5537,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s-official/text-to-video-pro",
@@ -5585,7 +5697,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s-official/image-to-video-pro",
@@ -5710,7 +5824,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o1-std/refrence-to-video",
@@ -5871,7 +5987,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o1-std/edit-video",
@@ -5967,7 +6085,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v4/text-to-image",
@@ -6075,7 +6195,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v4/image-to-image",
@@ -6191,7 +6313,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.6-pro/text-to-video",
@@ -6329,7 +6453,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.6-pro/image-to-video",
@@ -6458,7 +6584,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.6/image-to-video-flash",
@@ -6683,7 +6811,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/image-to-video-q2-pro",
@@ -7063,7 +7193,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/image-to-video-q2-turbo",
@@ -7443,7 +7575,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/reference-to-video-q2",
@@ -7845,7 +7979,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedance-v1.5-pro/text-to-video",
@@ -8101,7 +8237,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedance-v1.5-pro/text-to-video-fast",
@@ -8316,7 +8454,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedance-v1.5-pro/image-to-video",
@@ -8593,7 +8733,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedance-v1.5-pro/image-to-video-fast",
@@ -8828,7 +8970,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedance-v1-lite/reference-to-video",
@@ -9027,7 +9171,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-pro-official/text-to-image-ultra",
@@ -9164,7 +9310,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-pro-official/edit-ultra",
@@ -9314,7 +9462,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-fast/start-end-to-video",
@@ -9455,7 +9605,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/reference-to-video-q2-pro",
@@ -9887,7 +10039,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "youchuan/image-to-video",
@@ -10014,7 +10168,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "youchuan/text-to-image-v6",
@@ -10207,7 +10363,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "youchuan/text-to-image-v61",
@@ -10406,7 +10564,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "youchuan/text-to-image-niji6",
@@ -10599,7 +10759,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "youchuan/text-to-image-niji7",
@@ -10742,7 +10904,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "youchuan/text-to-image-v7",
@@ -10934,7 +11098,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/text-to-video-q3-pro",
@@ -11175,7 +11341,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/image-to-video-q3-pro",
@@ -11389,7 +11557,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "required_media",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-pro/start-end-to-video",
@@ -11530,7 +11700,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/image-to-video-q2-pro-fast",
@@ -11835,7 +12007,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/start-end-to-video-q2-pro-fast",
@@ -12110,7 +12284,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/text-to-audio/speech-2.8-hd",
@@ -12243,7 +12419,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/text-to-audio/speech-02-hd",
@@ -12376,7 +12554,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/text-to-audio/speech-02-turbo",
@@ -12509,7 +12689,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/text-to-audio/speech-2.6-hd",
@@ -12642,7 +12824,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/text-to-audio/speech-2.6-turbo",
@@ -12774,7 +12958,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/text-to-audio/speech-2.8-turbo",
@@ -12907,7 +13093,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3.0-std/text-to-video",
@@ -13123,7 +13311,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3.0-std/image-to-video",
@@ -13330,7 +13520,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3.0-pro/text-to-video",
@@ -13546,7 +13738,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3.0-pro/image-to-video",
@@ -13753,7 +13947,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g/image-to-video",
@@ -13865,7 +14061,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g/text-to-video",
@@ -13969,7 +14167,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "hunyuan3d-v3.1/text-to-3d",
@@ -14090,7 +14290,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hunyuan3d-v3.1/image-to-3d",
@@ -14268,7 +14470,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-std/text-to-video",
@@ -14388,7 +14592,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-pro/text-to-video",
@@ -14508,7 +14714,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-std/image-to-video",
@@ -14620,7 +14828,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-pro/image-to-video",
@@ -14732,7 +14942,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/text-to-video-q3-turbo",
@@ -14962,7 +15174,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/image-to-video-q3-turbo",
@@ -15154,7 +15368,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/start-end-to-video-q3-turbo",
@@ -15379,7 +15595,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/start-end-to-video-q3-pro",
@@ -15604,7 +15822,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/text-to-audio/music-2.5",
@@ -15705,7 +15925,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.6-std/motion-control",
@@ -15795,7 +16017,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.6-pro/motion-control",
@@ -15885,7 +16109,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/text-to-audio/voice-clone",
@@ -16143,7 +16369,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-pro-official/text-to-video",
@@ -16316,7 +16544,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-pro-official/image-to-video",
@@ -16505,7 +16735,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-fast-official/text-to-video",
@@ -16678,7 +16910,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-pro-official/reference-to-video",
@@ -16786,7 +17020,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-fast-official/video-extend",
@@ -16866,7 +17102,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-fast-official/image-to-video",
@@ -17055,7 +17293,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-pro-official/video-extend",
@@ -17135,7 +17375,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v5-lite/text-to-image",
@@ -17251,7 +17493,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v5-lite/image-to-image",
@@ -17361,7 +17605,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-g31-flash/text-to-image",
@@ -17529,7 +17775,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-g31-flash/image-to-image",
@@ -17711,7 +17959,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-g31-flash-official/text-to-image",
@@ -17880,7 +18130,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-g31-flash-official/image-to-image",
@@ -18062,7 +18314,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g-official/image-to-video",
@@ -18170,7 +18424,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g-official/text-to-video",
@@ -18294,7 +18550,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g-official/edit-video",
@@ -18366,7 +18624,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-1.5-official/text-to-image",
@@ -18544,7 +18804,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-1.5-official/image-to-image",
@@ -18770,7 +19032,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-std/video-edit",
@@ -18834,7 +19098,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-pro/video-edit",
@@ -18898,7 +19164,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-std/reference-to-video",
@@ -19040,7 +19308,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-pro/reference-to-video",
@@ -19182,7 +19452,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-v15/image-to-3d",
@@ -19343,7 +19615,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-v2/image-to-3d",
@@ -19464,7 +19738,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-v15/multi-image-to-3d",
@@ -19649,7 +19925,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-v2/multi-image-to-3d",
@@ -19794,7 +20072,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-portrait-v21/image-to-3d",
@@ -19895,7 +20175,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-portrait-v21/multi-image-to-3d",
@@ -20020,7 +20302,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-portrait-v20/image-to-3d",
@@ -20121,7 +20405,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-portrait-v20/multi-image-to-3d",
@@ -20246,7 +20532,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-portrait-v15/image-to-3d",
@@ -20347,7 +20635,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-portrait-v15/multi-image-to-3d",
@@ -20472,7 +20762,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.6/reference-to-video-flash",
@@ -20827,7 +21119,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.6/reference-to-video",
@@ -21094,7 +21388,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-elements",
@@ -21157,7 +21453,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-v1-official/text-to-image",
@@ -21262,7 +21560,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-v1-official/edit",
@@ -21380,7 +21680,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g/image-to-image",
@@ -21457,7 +21759,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g/text-to-image",
@@ -21559,7 +21863,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3.0-std/motion-control",
@@ -21648,7 +21954,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3.0-pro/motion-control",
@@ -21737,7 +22045,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen-image-2.0-pro/image-edit",
@@ -21920,7 +22230,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen-image-3.0-pro/text-to-image",
@@ -22139,7 +22451,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen-image-3.0-pro/image-edit",
@@ -22366,7 +22680,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen-image-2.0/image-edit",
@@ -22549,7 +22865,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/reference-to-video-q3",
@@ -22712,7 +23030,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "bytedance/dreamactor-v2",
@@ -22761,7 +23081,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen-image-2.0-pro/text-to-image",
@@ -22944,7 +23266,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen-image-2.0/text-to-image",
@@ -23127,7 +23451,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image/f-dev",
@@ -23159,7 +23485,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image/f-dev-lora",
@@ -23191,7 +23519,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-lip-sync/identify-face",
@@ -23238,7 +23568,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-lip-sync/tts",
@@ -23544,7 +23876,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-lip-sync/lip-sync-video",
@@ -23638,7 +23972,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0/text-to-video",
@@ -23923,7 +24259,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "direct_text",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0-fast/text-to-video",
@@ -24190,7 +24528,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "direct_text",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0/image-to-video",
@@ -24483,7 +24823,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "required_media",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0-fast/image-to-video",
@@ -24758,7 +25100,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "required_media",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0/multimodal-video",
@@ -25059,7 +25403,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "optional_media",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0-fast/multimodal-video",
@@ -25343,7 +25689,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "optional_media",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/reference-to-video-q3-mix",
@@ -25494,7 +25842,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/text-to-video",
@@ -25728,7 +26078,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/reference-to-video",
@@ -25933,7 +26285,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/image-edit",
@@ -25996,7 +26350,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/image-edit-pro",
@@ -26059,7 +26415,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/text-to-image",
@@ -26121,7 +26479,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/text-to-image-pro",
@@ -26183,7 +26543,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/image-to-video",
@@ -26399,7 +26761,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/video-extend",
@@ -26608,7 +26972,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7/video-edit",
@@ -26857,7 +27223,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s/image-to-video-pro-deprecated",
@@ -26986,7 +27354,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s/text-to-video-pro-deprecated",
@@ -27107,7 +27477,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v6/text-to-video",
@@ -27305,7 +27677,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v6/image-to-video",
@@ -27462,7 +27836,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v6/transition",
@@ -27736,7 +28112,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v6/extend",
@@ -27939,7 +28317,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.5-preview/text-to-video",
@@ -28185,7 +28565,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.5-preview/image-to-video",
@@ -28333,7 +28715,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.5-preview/text-to-image",
@@ -28444,7 +28828,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.5-preview/image-to-image",
@@ -28583,7 +28969,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s/image-to-video",
@@ -28695,7 +29083,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s/text-to-video",
@@ -28799,7 +29189,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/video-upscaler",
@@ -28901,7 +29293,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "upscaler",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/video-fps-increaser",
@@ -28942,7 +29336,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g-official/reference-to-video",
@@ -29050,7 +29446,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g-official/video-extend",
@@ -29136,7 +29534,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-lite-official/text-to-video",
@@ -29274,7 +29674,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-lite-official/image-to-video",
@@ -29420,7 +29822,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-lite-official/start-end-to-video",
@@ -29546,7 +29950,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2/image-to-image",
@@ -29674,7 +30080,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2/text-to-image",
@@ -29794,7 +30202,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-1.5/text-to-image-[Deprecated]",
@@ -29863,7 +30273,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-1.5/edit-[Deprecated]",
@@ -29941,7 +30353,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2-official/text-to-image",
@@ -30185,7 +30599,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2-official/image-to-image",
@@ -30442,7 +30858,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/happyhorse-1.0/text-to-video",
@@ -30648,7 +31066,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/happyhorse-1.0/image-to-video",
@@ -30828,7 +31248,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/suno-v5.5/single",
@@ -30895,7 +31317,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/suno-v5.5/custom",
@@ -30952,7 +31376,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/suno/lyrics",
@@ -30993,7 +31419,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/suno-v5/single",
@@ -31060,7 +31488,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/suno-v5/custom",
@@ -31117,7 +31547,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/suno-v4.5/single",
@@ -31184,7 +31616,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-audio/suno-v4.5/custom",
@@ -31241,7 +31675,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-x-official/edit",
@@ -31290,7 +31726,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-x-official/text-to-image",
@@ -31414,7 +31852,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3-4k/image-to-video",
@@ -31524,7 +31964,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3-4k/text-to-video",
@@ -31724,7 +32166,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-4k/text-to-video",
@@ -31829,7 +32273,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-4k/image-to-video",
@@ -31926,7 +32372,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-video-o3-4k/reference-to-video",
@@ -32046,7 +32494,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/happyhorse-1.0/reference-to-video",
@@ -32260,7 +32710,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/happyhorse-1.0/video-edit",
@@ -32379,7 +32831,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v4/text-to-video-std",
@@ -32524,7 +32978,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v4/image-to-video-std",
@@ -32643,7 +33099,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.5-turbo-std/text-to-video",
@@ -32759,7 +33217,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v4/text-to-video-fast",
@@ -32897,7 +33357,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v4/image-to-video-fast",
@@ -33009,7 +33471,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v4/omni-reference-std",
@@ -33133,7 +33597,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v4/omni-reference-fast",
@@ -33250,7 +33716,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-elements-advanced",
@@ -33372,7 +33840,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "youchuan/text-to-image-v81",
@@ -33555,7 +34025,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-fast-official/reference-to-video",
@@ -33697,7 +34169,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-imagine-image-quality/edit",
@@ -33886,7 +34360,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-imagine-image-quality/text-to-image",
@@ -34062,7 +34538,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "bytedance/jimeng-4.6/text-to-image",
@@ -34143,7 +34621,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "bytedance/jimeng-4.6/image-to-image",
@@ -34232,7 +34712,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "gemini-omni-flash/text-to-video",
@@ -34442,7 +34924,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "gemini-omni-flash/image-to-video",
@@ -34660,7 +35144,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "volc-subtitle-erase/video",
@@ -34707,7 +35193,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "gemini-omni-flash/video-edit",
@@ -34832,7 +35320,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "volc-subtitle-erase-pro/video",
@@ -34917,7 +35407,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s/image-to-video-asyn",
@@ -35022,7 +35514,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-3-flash-preview/image-to-text",
@@ -35069,7 +35563,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-3-flash-preview/text-to-text",
@@ -35108,7 +35604,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-3-flash-preview/video-to-text",
@@ -35155,7 +35653,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-3-pro-preview/image-to-text",
@@ -35203,7 +35703,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-3-pro-preview/text-to-text",
@@ -35242,7 +35744,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-3-pro-preview/video-to-text",
@@ -35289,7 +35793,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-25-flash/image-to-text",
@@ -35336,7 +35842,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-pro/image-to-video",
@@ -35469,7 +35977,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-25-flash/text-to-text",
@@ -35508,7 +36018,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-25-flash/video-to-text",
@@ -35555,7 +36067,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-25-pro/image-to-text",
@@ -35602,7 +36116,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-25-pro/text-to-text",
@@ -35641,7 +36157,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-25-pro/video-to-text",
@@ -35688,7 +36206,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-upscale-standard-v2",
@@ -35819,7 +36339,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-upscale/low-resolution-v2",
@@ -35950,7 +36472,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-upscale-cgi",
@@ -36081,7 +36605,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-upscale-high-fidelity-v2",
@@ -36212,7 +36738,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-upscale-text-refine",
@@ -36343,7 +36871,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/video-upscale",
@@ -36477,7 +37007,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-3/image-to-image",
@@ -36525,7 +37057,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-4/image-to-image",
@@ -36572,7 +37106,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-3/text-to-image",
@@ -36612,7 +37148,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-4/text-to-image",
@@ -36651,7 +37189,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v5.5/text-to-video",
@@ -37259,7 +37799,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v5.5/image-to-video",
@@ -37841,7 +38383,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v5.5-transition",
@@ -38106,7 +38650,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v5.5-effects",
@@ -38420,7 +38966,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-r/gen4-turbo-official/image-to-video",
@@ -38539,7 +39087,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-r/gen4-aleph-official/video-to-video",
@@ -38630,7 +39180,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-r/gen4-turbo/image-to-video",
@@ -38740,7 +39292,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/ltx-2/text-to-video-lora",
@@ -38766,7 +39320,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v3/reference-to-video",
@@ -38856,7 +39412,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v3/video-restyling",
@@ -38940,7 +39498,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v3/single-shot-video-extension",
@@ -38995,7 +39555,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "skyreels-v3/shot-switching-video-extension",
@@ -39090,7 +39652,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-s-official/sora-upload-character",
@@ -39138,7 +39702,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/text-to-video-q3-pro-fast",
@@ -39363,7 +39929,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/image-to-video-q3-pro-fast",
@@ -39562,7 +40130,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/start-end-to-video-q3-pro-fast",
@@ -39769,7 +40339,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v5.6/text-to-video",
@@ -40137,7 +40709,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v5.6/image-to-video",
@@ -40479,7 +41053,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "higgsfield/soul/image-to-image",
@@ -41181,7 +41757,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "higgsfield/dop/image-to-video",
@@ -41282,7 +41860,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-qwen-27b/chat",
@@ -41337,7 +41917,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/voice-design",
@@ -41398,7 +41980,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-3-pro-preview-cv/image-to-text",
@@ -41446,7 +42030,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-25-flash-cv/image-to-text",
@@ -41493,7 +42079,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-3-flash-preview-cv/image-to-text",
@@ -41540,7 +42128,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-text-g-25-pro-cv/image-to-text",
@@ -41587,7 +42177,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-lite/text-to-video",
@@ -41712,7 +42304,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-v3.1-lite/image-to-video",
@@ -41839,7 +42433,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-c1/text-to-video",
@@ -42037,7 +42633,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-c1/image-to-video",
@@ -42194,7 +42792,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-c1/transition",
@@ -42375,7 +42975,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-c1/reference-to-video",
@@ -42578,7 +43180,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "image-enhance/hypir-ultra",
@@ -42729,7 +43333,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3.0-4k/motion-control",
@@ -42755,7 +43361,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-v21/image-to-3d",
@@ -42876,7 +43484,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "hitem3d-v21/multi-image-to-3d",
@@ -43021,7 +43631,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2-ai-avatar-standard/image-audio-to-video",
@@ -43077,7 +43689,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2-ai-avatar-pro/image-audio-to-video",
@@ -43133,7 +43747,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "image-enhance/hypir-balance",
@@ -43208,7 +43824,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.0/text-to-world",
@@ -43304,7 +43922,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble/upload-media-asset",
@@ -43386,7 +44006,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.0/image-to-world",
@@ -43512,7 +44134,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.0/multi-image-to-world",
@@ -43615,7 +44239,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.0/video-to-world",
@@ -43719,7 +44345,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.1/video-to-world",
@@ -43823,7 +44451,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.1-plus/video-to-world",
@@ -43927,7 +44557,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.1/multi-image-to-world",
@@ -44030,7 +44662,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.1-plus/multi-image-to-world",
@@ -44133,7 +44767,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.1/image-to-world",
@@ -44259,7 +44895,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.1-plus/image-to-world",
@@ -44385,7 +45023,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.1/text-to-world",
@@ -44482,7 +45122,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "marble-1.1-plus/text-to-world",
@@ -44579,7 +45221,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "meshy6/text-to-3d",
@@ -44732,7 +45376,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "meshy6/image-to-3d",
@@ -44867,7 +45513,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/files-upload",
@@ -44952,7 +45600,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-v7.6/generate-song",
@@ -45045,7 +45695,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-o2/generate-song",
@@ -45117,7 +45769,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-v8/generate-song",
@@ -45210,7 +45864,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-v9/generate-song",
@@ -45303,7 +45959,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-v7.6/generate-bgm",
@@ -45374,7 +46032,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-o2/instrumental-generate",
@@ -45430,7 +46090,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-v8/generate-bgm",
@@ -45501,7 +46163,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-v7.6/extend-song",
@@ -45557,7 +46221,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-v8/extend-song",
@@ -45632,7 +46298,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/vocal-clone",
@@ -45673,7 +46341,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/generate-lyrics",
@@ -45714,7 +46384,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/mureka-v9/generate-bgm",
@@ -45785,7 +46457,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "pixverse-v6/effects",
@@ -45936,7 +46610,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "luma/uni-1/text-to-image",
@@ -46074,7 +46750,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "luma/uni-1/image-to-image",
@@ -46228,7 +46906,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "luma/uni-1/image-edit",
@@ -46367,7 +47047,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "luma/uni-1-max/text-to-image",
@@ -46506,7 +47188,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "luma/uni-1-max/image-to-image",
@@ -46660,7 +47344,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "luma/uni-1-max/image-edit",
@@ -46799,7 +47485,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-2.7-spicy/image-to-video",
@@ -46920,7 +47608,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/stem-song",
@@ -46995,7 +47685,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/recognize-song",
@@ -47035,7 +47727,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/describe-song",
@@ -47076,7 +47770,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "mureka-ai/extend-lyrics",
@@ -47116,7 +47812,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "volc-drama/video-translate",
@@ -47322,7 +48020,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g-official/image-to-video-v1.5",
@@ -47415,7 +48115,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/reference-to-video-q3-ad",
@@ -47566,7 +48268,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "volc-drama/serial-video-translate",
@@ -47790,7 +48494,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/short-play-q3-drama",
@@ -48098,7 +48804,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/music-2.6",
@@ -48243,7 +48951,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/music-cover",
@@ -48387,7 +49097,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/music-cover-preprocess",
@@ -48428,7 +49140,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0/multimodal-video-star",
@@ -48680,7 +49394,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "template",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0/multimodal-video-star-fast",
@@ -48926,7 +49642,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "template",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/happyhorse-1.1/text-to-video",
@@ -49152,7 +49870,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/happyhorse-1.1/image-to-video",
@@ -49332,7 +50052,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/happyhorse-1.1/reference-to-video",
@@ -49566,7 +50288,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0-mini/text-to-video",
@@ -49840,7 +50564,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "direct_text",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0-mini/image-to-video",
@@ -50153,7 +50879,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "required_media",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video/sparkvideo-2.0-mini/multimodal-video",
@@ -50525,7 +51253,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "optional_media",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3-turbo-std/text-to-video",
@@ -50678,7 +51408,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3-turbo-pro/text-to-video",
@@ -50825,7 +51557,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3-turbo-std/image-to-video",
@@ -50956,7 +51690,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v3-turbo-pro/image-to-video",
@@ -51087,7 +51823,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/reference-to-video-q3-drama",
@@ -51226,7 +51964,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "vidu/short-play-q3-ad",
@@ -51304,7 +52044,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-g31-flash-lite/text-to-image",
@@ -51423,7 +52165,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-g31-flash-lite/image-to-image",
@@ -51551,7 +52295,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-g31-flash-lite-official/text-to-image",
@@ -51671,7 +52417,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-n-g31-flash-lite-official/image-to-image",
@@ -51804,7 +52552,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.6-std/image-to-video",
@@ -51898,7 +52648,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "kling-v2.6-std/text-to-video",
@@ -52007,7 +52759,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "bytedance/doubao-seed-audio-1.0",
@@ -52126,7 +52880,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "bytedance/doubao-seed-tts-2.0",
@@ -52376,7 +53132,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "youchuan/text-to-image-v82",
@@ -52559,7 +53317,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v5-pro/text-to-image",
@@ -52661,7 +53421,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v5-pro/image-to-image",
@@ -52771,7 +53533,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3/multimodal-to-video",
@@ -52981,7 +53745,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "optional_media",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3/text-to-video",
@@ -53155,15 +53921,40 @@
     "status": "no_public_price",
     "note": "官方公开定价文件无此端点条目"
    },
-   "verification_status": "schema_verified+real_run_2k_via_ai_app+real_run_768p_via_open_workflow",
+   "verification_status": "schema_verified+reported_runs_via_personal_app_or_open_workflow",
    "verification_notes": [
-    "闭源模型证据:2K 档经官方 AI 应用(2083105376052006914)2026-09-12 一次成功;09-14/15 复跑被 414(算力值闸门)",
-    "开源权重证据:768P(1344x768)经平台工作流托管开源 H3 权重 2026-09-16 实测成功(78 币/195s, plus 0.4 币/秒), 见 run_evidence;此路线分辨率由工作流参数控制, 不等于标准模型 API 的 resolution=768P 档",
-    "标准模型 API 直调(768P/2K)均未实测(个人 Key 1014;企业 Key 才可)"
+    "三次个人应用2K与一次云端开源768P历史记录见run_evidence；本轮未重新调用私人任务。",
+    "标准模型API与regeneration没有企业实跑证据；不外推图生/多模态或其他模型。",
+    "414为历史拒绝；同应用09-16/17已报告成功，根因未确认。"
    ],
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
+   ],
+   "single_prompt_2k": "direct_text",
+   "platform_price_evidence": [
+    {
+     "endpoint": "minimax/hailuo-h3/text-to-video",
+     "resolution": "2K",
+     "rate_cny": "0.77",
+     "unit": "CNY/billable_output_second",
+     "source_id": "h3-price-page-20260917",
+     "observed_at": "2026-09-17",
+     "verification": "reported_public_page_not_refetched",
+     "applies_to": "enterprise-shared standard-model-api",
+     "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+    },
+    {
+     "endpoint": "minimax/hailuo-h3/text-to-video",
+     "resolution": "768P",
+     "rate_cny": "0.48",
+     "unit": "CNY/billable_output_second",
+     "source_id": "h3-price-page-20260917",
+     "observed_at": "2026-09-17",
+     "verification": "reported_public_page_not_refetched",
+     "applies_to": "enterprise-shared standard-model-api",
+     "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+    }
    ]
   },
   {
@@ -53322,7 +54113,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "optional_media",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-upscale-high-fidelity-v3",
@@ -53489,7 +54282,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-upscale-detail-faces",
@@ -53576,7 +54371,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-upscale-transparent",
@@ -53646,7 +54443,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/video-proteus",
@@ -53804,7 +54603,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/video-starlight",
@@ -53887,7 +54688,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/video-denoise",
@@ -53965,7 +54768,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/video-astra",
@@ -54028,7 +54833,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/video-frame-interpolation",
@@ -54118,7 +54925,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-gigapixel-standard-2",
@@ -54281,7 +55090,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-gigapixel-low-resolution-2",
@@ -54444,7 +55255,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-gigapixel-art-and-cgi",
@@ -54614,7 +55427,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-gigapixel-high-fidelity-2",
@@ -54767,7 +55582,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "topazlabs/image-gigapixel-text-and-shapes",
@@ -54958,7 +55775,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen3-tts-flash",
@@ -55306,7 +56125,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen3-tts-instruct-flash",
@@ -55548,7 +56369,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen-image-3.0/text-to-image",
@@ -55751,7 +56574,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/qwen-image-3.0/image-edit",
@@ -55963,7 +56788,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-flux3/text-to-video",
@@ -56097,7 +56924,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-flux3/image-to-video",
@@ -56239,7 +57068,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-flux3/video-to-video",
@@ -56380,7 +57211,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-flux3/draft-enhance",
@@ -56444,7 +57277,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "seedream-v5-pro/layer-decomposition",
@@ -56538,7 +57373,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3/regeneration-text-to-video",
@@ -56599,7 +57436,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "regeneration",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3/regeneration-image-to-video",
@@ -56676,7 +57515,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "regeneration",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3/regeneration-multimodal-to-video",
@@ -56761,7 +57602,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "regeneration",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3/context-ir-multimodal",
@@ -56948,7 +57791,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3/context-ir-text",
@@ -57106,7 +57951,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3/context-ir-image",
@@ -57241,7 +58088,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "bytedance/seedance-2.5-token/text-to-video",
@@ -57604,7 +58453,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "direct_text",
+   "platform_price_evidence": []
   },
   {
    "id": "bytedance/seedance-2.5-token/image-to-video",
@@ -57977,7 +58828,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "required_media",
+   "platform_price_evidence": []
   },
   {
    "id": "bytedance/seedance-2.5-token/multimodal-video",
@@ -58578,7 +59431,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "optional_media",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g-official/reference-to-video-v1.5",
@@ -58684,7 +59539,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-video-g-official/text-to-video-v1.5",
@@ -58788,7 +59645,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-imagine-image-2.0/text-to-image",
@@ -58936,7 +59795,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-3.0/image-to-video",
@@ -59257,7 +60118,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-3.0/reference-to-video",
@@ -59600,7 +60463,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-3.0-prime/image-to-video",
@@ -59921,7 +60786,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "alibaba/wan-3.0-prime/reference-to-video",
@@ -60264,7 +61131,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "google/gemini-omni-1.1-flash/text-to-video",
@@ -60359,7 +61228,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "google/gemini-omni-1.1-flash/reference-to-video",
@@ -60470,7 +61341,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "google/gemini-omni-1.1-flash/image-to-video",
@@ -60581,7 +61454,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3-max/text-to-video",
@@ -60755,7 +61630,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/hailuo-h3-max/image-to-video",
@@ -60906,7 +61783,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/h3-max-turbo/text-to-video",
@@ -61078,7 +61957,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "minimax/h3-max-turbo/image-to-video",
@@ -61227,7 +62108,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "google/gemini-omni-1.1-flash/video-edit",
@@ -61304,7 +62187,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "excluded_no_2k",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2.5-official-token/sunburst/text-to-image",
@@ -61538,7 +62423,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2.5-official-token/sunburst/edit",
@@ -61780,7 +62667,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2.5-official-token/flare/text-to-image",
@@ -62014,7 +62903,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2.5-official-token/flare/edit",
@@ -62256,7 +63147,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2.5/flare/text-to-image",
@@ -62402,7 +63295,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2.5/flare/image-to-image",
@@ -62556,7 +63451,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2.5/sunburst/text-to-image",
@@ -62702,7 +63599,9 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   },
   {
    "id": "rhart-image-g-2.5/sunburst/image-to-image",
@@ -62856,116 +63755,148 @@
    "sources": [
     "https://raw.githubusercontent.com/HM-RunningHub/ComfyUI_RH_OpenAPI/main/models_registry.json",
     "https://www.runninghub.cn/runninghub-api-doc-cn/doc-8287334"
-   ]
+   ],
+   "single_prompt_2k": "not_video",
+   "platform_price_evidence": []
   }
  ],
  "pricing_anchors": {
-  "minimax_official_cny": {
-   "source": "https://platform.minimax.cn/docs/guides/pricing-paygo",
-   "collected_at": "2026-09-13",
-   "h3_768p_cny_per_second": 0.5,
-   "h3_2k_cny_per_second": 0.8,
-   "h3_max_480p_cny_per_second": 0.33,
-   "h3_max_768p_cny_per_second": 0.5,
-   "regen_768p_to_2k_output_cny_per_second": 0.3,
-   "regen_768p_to_2k_input_video_cny_per_second": 0.3,
-   "regen_image_cny_each_after_5_free": 0.15,
-   "h3_image_cny_each_after_5_free": 0.2,
-   "context_ir_input_cny_per_mtoken": 5.8,
-   "context_ir_output_cny_per_mtoken": 23.0,
-   "usd": {
-    "h3_768p_usd_per_second": 0.08,
-    "h3_2k_usd_per_second": 0.13,
-    "source": "https://platform.minimax.io/docs/guides/pricing-paygo"
+  "platform_exact_endpoint_records": [
+   {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "resolution": "2K",
+    "rate_cny": "0.77",
+    "unit": "CNY/billable_output_second",
+    "source_id": "h3-price-page-20260917",
+    "observed_at": "2026-09-17",
+    "verification": "reported_public_page_not_refetched",
+    "applies_to": "enterprise-shared standard-model-api",
+    "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
+   },
+   {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "resolution": "768P",
+    "rate_cny": "0.48",
+    "unit": "CNY/billable_output_second",
+    "source_id": "h3-price-page-20260917",
+    "observed_at": "2026-09-17",
+    "verification": "reported_public_page_not_refetched",
+    "applies_to": "enterprise-shared standard-model-api",
+    "note": "Exact endpoint only. Do not propagate to H3-Max, Turbo, image, multimodal, regeneration or personal-app tariffs."
    }
-  }
+  ],
+  "note": "原厂参考价不作为RunningHub报价；旧引用保留在Git历史。"
  },
  "run_evidence": [
   {
-   "record": "output/runninghub/api/h3_standard_app_runs/20260912T113649Z-d0a65f81/run.json",
-   "route": "ai-app(官方标准应用: Minimax H3 文生视频工作流)",
-   "webapp_id": "2083105376052006914",
+   "id": "personal-2k-2026-09-12",
+   "date": "2026-09-12",
    "task_id": "2098737586251202562",
-   "child_task_id": "2098737633676382210",
-   "endpoint_model": "minimax/hailuo-h3(经应用内工作流调用)",
+   "route": "personal-ai-app",
+   "key_type": "consumer-member",
+   "endpoint": "minimax/hailuo-h3/text-to-video",
+   "webapp_id": "2083105376052006914",
    "request": {
     "resolution": "2K",
     "duration": "5",
     "ratio": "16:9"
    },
    "status": "SUCCESS",
-   "output_measured": {
+   "usage": {
+    "consumeCoins": "7",
+    "thirdPartyConsumeMoney": "3.85",
+    "consumeMoney": null,
+    "taskCostTime": "309",
+    "output_seconds": "5"
+   },
+   "media": {
     "width": 2560,
     "height": 1440,
-    "fps": 24,
-    "duration_seconds": 5.167,
+    "fps": "24",
+    "duration_seconds": "5.167",
     "has_audio": true,
-    "video_codec": "h264",
-    "audio_codec": "aac"
+    "sha256": null
    },
-   "usage": {
-    "consumeCoins": 7,
-    "consumeMoney": null,
-    "thirdPartyConsumeMoney": 3.85,
-    "taskCostTime": 309,
-    "output_seconds": 5
-   },
-   "collected_at": "2026-09-12",
-   "reverified_at": "2026-09-13",
-   "verification": "real_run_success+cost_verified"
+   "evidence_source": "personal-runs-20260917",
+   "evidence_level": "reported_live_run_not_requeried",
+   "child_task_id": "2098737633676382210",
+   "usage_scope": "Reported reconciled chain total. Do not sum parent/child aggregate fields again."
   },
   {
-   "record": "output/runninghub/api/h3_personal_app_runs/20260912T093142Z-1eb2579a/run.json",
-   "route": "ai-app(自定义应用: minimax-h3-文生视频)",
-   "webapp_id": "2084613917401243650",
-   "task_id": null,
-   "request": {
-    "resolution": "2K",
-    "duration": "5"
-   },
-   "status": "FAILED(414 TASK_CREATE_FAILED_BY_NOT_ENOUGH_POWER_VALUE)",
-   "usage": null,
-   "collected_at": "2026-09-12",
-   "verification": "channel_restriction_observed",
-   "notes": "自定义应用按算力值闸门,未起跑未扣费"
-  },
-  {
-   "record": "output/runninghub/api/h3_t2v_runs/20260912T085951Z-56e33ed8/run.json",
-   "route": "standard-model-api(minimax/hailuo-h3/text-to-video)",
+   "id": "personal-2k-2026-09-16",
+   "date": "2026-09-16",
+   "task_id": "2100124158796193794",
+   "route": "personal-ai-app",
+   "key_type": "consumer-member",
+   "endpoint": "minimax/hailuo-h3/text-to-video",
+   "webapp_id": "2083105376052006914",
    "request": {
     "resolution": "2K",
     "duration": "5",
     "ratio": "16:9"
    },
-   "status": "FAILED(1014 仅限企业级共享 Key)",
-   "usage": null,
-   "collected_at": "2026-09-12",
-   "reverified_at": "2026-09-13",
-   "verification": "channel_restriction_observed"
-  },
-  {
-   "record": "docs/04-电商AI工作流/14-RunningHub-H3视频能力单元API调研.md §6",
-   "route": "workflow-api(rh-h3-hoodie-v3, 0.2MP≈352×608, 非 768P 档)",
-   "task_id": "2097529689961885697",
    "status": "SUCCESS",
-   "output_measured": {
-    "width": 352,
-    "height": 608,
-    "fps": 24,
-    "duration_seconds": 5.167
-   },
    "usage": {
-    "consumeCoins": 14,
-    "taskCostTime": 67
+    "consumeCoins": "6",
+    "thirdPartyConsumeMoney": "3.85",
+    "consumeMoney": null,
+    "taskCostTime": "252",
+    "output_seconds": "5"
    },
-   "collected_at": "2026-09-09",
-   "verification": "real_run_success+cost_verified",
-   "notes": "工作流按运行秒计币 ≈0.21 币/秒;此为工作流算力费,不是 768P 模型档价格"
+   "media": {
+    "width": 2560,
+    "height": 1440,
+    "fps": "24",
+    "duration_seconds": "5.167",
+    "has_audio": true,
+    "sha256": "2bf506c614dd067813ee65787a221ef1e18b5dd3733f3367ccb3c8c70a47bef5"
+   },
+   "evidence_source": "personal-runs-20260917",
+   "evidence_level": "reported_live_run_not_requeried",
+   "child_task_id": null,
+   "usage_scope": "Reported reconciled chain total. Do not sum parent/child aggregate fields again."
   },
   {
-   "record": "output/runninghub/api/matrix_runs/20260916T003929Z-94d031-wf-inline/task_record.json",
-   "route": "workflow-api(开源 H3 权重工作流 h3-t2v-open-768p-cloud.json, plus 实例)",
+   "id": "personal-2k-2026-09-17",
+   "date": "2026-09-17",
+   "task_id": "2100427462658981891",
+   "route": "personal-ai-app",
+   "key_type": "consumer-member",
+   "endpoint": "minimax/hailuo-h3/text-to-video",
+   "webapp_id": "2083105376052006914",
+   "request": {
+    "resolution": "2K",
+    "duration": "5",
+    "ratio": "16:9"
+   },
+   "status": "SUCCESS",
+   "usage": {
+    "consumeCoins": "5",
+    "thirdPartyConsumeMoney": "3.85",
+    "consumeMoney": null,
+    "taskCostTime": "220",
+    "output_seconds": "5"
+   },
+   "media": {
+    "width": 2560,
+    "height": 1440,
+    "fps": "24",
+    "duration_seconds": "5.167",
+    "has_audio": true,
+    "sha256": "2502953651b5fd009f5a1903174c4374598f4557ddb15fb17f5d57e044983684"
+   },
+   "evidence_source": "personal-runs-20260917",
+   "evidence_level": "reported_live_run_not_requeried",
+   "child_task_id": null,
+   "usage_scope": "Reported reconciled chain total. Do not sum parent/child aggregate fields again."
+  },
+  {
+   "id": "personal-open-768p-20260916",
+   "date": "2026-09-16",
    "task_id": "2100021717924806657",
+   "route": "personal-open-workflow",
+   "key_type": "consumer-member",
+   "endpoint": null,
    "request": {
     "prompt": "与 09-12 2K 实测同一提示词",
     "megapixels": 0.98,
@@ -62974,7 +63905,12 @@
     "steps": 8
    },
    "status": "SUCCESS",
-   "output_measured": {
+   "usage": {
+    "consumeCoins": 78,
+    "taskCostTime": 195,
+    "thirdPartyConsumeMoney": null
+   },
+   "media": {
     "width": 1344,
     "height": 768,
     "fps": 24,
@@ -62984,117 +63920,120 @@
     "audio_codec": "aac",
     "sha256_12": "f5176d6b99d9"
    },
-   "usage": {
-    "consumeCoins": 78,
-    "taskCostTime": 195,
-    "thirdPartyConsumeMoney": null
-   },
-   "collected_at": "2026-09-16",
-   "verification": "real_run_success+cost_verified",
-   "notes": "渠道=平台工作流托管开源 H3 权重(fl2va int8+8步turbo LoRA), 按运行秒计币(78/195=0.4 币/秒, plus 档);非标准模型 API 的 768P 档, 分辨率由工作流 ResolutionSelector 控制(megapixels 0.98=1344x768, 与官方 768p 标注一致)"
-  },
-  {
-   "record": "output/runninghub/api/matrix_runs/20260915T134805Z-174788-wf-inline/task_record.json",
-   "route": "workflow-api(SD1.5 最小文生图诊断, 判别 414 闸门范围)",
-   "task_id": "2099857788745515009",
-   "status": "SUCCESS",
-   "output_measured": {
-    "note": "512x512 image"
-   },
-   "usage": {
-    "consumeCoins": 3,
-    "taskCostTime": 12
-   },
-   "collected_at": "2026-09-15",
-   "verification": "real_run_success+cost_verified",
-   "notes": "证明工作流 API 钱包计费正常;414 仅挡 RH_ 闭源模型节点与 AI 应用(算力值闸门), 不挡普通工作流"
-  },
-  {
-   "record": "output/runninghub/api/matrix_runs/20260914T143052Z-5925ed-wf-inline/task_record.json",
-   "route": "workflow-api(直传 RH_MinimaxHailuoH3TextToVideo 节点, 768P/5s/16:9)",
-   "request": {
-    "resolution": "768P",
-    "duration": "5",
-    "ratio": "16:9"
-   },
-   "status": "SUBMIT_REJECTED(414 TASK_CREATE_FAILED_BY_NOT_ENOUGH_POWER_VALUE)",
-   "usage": null,
-   "cost_cny": 0,
-   "collected_at": "2026-09-14",
-   "verification": "channel_gate_observed",
-   "notes": "工作流 API 创建在计费闸门被拒,任务未创建、未扣费;经 docs/05 examples/python/rh_min_client.py run-workflow 入口执行"
-  },
-  {
-   "record": "output/runninghub/api/matrix_runs/20260914T143223Z-4f0ea9-aiapp-2083105376052006914/task_record.json",
-   "route": "ai-app(官方应用 2083105376052006914, 2K/5s/16:9)",
-   "request": {
-    "resolution": "2K",
-    "duration": "5",
-    "ratio": "16:9"
-   },
-   "status": "SUBMIT_REJECTED(414 TASK_CREATE_FAILED_BY_NOT_ENOUGH_POWER_VALUE)",
-   "usage": null,
-   "cost_cny": 0,
-   "collected_at": "2026-09-14",
-   "verification": "account_state_observed",
-   "notes": "同应用同类参数 2026-09-12 成功(taskId 2098737586251202562);2026-09-14 与 2026-09-15 两次重试均被 414:账户算力值/余额耗尽且无按日刷新(持续账户状态,非渠道关闭或应用下架);经 rh_min_client.py run-ai-app 入口执行"
+   "evidence_source": "registry-snapshot-20260913",
+   "evidence_level": "reported_live_run_not_requeried",
+   "note": "Report added 2026-09-16; hosted on RunningHub, not a local H3 deployment. No extrapolation to standard-model API. Runtime cost is not linear in output duration."
   }
  ],
  "gaps": [
   {
-   "id": "account-balance-exhausted",
-   "severity": "blocker",
-   "detail": "2026-09-14 起账户算力值/余额耗尽(2026-09-15 复测仍 414,无按日刷新):工作流 API(414)与官方 AI 应用(同码)均在创建闸门被拒,任务未创建、零扣费。三个关键成片任务(A 768P / B 2K 直出 / C 768P→2K)全部受阻,直至充值或获得新授权额度。恢复后最小待执行命令见 docs/05-RunningHub-API/README.md。"
+   "id": "current-h3-price",
+   "severity": "high",
+   "status": "open",
+   "detail": "2K/768P 文生价已从 09-17 页面报告统一；尚无本轮 price-preview。仅作用于精确文生端点。",
+   "closure_evidence": "企业共享 Key 免费 price-preview 或重新留存官方价格页。"
   },
   {
-   "id": "h3-rh-price",
+   "id": "regeneration-platform-cost",
    "severity": "high",
-   "detail": "RunningHub 标准模型 API 的 H3 端点(含 768P/2K/regeneration)在官方公开定价文件(pricing.public.json, 353 条, 2026-04-29)中零条目;price-preview 接口个人 Key 返回 1014。需企业级-共享 Key 调 price-preview 或实跑一条任务才能得到平台侧官方价。"
+   "status": "open",
+   "detail": "768P→2K 平台再生成价、输入是否另计费及完整双任务账单未知；不再用原厂 ¥1.10/秒充当平台总价。",
+   "closure_evidence": "同一源链路的两个 taskId、对应 preview/usage、最终提示词哈希、媒体检查和去重对账。"
+  },
+  {
+   "id": "enterprise-live-billing",
+   "severity": "high",
+   "status": "open",
+   "detail": "企业共享有公开资料历史记录，没有企业 Key 实际成片与扣费证据。",
+   "closure_evidence": "代表性企业任务报价、创建响应、终态 usage 与媒体元数据；不得用个人 Key 样本替代。"
   },
   {
    "id": "coin-cny-rate",
    "severity": "high",
-   "detail": "consumeCoins(平台币)与人民币的官方兑换比例未在公开文档找到。旁证:第三方代充 1000 币≈¥14–19;doc14 工作假设 ¥0.02/币(未对账确认)。所有「币→元」换算必须标注此缺口。"
+   "status": "open",
+   "detail": "RH 币→人民币及会员固定费分摊未知，个人混合单位支出不能冒充人民币总成本。",
+   "closure_evidence": "账户自身正规充值/会员账单、币种定义与明确分摊周期；不采用第三方代充值。"
   },
   {
-   "id": "ai-app-coin-semantics",
+   "id": "personal-long-duration",
    "severity": "medium",
-   "detail": "AI 应用任务 7 币/309s 的计费规则(按次、按秒还是按应用定价)与工作流 API 的 ≈0.2 币/秒不一致,平台未公开 AI 应用计费公式。需对照控制台「任务与账单」明细。"
+   "status": "open",
+   "detail": "只有 5 秒个人应用三次历史记录；10/15 秒附加币未知。",
+   "closure_evidence": "分别保存较长时长 usage，不按 5 秒平台币线性外推。"
   },
   {
-   "id": "openapi-export",
+   "id": "dedicated-rental",
    "severity": "medium",
-   "detail": "官方文档站为 Apifox 托管(runninghub.cn/runninghub-api-doc-cn),未发现公开的 OpenAPI/Swagger 导出文件;接口族清单以文档页+官方仓库客户端代码核对。"
+   "status": "open",
+   "detail": "独占 GPU 当前租金、利用率与单条摊销未知。",
+   "closure_evidence": "官方租价及周期、接受成片数、失败任务成本分摊。"
   },
   {
-   "id": "seedance-2.5-price",
+   "id": "extended-concurrency",
    "severity": "medium",
-   "detail": "seedance-2.5-token(480p–4k, 4–30s)与 wan-3.0、h3-max-turbo、gemini-omni-1.1 等新端点(2026-04 快照后新增的 39 个)无公开定价条目。"
+   "status": "open",
+   "detail": "企业共享默认额度以外扩容价格未知。",
+   "closure_evidence": "官方书面扩容报价。"
   },
   {
-   "id": "llm-protocols",
-   "severity": "low",
-   "detail": "LLM API 声称兼容 OpenAI/Anthropic/Gemini 三种协议,但仅 chat/completions 路径有公开文档;Anthropic(/v1/messages)与 Gemini 端点路径未公开列明。"
+   "id": "conditional-route-inputs",
+   "severity": "medium",
+   "status": "open",
+   "detail": "图生/多模态/模板/超分不等于仅输入提示词；部分输入参数虽可选，仍需运行验证。",
+   "closure_evidence": "固定前置图片/视频生成路线及费用，或验证无媒体输入确实成功。"
   },
   {
-   "id": "account-billing-api",
-   "severity": "low",
-   "detail": "账户余额、任务账单明细、任务列表查询未发现公开 API(仅网页控制台「任务与账单」);费用对账目前依赖任务 usage 字段+人工查账。"
+   "id": "catalogue-freshness",
+   "severity": "medium",
+   "status": "open",
+   "detail": "模型集合仍是 09-13 官方注册表快照（09-14复检），不是 09-21 全平台实时穷举。",
+   "closure_evidence": "显式 --refresh 或指定新官方快照；记录实际下载时间和 SHA256。"
   },
   {
-   "id": "h3-768p-pixels",
-   "severity": "low",
-   "detail": "H3 768P 档的实际输出像素未实测(推断 16:9 下为 1344×768,依据 regeneration 接口对源视频的约束:尺寸被 32 整除、面积上限 768×1344)。2K 已实测 2560×1440。"
+   "id": "historical-raw-evidence",
+   "severity": "medium",
+   "status": "open",
+   "detail": "新增三次个人样本从仓库已有页面迁入；原始 API 响应/媒体未全部入库，本轮未复查私人任务。",
+   "closure_evidence": "用环境变量凭据只读重查既有任务，并保存脱敏摘录。"
   },
   {
-   "id": "output-url-validity",
-   "severity": "low",
-   "detail": "产物 URL 位于平台对象存储且有时效,官方建议及时转存,但具体有效时长未在公开文档列明;实测任务次日(2026-09-13)产物 URL 仍可访问。"
+   "id": "refund-and-bills",
+   "severity": "medium",
+   "status": "open",
+   "detail": "失败/取消/保留实例与退款规则、完整账单 API 未逐项核验。账户状态 API 不等于账单明细。",
+   "closure_evidence": "独立规则来源及费用字段范围；未知/空值不得当0。"
   },
   {
-   "id": "dynamic-apps-unbounded",
+   "id": "dynamic-instances",
    "severity": "info",
-   "detail": "AI 应用/工作流为动态社区实例(平台应用市场持续新增),无法穷举;已交付通用 webappId/workflowId 调用机制+本仓库已验证实例清单,不声称覆盖全部私人实例。"
+   "status": "open",
+   "detail": "私人和动态社区应用无法以当前公开模型快照穷举。",
+   "closure_evidence": "交付通用调用机制及已验证实例，明确集合边界。"
+  }
+ ],
+ "channel_history": [
+  {
+   "date": "2026-09-14/15",
+   "code": "414",
+   "status": "historical_rejection",
+   "root_cause": "unconfirmed",
+   "note": "Specific RH-node/app submissions rejected. Does not establish exhausted balance, daily quota behavior or root cause."
+  },
+  {
+   "date": "2026-09-16/17",
+   "status": "reported_recovery",
+   "task_ids": [
+    "2100124158796193794",
+    "2100427462658981891"
+   ],
+   "note": "Same application later succeeded. Does not establish why earlier requests failed."
+  },
+  {
+   "date": "2026-09-17",
+   "code": "421",
+   "status": "reported_concurrency_rejection",
+   "scope": "one consumer NORMAL key on tested AI application",
+   "note": "Second overlapping request rejected; not a universal limit for all plans."
   }
  ]
 }
