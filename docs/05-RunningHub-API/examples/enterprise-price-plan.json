@@ -1,0 +1,56 @@
+[
+  {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "payload": {
+      "prompt": "橙猫在雨后屋顶缓慢行走",
+      "resolution": "768P",
+      "duration": "5",
+      "ratio": "16:9"
+    }
+  },
+  {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "payload": {
+      "prompt": "橙猫在雨后屋顶缓慢行走",
+      "resolution": "768P",
+      "duration": "10",
+      "ratio": "16:9"
+    }
+  },
+  {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "payload": {
+      "prompt": "橙猫在雨后屋顶缓慢行走",
+      "resolution": "768P",
+      "duration": "15",
+      "ratio": "16:9"
+    }
+  },
+  {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "payload": {
+      "prompt": "橙猫在雨后屋顶缓慢行走",
+      "resolution": "2K",
+      "duration": "5",
+      "ratio": "16:9"
+    }
+  },
+  {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "payload": {
+      "prompt": "橙猫在雨后屋顶缓慢行走",
+      "resolution": "2K",
+      "duration": "10",
+      "ratio": "16:9"
+    }
+  },
+  {
+    "endpoint": "minimax/hailuo-h3/text-to-video",
+    "payload": {
+      "prompt": "橙猫在雨后屋顶缓慢行走",
+      "resolution": "2K",
+      "duration": "15",
+      "ratio": "16:9"
+    }
+  }
+]

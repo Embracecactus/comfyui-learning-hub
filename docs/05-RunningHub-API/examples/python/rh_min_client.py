@@ -5,7 +5,7 @@
 模型端点与参数来自 docs/05-RunningHub-API/data/runninghub-api-registry.json,
 不要把参数硬编码进客户端。
 
-验证状态(2026-09-14):
+历史验证状态(2026-09-14;2026-09-21修复仅离线验证):
   - query / resume / outputs / app-params / 上传 / 工作流与 AI 应用提交:
     本仓库已用真实 Key 实测;
   - 标准模型 API 提交(含 price-preview):个人 Key 返回 1014,需企业级-共享
@@ -14,7 +14,7 @@
 
 付费闸门:run / run-ai-app / run-workflow 必须显式传 --execute 才会创建任务;
 不带 --execute 时只做本地检查并打印执行计划(dry-run),不发任何请求。
-query / resume / outputs / price / app-params 不创建任务,无需闸门。
+account / query / resume / outputs / price / app-params 不创建任务,无需闸门。
 
 任务恢复:提交成功立刻把 taskId 写入 --record-dir 下的 JSON;轮询超时、
 下载失败都不会触发重新提交——用 resume <taskId> 续查/下载/归档费用。
@@ -35,6 +35,7 @@ query / resume / outputs / price / app-params 不创建任务,无需闸门。
         '[{"nodeId":"1","fieldName":"prompt","fieldValue":"…"}]' --execute
     python3 rh_min_client.py run-workflow - --inline ./workflow-api.json \
         --set '115.aspect_ratio=9:16 (Portrait Widescreen)' --execute
+    python3 rh_min_client.py account             # 只读账户状态
     python3 rh_min_client.py query <taskId>
     python3 rh_min_client.py resume <taskId>      # 续查/下载/归档费用,不重新提交
     python3 rh_min_client.py outputs <taskId>     # 旧接口:费用字段+节点级失败归因
@@ -51,14 +52,17 @@ import sys
 import time
 import urllib.error
 import urllib.request
+import urllib.parse
+import re
 import uuid
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 DEFAULT_BASE_URL = "https://www.runninghub.cn/openapi/v2"
-NON_TERMINAL = {"CREATE", "QUEUED", "RUNNING"}
+NON_TERMINAL = {"CREATE", "CREATED", "QUEUED", "RUNNING"}
 TERMINAL_OK = {"SUCCESS"}
-TERMINAL_FAIL = {"FAILED", "CANCEL"}
+TERMINAL_FAIL = {"FAILED", "CANCEL", "CANCELED", "CANCELLED"}
 TRANSIENT_HTTP = {408, 429, 500, 502, 503, 504}
 
 
@@ -84,6 +88,46 @@ class TransportError(RHError):
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def redact(value: object, key: str = "") -> object:
+    """Remove credentials recursively, including echoed API demos and error text."""
+    if isinstance(value, dict):
+        return {k: "[REDACTED]" if str(k).lower() in
+                {"apikey", "api_key", "authorization", "cookie", "token", "access_token"}
+                else redact(v, key) for k, v in value.items()}
+    if isinstance(value, list):
+        return [redact(v, key) for v in value]
+    if isinstance(value, str):
+        if key:
+            value = value.replace(key, "[REDACTED]")
+        value = re.sub(r"(?i)(api[_-]?key=)[^&\s]+", r"\1[REDACTED]", value)
+        return value
+    return value
+
+
+def checked(body: dict) -> dict:
+    """Validate both legacy code/data and flat v2 errors before reading fields."""
+    if not isinstance(body, dict):
+        raise TransportError("Unexpected JSON response type")
+    ok = (None, "", 0, "0")
+    if body.get("code") not in ok or body.get("errorCode") not in ok:
+        raise RHError(f"平台拒绝: {body.get('code') or body.get('errorCode')} "
+                      f"{body.get('msg') or body.get('errorMessage') or ''}")
+    if body.get("errorMessage"):
+        raise RHError(f"平台返回错误: {body['errorMessage']}")
+    data = body.get("data")
+    if isinstance(data, dict):
+        checked(data)
+    return body
+
+
+def task_response(body: dict) -> dict:
+    """Normalize only task responses, not arbitrary legacy data collections."""
+    checked(body)
+    if isinstance(body.get("data"), dict) and not body.get("status"):
+        body = body["data"]
+    return body
 
 
 def _request(url: str, key: str, payload: dict | None = None,
@@ -113,21 +157,24 @@ def _request(url: str, key: str, payload: dict | None = None,
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 raw = r.read().decode(errors="replace")
             try:
-                return json.loads(raw)
+                parsed = json.loads(raw)
+                if not isinstance(parsed, dict):
+                    raise TransportError("JSON response must be an object")
+                return redact(parsed, key)
             except json.JSONDecodeError:
-                last = TransportError(f"non-JSON 2xx response: {raw[:200]!r}")
+                last = TransportError(f"non-JSON 2xx response: {redact(raw[:200], key)!r}")
                 if attempt >= retries:
                     raise last
                 continue
         except urllib.error.HTTPError as e:
-            detail = e.read().decode(errors="replace")[:300]
+            detail = str(redact(e.read().decode(errors="replace"), key))[:300]
             if e.code in TRANSIENT_HTTP and attempt < retries:
                 last = TransportError(f"HTTP {e.code}: {detail}")
                 time.sleep(2 ** attempt)
                 continue
             raise TransportError(f"HTTP {e.code}: {detail}") from e
         except (urllib.error.URLError, TimeoutError, OSError) as e:
-            last = TransportError(f"{type(e).__name__}: {e}")
+            last = TransportError(f"{type(e).__name__}: {redact(str(e), key)}")
             if attempt < retries:
                 time.sleep(2 ** attempt)
                 continue
@@ -162,28 +209,50 @@ class RunningHubClient:
             raise RHError(f"upload failed: {json.dumps(body, ensure_ascii=False)[:300]}")
         return body["data"]["download_url"]
 
-    def price_preview(self, endpoint: str, payload: dict) -> dict:
+    def account_status(self) -> dict:
+        """Read-only balance/key status; lowercase body 'apikey' is intentional."""
         self._require_key()
-        """官方预估价,不创建任务、不扣费。个人 Key 会得到 1014。"""
-        return _request(f"{self.base}/price-preview/{endpoint}", self.key, payload)
+        return checked(_request(f"{self.origin}/uc/openapi/accountStatus", self.key,
+                                {"apikey": self.key}))
 
-    def submit(self, endpoint: str, payload: dict) -> str:
-        """提交一次;结果不确定时抛 SubmissionUncertain,调用方不得盲目重试。"""
+    def price_preview(self, endpoint: str, payload: dict) -> dict:
+        """Read-only quote. Access refusal is an error, never a zero-price quote."""
+        self._require_key()
+        body = checked(_request(f"{self.base}/price-preview/{endpoint}", self.key, payload))
+        quote = body["data"] if isinstance(body.get("data"), dict) else body
         try:
-            body = _request(f"{self.base}/{endpoint}", self.key, payload,
-                            timeout=90, retries=1)
+            amount = Decimal(str(quote.get("estimatedPrice")))
+            if not amount.is_finite() or amount < 0 or not quote.get("currency"):
+                raise ValueError("invalid quote")
+        except (InvalidOperation, ValueError) as exc:
+            raise RHError("预估响应缺少有效非负estimatedPrice/currency，不创建任务") from exc
+        return quote
+
+    def _submit_once(self, url: str, payload: dict) -> str:
+        self._require_key()
+        try:
+            body = _request(url, self.key, payload, timeout=90, retries=1)
         except TransportError as exc:
             raise SubmissionUncertain(f"提交结果不确定,未自动重试:{exc}") from exc
-        if body.get("errorCode") or body.get("errorMessage"):
-            raise RHError(f"提交被平台拒绝: {body.get('errorCode')} {body.get('errorMessage')}")
-        task_id = body.get("taskId") or body.get("task_id") or body.get("data", {}).get("taskId")
+        try:
+            checked(body)  # deterministic business refusal remains RHError
+        except TransportError as exc:
+            raise SubmissionUncertain('无法解析提交响应;请先核对任务,勿重复提交') from exc
+        data = body.get("data") if isinstance(body.get("data"), dict) else {}
+        task_id = body.get("taskId") or body.get("task_id") or data.get("taskId")
         if not task_id:
-            raise SubmissionUncertain(f"响应无 taskId: {json.dumps(body, ensure_ascii=False)[:300]}")
+            raise SubmissionUncertain("响应未包含taskId;请核对控制台,勿重复提交")
         return str(task_id)
+
+    def submit(self, endpoint: str, payload: dict) -> str:
+        return self._submit_once(f"{self.base}/{endpoint}", payload)
 
     def query(self, task_id: str) -> dict:
         self._require_key()
-        return _request(f"{self.base}/query", self.key, {"taskId": task_id})
+        body = task_response(_request(f"{self.base}/query", self.key, {"taskId": task_id}))
+        if not body.get("status"):
+            raise RHError("任务查询响应缺少status;请保留taskId后重查")
+        return body
 
     def poll(self, task_id: str) -> dict:
         """轮询到终态。终态 FAILED/CANCEL 也返回(调用方记录 usage/failedReason);
@@ -227,7 +296,7 @@ class RunningHubClient:
 
     @staticmethod
     def media_probe(path: Path) -> dict:
-        """ffprobe 实测宽高/帧率/时长/音轨;ffprobe 不可用时记录错误不阻断。"""
+        """ffprobe 实测宽高/帧率/时长/音轨;ffprobe 不可用时记录错误，不标为媒体验收通过。"""
         cmd = ["ffprobe", "-v", "error", "-show_entries",
                "format=duration,size:stream=index,codec_type,codec_name,width,height,avg_frame_rate",
                "-of", "json", str(path)]
@@ -290,7 +359,8 @@ class RunningHubClient:
         if record["status"] in TERMINAL_OK:
             record["outputs"] = self.archive_outputs(final, run_dir)
             record["status"] = ("MEDIA_VALIDATED" if record["outputs"]
-                                and all("download_error" not in o for o in record["outputs"])
+                                and all("download_error" not in o and "error" not in o.get("media", {})
+                                        for o in record["outputs"])
                                 else "OUTPUT_INCOMPLETE")
             save()
         print(f"[done] status={record['status']} "
@@ -301,17 +371,20 @@ class RunningHubClient:
     @staticmethod
     def _new_run_dir(record_dir: Path, label: str) -> Path:
         run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:6]
-        run_dir = Path(record_dir) / f"{run_id}-{label}"
+        run_dir = Path(record_dir or "output/runninghub/api/matrix_runs") / f"{run_id}-{label}"
         run_dir.mkdir(parents=True, exist_ok=True)
         return run_dir
 
     def run(self, endpoint: str, payload: dict, local_files: dict | None = None,
-            execute: bool = False, record_dir: Path | None = None) -> dict:
+            execute: bool = False, record_dir: Path | None = None,
+            allow_unpriced: bool = False, source_chain: dict | None = None) -> dict:
         """标准模型 API 完整生命周期(execute=False 为 dry-run,不发请求)。"""
         record: dict = {"route": "standard-model-api", "endpoint": endpoint,
                         "payload": dict(payload), "submitted_at": None,
                         "status": "DRY_RUN", "transitions": [], "final": None,
                         "outputs": [], "usage": None, "errors": []}
+        if source_chain is not None:
+            record["source_chain"] = dict(source_chain)
         payload = dict(payload)
         for field, path in (local_files or {}).items():
             if not execute:
@@ -329,15 +402,17 @@ class RunningHubClient:
                              ensure_ascii=False, indent=2))
             return record
 
+        self._require_key()
         preview, preview_err = None, None
         try:
             preview = self.price_preview(endpoint, payload)
+            if preview.get("estimatedPrice") is None or not preview.get("currency"):
+                raise RHError("预估响应缺少estimatedPrice/currency")
         except (TransportError, RHError) as e:
-            preview_err = str(e)  # 预估失败不阻断提交,记录后继续
+            preview_err = str(e)
+            if not allow_unpriced:
+                raise RHError(f"未取得有效预估价,未创建任务:{e};明确接受未知费用才用--allow-unpriced") from e
         record["price_preview"] = {"response": preview, "error": preview_err}
-        if preview and preview.get("errorCode"):
-            print(f"[price-preview] 业务拒绝 {preview.get('errorCode')}: "
-                  f"{preview.get('errorMessage')}(预估失败不阻断提交)")
 
         run_dir = self._new_run_dir(record_dir, endpoint.replace("/", "_"))
         record_path = run_dir / "task_record.json"
@@ -355,6 +430,11 @@ class RunningHubClient:
             print(f"[blocked] {exc}\n[record] {record_path}\n"
                   f"[next] 到控制台核对是否已建任务;确认没有再重试,有则用 resume",
                   file=sys.stderr)
+            raise
+        except RHError as exc:
+            record["status"] = "SUBMIT_REJECTED"
+            record["errors"].append(str(exc))
+            save()
             raise
         record["task_id"] = task_id
         record["submitted_at"] = _now()
@@ -382,30 +462,24 @@ class RunningHubClient:
             payload["webhookUrl"] = webhook_url
         if instance_type:
             payload["instanceType"] = instance_type
-        body = _request(f"{self.origin}/task/openapi/create", self.key, payload,
-                        timeout=90, retries=1)
-        if body.get("code") != 0:
-            raise RHError(f"create failed code={body.get('code')} msg={body.get('msg')} "
-                          f"{json.dumps(body.get('data') or {}, ensure_ascii=False)[:200]}")
-        return str(body["data"]["taskId"])
+        return self._submit_once(f"{self.origin}/task/openapi/create", payload)
 
     def ai_app_run(self, webapp_id: str, node_info_list: list[dict]) -> str:
         self._require_key()
         payload = {"apiKey": self.key, "webappId": str(webapp_id),
                    "nodeInfoList": node_info_list}
-        body = _request(f"{self.origin}/task/openapi/ai-app/run", self.key, payload,
-                        timeout=90, retries=1)
-        if body.get("code") != 0:
-            raise RHError(f"ai-app run failed code={body.get('code')} msg={body.get('msg')}")
-        return str(body["data"]["taskId"])
+        return self._submit_once(f"{self.origin}/task/openapi/ai-app/run", payload)
 
     def ai_app_node_info(self, webapp_id: str) -> dict:
         self._require_key()
         """GET apiCallDemo:应用节点参数 schema(免费,用于拼 nodeInfoList)。"""
-        url = (f"{self.origin}/api/webapp/apiCallDemo?apiKey={self.key}"
-               f"&webappId={webapp_id}")
-        with urllib.request.urlopen(url, timeout=60) as r:
-            return json.loads(r.read().decode())
+        url = f"{self.origin}/api/webapp/apiCallDemo?" + urllib.parse.urlencode(
+            {"apiKey": self.key, "webappId": webapp_id})
+        try:
+            with urllib.request.urlopen(url, timeout=60) as r:
+                return checked(redact(json.loads(r.read().decode()), self.key))
+        except (urllib.error.URLError, OSError, ValueError) as exc:
+            raise RHError(str(redact(str(exc), self.key))) from None
 
     def workflow_outputs(self, task_id: str) -> dict:
         self._require_key()
@@ -472,7 +546,8 @@ class RunningHubClient:
         try:
             task_id = self.ai_app_run(webapp_id, node_info_list)
         except (RHError, TransportError) as exc:
-            record["status"] = "SUBMIT_REJECTED"
+            record["status"] = ("SUBMISSION_UNCERTAIN" if isinstance(exc, (SubmissionUncertain, TransportError))
+                                else "SUBMIT_REJECTED")
             record["errors"].append(str(exc))
             save()
             print(f"[rejected] {exc}\n[record] {record_path}", file=sys.stderr)
@@ -525,7 +600,8 @@ class RunningHubClient:
                                            workflow_inline=inline,
                                            instance_type=instance_type)
         except (RHError, TransportError) as exc:
-            record["status"] = "SUBMIT_REJECTED"
+            record["status"] = ("SUBMISSION_UNCERTAIN" if isinstance(exc, (SubmissionUncertain, TransportError))
+                                else "SUBMIT_REJECTED")
             record["errors"].append(str(exc))
             save()
             print(f"[rejected] {exc}\n[record] {record_path}", file=sys.stderr)
@@ -555,6 +631,8 @@ def build_record_from_existing(client: RunningHubClient, task_id: str,
               "outputs": [], "resumed_at": _now()}
     if status in TERMINAL_OK:
         record["outputs"] = client.archive_outputs(final, download_dir)
+        if not record["outputs"] or any("download_error" in o or "error" in o.get("media", {}) for o in record["outputs"]):
+            record["status"] = "OUTPUT_INCOMPLETE"
     return record
 
 
@@ -574,6 +652,8 @@ def main(argv: list[str] | None = None) -> int:
     def add(name: str, help_text: str) -> argparse.ArgumentParser:
         return sub.add_parser(name, help=help_text, parents=[common])
 
+    add("account", "只读账户状态(免费;不创建任务)")
+
     p = add("query", "查一次任务状态(免费)")
     p.add_argument("task_id")
 
@@ -591,6 +671,7 @@ def main(argv: list[str] | None = None) -> int:
     p = add("run", "标准模型 API 提交(需 --execute)")
     p.add_argument("endpoint")
     p.add_argument("payload", help="JSON 字符串")
+    p.add_argument("--allow-unpriced", action="store_true", help="显式接受无法预估的费用")
     p.add_argument("--local-files", action="append", default=[],
                    metavar="FIELD=PATH", help="本地媒体字段,先上传再提交;可重复")
     p.add_argument("--execute", action="store_true", help="确认创建付费任务")
@@ -610,6 +691,16 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--instance-type", default=None, help="如 plus(48G 机器)")
     p.add_argument("--execute", action="store_true", help="确认创建付费任务")
 
+    p = add("video", "H3单提示词入口；默认dry-run，显式选择Key通道")
+    p.add_argument("--prompt", required=True)
+    p.add_argument("--key-type", choices=("consumer-member", "enterprise-shared"), required=True)
+    p.add_argument("--resolution", choices=("768P", "2K"), default="2K")
+    p.add_argument("--duration", type=int, choices=range(5, 16), default=5)
+    p.add_argument("--ratio", choices=("21:9", "16:9", "4:3", "1:1", "3:4", "9:16", "9:21"), default="16:9")
+    p.add_argument("--webapp-id", default="2083105376052006914")
+    p.add_argument("--execute", action="store_true")
+    p.add_argument("--allow-unpriced", action="store_true")
+
     p = add("app-params", "查询 AI 应用节点参数 schema(免费)")
     p.add_argument("webapp_id")
 
@@ -617,6 +708,24 @@ def main(argv: list[str] | None = None) -> int:
     client = RunningHubClient(poll_interval=args.poll_interval,
                               max_poll_seconds=args.timeout)
 
+    if args.cmd == "video":
+        if not args.prompt.strip():
+            raise RHError("提示词不能为空")
+        payload = {"prompt": args.prompt, "resolution": args.resolution,
+                   "duration": str(args.duration), "ratio": args.ratio}
+        if args.key_type == "enterprise-shared":
+            record = client.run("minimax/hailuo-h3/text-to-video", payload,
+                                execute=args.execute, record_dir=args.record_dir,
+                                allow_unpriced=args.allow_unpriced)
+        else:
+            nodes = [{"nodeId": "1", "fieldName": k, "fieldValue": v,
+                      "description": k} for k, v in payload.items()]
+            record = client.run_ai_app(args.webapp_id, nodes, execute=args.execute,
+                                      record_dir=args.record_dir)
+        return 0 if record.get("status") in ("MEDIA_VALIDATED", "DRY_RUN") else 1
+    if args.cmd == "account":
+        print(json.dumps(redact(client.account_status(), client.key), ensure_ascii=False, indent=2))
+        return 0
     if args.cmd == "query":
         final = client.query(args.task_id)
         print(json.dumps(final, ensure_ascii=False, indent=2))
@@ -654,7 +763,7 @@ def main(argv: list[str] | None = None) -> int:
             local_files[field] = path
         record = client.run(args.endpoint, json.loads(args.payload),
                             local_files=local_files, execute=args.execute,
-                            record_dir=args.record_dir)
+                            record_dir=args.record_dir, allow_unpriced=args.allow_unpriced)
         return 0 if record.get("status") in ("MEDIA_VALIDATED", "DRY_RUN") else 1
     if args.cmd == "run-ai-app":
         record = client.run_ai_app(args.webapp_id, json.loads(args.node_info_list),
@@ -667,7 +776,7 @@ def main(argv: list[str] | None = None) -> int:
                 raise SystemExit(f"--set 需要 NODE.FIELD=VALUE 形式: {item}")
             key, value = item.split("=", 1)
             bake[key] = value
-        inline = args.inline_path if args.workflow_id == "-" else None
+        inline = args.inline_path
         if args.workflow_id == "-" and not inline:
             raise SystemExit("workflow_id 为 '-' 时必须给 --inline")
         if args.workflow_id != "-" and inline:
@@ -682,4 +791,8 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except (RHError, ValueError, OSError) as exc:
+        print(str(redact(str(exc), os.environ.get("RH_API_KEY", ""))), file=sys.stderr)
+        raise SystemExit(2)

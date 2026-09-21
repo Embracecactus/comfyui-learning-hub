@@ -128,8 +128,8 @@ def option_values(param: Mapping[str, Any]) -> list[str]:
 
 def load_h3_model(registry_path: Path) -> dict[str, Any]:
     registry = load_json(registry_path)
-    for model in registry.get("models") or []:
-        if isinstance(model, Mapping) and model.get("endpoint") == ENDPOINT:
+    for model in registry.get("models") or registry.get("model_capabilities") or []:
+        if isinstance(model, Mapping) and (model.get("endpoint") or model.get("id")) == ENDPOINT:
             model = dict(model)
             params = {p.get("fieldKey"): p for p in model.get("params") or [] if isinstance(p, Mapping)}
             required = {"prompt", "resolution", "duration"}
@@ -391,7 +391,7 @@ def default_paths() -> tuple[Path, Path, Path]:
     root = Path(__file__).resolve().parents[1]
     return (
         root / "output/runninghub/api/config.json",
-        root / "output/runninghub/api/developer-kit/model-registry.public.json",
+        root / "docs/05-RunningHub-API/data/runninghub-api-registry.json",
         root / "output/runninghub/api/h3_t2v_runs",
     )
 

@@ -75,3 +75,16 @@ scripts/
 - DSW 帮助文档：https://help.aliyun.com/zh/pai/dsw-overview
 
 > 注意：MiniMax H3 受 Community License（地域/用途限制）约束；实例「运行中」即计费，用完请手动停止，避免 NAT+EIP/GA 等独立计费项持续扣费。
+
+## RunningHub 单提示词视频 API 与费用
+
+[RunningHub 接入与成本入口](docs/05-RunningHub-API/README.md)：覆盖保留模型快照、单提示词2K纳入/排除、个人/共享/独占Key矩阵、统一价格证据与两阶段对账。当前完成工程一致性修复；企业和两阶段实扣费用等未闭合项明确保留，不宣称全量实测。
+
+```bash
+python3 scripts/rh_survey_build_cost_tables.py --check
+python3 -m unittest discover -s tests/scripts -p 'test_rh_handoff*.py' -v
+```
+
+### RunningHub 当天公开价格与目录
+
+[2026-09-21 公开取证结果](docs/05-RunningHub-API/06-公开报价与目录复核.md)：中国站匿名标准模型目录244项、26/26显式2K视频价表，以及H3 768P/2K六组报价。公开报价与账户实扣分开；企业与两阶段真实账单仍以授权验证为准。

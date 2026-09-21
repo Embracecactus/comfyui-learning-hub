@@ -1,74 +1,54 @@
-# RunningHub API 调研与接入资料(docs/05)
+# RunningHub API 接入与成本资料
 
-2026-09-13 完成的 RunningHub 全量公开 API 盘点、可复用接入方案,
-以及从头生成 768P / 2K 视频的完整费用核验;**2026-09-14/15 复验**:
-客户端修复(任务恢复/付费闸门/下载归档)、注册表证据范围收窄、
-官方快照 SHA256 复检一致、账户余额阻塞记录(见下表)。
+> 自动生成于证据维护版本 2026-09-21；模型集合日期 2026-09-13。这不是实时全平台或全账户验收。
+> 输入：`data/handoff-evidence.json`（价格/证据/权益）与 `data/runninghub-api-registry.json`（模型契约与历史价格快照）。不要手改生成文件。
 
-## 渠道验证状态(截至 2026-09-15,个人消费级 Key,站点点 .cn)
 
-| 渠道 | 状态 | 证据 |
-| --- | --- | --- |
-| `/openapi/v2/query` 查询 | ✅ 已验证 | 2026-09-13/14 实测,usage 费用字段完整 |
-| `resume`/`outputs`(续查/下载/费用归因) | ✅ 已验证 | 2026-09-14,下载文件 sha256 与 09-12 归档一致 |
-| `/api/webapp/apiCallDemo` 应用参数 | ✅ 已验证 | 2026-09-14;注意:响应会回显 apiKey,勿外传原文 |
-| AI 应用生成(官方应用 2083105376052006914,2K/5s) | ✅ 2026-09-12 一次成功(¥3.85+7 币);**2026-09-14 起被 414 拒(09-15 复测仍拒)** | "算力值"钱包耗尽且无按日刷新,任务未创建、零扣费;同应用同参数 09-12 曾成功(账户状态,非渠道关闭) |
-| 工作流 API 生成(普通节点) | ✅ **已验证**(2026-09-15/16) | SD1.5 诊断成功(3 币/12s);**开源 H3 768P 文生视频成功(taskId 2100021717924806657,78 币/195s,1344×768@24fps 带音轨)** |
-| 工作流 API 生成(RH_ 闭源模型节点) | ⛔ 2026-09-14 创建闸门 414 | 平台是否原生接管 RH_ 节点鉴权未验证;"算力值"闸门挡在内容校验之前 |
-| 标准模型 API(含 768P/2K/regeneration 直调、price-preview) | ⛔ 仅企业级-共享 Key | 个人 Key 实测 1014(09-07/09-12/09-13 三次) |
-| C 路线(768P→2K regeneration) | ⛔ 未实测 | 需标准模型 API(企业 Key)或已验证的应用/工作流渠道;**没有 A 的 768P 源视频前也无法执行** |
+## 入口
 
-**恢复付费验证的最小待执行命令**(前提:账户充值或获得含算力值的授权;
-按序执行,A 的产物供 C 复用):
+[API与覆盖报告](01-调研报告.md) · [完整成本报告](02-768P-2K费用报告.md) · [HTML报告](runninghub-h3-2k-api.html) · [实际接入与验收](04-接入与费用验收.md) · [当天公开价目与目录复核](06-公开报价与目录复核.md)
+
+## 当前结论
+
+当前匿名中国站目录244项，显式2K视频26项，目标价表26/26已取得；与保留的GitHub快照分列，见06-公开报价与目录复核.md。
+
+| 渠道 | 5秒 | 10秒 | 15秒 | 状态 |
+|---|---|---|---|---|
+| 企业共享H3文生2K | ¥3.85 | ¥7.70 | ¥11.55 | 2026-09-21官方公开价；非企业实扣账单 |
+| 企业共享H3文生768P | ¥2.40 | ¥4.80 | ¥7.20 | 精确文生端点，不外推其他H3家族 |
+| 个人AI应用2K | 历史实测 ¥3.85 + 5–7 RH币 | 按5秒样本线性模型费预算 ¥7.70 + RH币未知（未实测） | 按5秒样本线性模型费预算 ¥11.55 + RH币未知（未实测） | 混合单位，人民币总成本未闭合 |
+| 768P→regeneration 2K | 两阶段各计费5秒时预算 ¥3.90（未实扣） | 两阶段各计费10秒时预算 ¥7.80（未实扣） | 两阶段各计费15秒时预算 ¥11.70（未实扣） | 公开阶段预算，不是实际账单 |
+| 独占GPU应用/工作流 | 租金未知 | 利用率未知 | 摊销未知 | 租期内运行秒增量为0不代表总成本为0 |
+
+本版本完成资料/数据/客户端一致性修复，不把“离线验收通过”当作“所有企业和两阶段账单已实跑通过”。具体缺口及关闭标准在费用报告中逐项列出。
+
+## 生成与检查
 
 ```bash
-export RH_API_KEY=<个人或企业 Key>
+python3 scripts/rh_survey_build_registry.py           # 离线重建；不谎报新采集日期
+python3 scripts/rh_survey_build_cost_tables.py        # 同一生成器，非第二套手写价格
+python3 scripts/rh_survey_build_cost_tables.py --check # 只校验，发现漂移时退出非0
+python3 -m unittest discover -s tests/scripts -p 'test_rh_handoff*.py' -v
+```
+
+显式刷新模型快照使用`python3 scripts/rh_survey_build_registry.py --refresh`，或`--models-registry <官方JSON>`；可用`--pricing <官方pricing.public.json>`更新对应历史价格来源。下载失败不覆盖已提交数据；价格覆盖只匹配精确端点+分辨率。刷新目录不自动刷新价目或任务证据。
+
+## 最小调用
+
+```bash
 CLIENT=docs/05-RunningHub-API/examples/python/rh_min_client.py
-# A. 768P 文生视频(开源 H3 权重工作流,已实测成功路线;plus=48G 实例)
-python3 $CLIENT run-workflow - \
-  --inline docs/05-RunningHub-API/examples/workflows/h3-t2v-open-768p-cloud.json \
-  --instance-type plus --execute
-# B. 2K 直出(AI 应用路线,与 2026-09-12 成功样本同参数,预估 ¥3.85+7 币)
-python3 $CLIENT run-ai-app 2083105376052006914 \
-  '[{"nodeId":"1","fieldName":"prompt","fieldValue":"一只橙色猫在雨后的城市屋顶上缓慢行走，电影感镜头，光线自然。","description":"prompt"},{"nodeId":"1","fieldName":"resolution","fieldValue":"2K","description":"resolution 分辨率"},{"nodeId":"1","fieldName":"duration","fieldValue":"5","description":"duration 时长（秒）"},{"nodeId":"1","fieldName":"ratio","fieldValue":"16:9","description":"ratio 比例"}]' \
-  --execute
-# C. 768P→2K(需 A 成功产出源视频;上传源视频后按 02-费用报告 §2 C 行执行,
-#    标准模型 API 需企业级-共享 Key)
+# 无密钥、无网络的计划检查
+python3 "$CLIENT" run minimax/hailuo-h3/text-to-video \
+  '{"prompt":"一只橙猫在雨后屋顶缓慢行走","resolution":"2K","duration":"5","ratio":"16:9"}'
+# 通过安全环境变量配置RH_API_KEY后，以下只读命令可用
+python3 "$CLIENT" account
+python3 "$CLIENT" price minimax/hailuo-h3/text-to-video \
+  '{"prompt":"一只橙猫在雨后屋顶缓慢行走","resolution":"2K","duration":"5","ratio":"16:9"}'
+# 只有明确增加 --execute 才可能创建付费任务；不要在仓库或shell历史里写真实Key
 ```
 
-## 文档
+## 数据契约
 
-| 文件 | 内容 |
-| --- | --- |
-| [01-调研报告.md](01-调研报告.md) | 工程可复用资产、14 接口族 + 422 模型覆盖统计、Key 类型矩阵、验证状态体系、方式 A/B 评估、缺口汇总 |
-| [02-768P-2K费用报告.md](02-768P-2K费用报告.md) | 从提示词到成片的完整价格结论(5/10/15 秒)、三种情形(A/B/C)核验、实测证据链、价格冲突、缺口 |
-| [03-下一阶段开发goal.md](03-下一阶段开发goal.md) | 基于已查明事实的下一步:企业 Key 核价 → 币值对账 → 方式 A 资料包定稿 → 条件触发的托管立项 |
+`runninghub-api-registry.json`：模型契约/历史价格；`handoff-evidence.json`：有日期的历史样本、权益和缺口，并以SHA256绑定`public-pricing-20260921.json`的当日官方网页原始报价和目录；所有CSV/报告/HTML由这些明确来源生成。新增价格必须写来源、日期、单位、精确端点与证据等级。未知不是零；页面报告不是本轮实测；实际像素不同于分辨率标签。
 
-## 数据(机器可读)
-
-| 文件 | 内容 |
-| --- | --- |
-| [data/runninghub-api-registry.json](data/runninghub-api-registry.json) | 主注册表:14 接口族 + 422 模型能力(参数 schema/分辨率/时长/音频/768P·2K 标记/价格/验证状态)+ MiniMax 价格锚点 + 4 条实测费用证据 + 9 条缺口 |
-| [data/model-capabilities.csv](data/model-capabilities.csv) | 人工可读扁平目录(422 行) |
-| [data/cost-768p.csv](data/cost-768p.csv) | 768P 从头生成费用对照(9 行 × 21 列,价格类型四分:官方标价/实测/推算/缺口) |
-| [data/cost-2k.csv](data/cost-2k.csv) | 2K 从头生成费用对照(12 行,含直出与两阶段路线) |
-| [data/sources-snapshot.json](data/sources-snapshot.json) | 来源快照(URL/时间/SHA256) |
-
-## 接入原型(供别人使用,方式 A)
-
-- [examples/python/rh_min_client.py](examples/python/rh_min_client.py)
-  ——零依赖最小客户端:通用传输(鉴权/上传/预估/提交/轮询/取消/
-  工作流/AI 应用)与模型参数分离,`RH_API_KEY` 环境变量注入,无硬编码密钥。
-- [examples/curl/](examples/curl/) ——五个可直接执行的场景:
-  `01` H3 768P 直出、`02` H3 2K 直出、`03` 768P→2K 官方两阶段、
-  `04` AI 应用路线(个人 Key,已实测)、`05` ComfyUI 工作流路线。
-
-## 更新方法
-
-```bash
-python3 scripts/rh_survey_build_registry.py      # 重拉官方快照,重建注册表与目录
-python3 scripts/rh_survey_build_cost_tables.py   # 修订价格后重建两张费用 CSV
-```
-
-安全约定:任何交付不入库 API Key/Cookie/令牌/私人任务签名链接;
-费用证据仅引用 taskId 与 usage 字段。
+CSV采用UTF-8 BOM和英文机器字段。`price_per_second_cny`只表示该模型阶段单价；`five_second_cost`等才表示标注条件下的总价/预算，不完整路线必须保留`full_cost_status=incomplete`。计费输出秒、媒体秒和运行秒分别建模。
