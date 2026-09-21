@@ -29,7 +29,7 @@ jobs:
           from urllib.parse import urlsplit
           repo='Embracecactus/comfyui-learning-hub'
           base='https://api.github.com/repos/'+repo
-          expected='1e732a0eaf9eeb2c7e02041e7e45bfc183b3db81'
+          expected='aeaffa0591ac061a2af87fb64445874af8b7df30'
           assert subprocess.check_output(['git','rev-parse','HEAD^'],text=True).strip()==expected, 'Unexpected source base'
           class SafeRedirect(urllib.request.HTTPRedirectHandler):
             def redirect_request(self,req,fp,code,msg,headers,newurl):
@@ -46,7 +46,6 @@ jobs:
           for i,sha in enumerate(shas):
             record=json.loads(get('/git/blobs/'+sha));chunk=base64.b64decode(record['content'])
             if i==2:
-              # Correct one identified base64 transport insertion; validate original bytes.
               encoded=base64.b64encode(chunk).decode()
               assert encoded.count('QjFKPryjptrQ')==1
               encoded=encoded.replace('QjFKPryjptrQ','QjFKPryptrQ',1)+'7'
@@ -58,6 +57,10 @@ jobs:
           patch=gzip.decompress(compressed)
           subprocess.run(['git','apply','--check','-'],input=patch,check=True)
           subprocess.run(['git','apply','-'],input=patch,check=True)
+          followup_sha='b83770d8f7a622c60c381bb34a226330ed086308'
+          followup=base64.b64decode(json.loads(get('/git/blobs/'+followup_sha))['content'])
+          assert hashlib.sha1(('blob '+str(len(followup))+'\0').encode()+followup).hexdigest()==followup_sha
+          exec(compile(followup,'verified_sanitization_followup.py','exec'))
           temp=Path(os.environ['RUNNER_TEMP'])
           for name,artifact,digest in [('current',10626612821,'871bad89391d77006f553464096f1574524655800743d0812216a19f1bfa0bd6'),('initial',10625924964,'b168f85ebc8aae4fba87fa14c4c710b9845091c2bf599577a075950b5e8a294d')]:
             raw=get('/actions/artifacts/'+str(artifact)+'/zip')
@@ -67,7 +70,7 @@ jobs:
               for info in z.infolist():
                 assert (target/info.filename).resolve().is_relative_to(target.resolve()), 'Unsafe archive path'
               z.extractall(target)
-          print('Source patch and two official-public research artifacts verified.')
+          print('Source patch, sanitization and public-only artifacts verified.')
           PY
       - name: Import current evidence, generate and verify
         shell: bash
@@ -85,6 +88,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git add README.md .github/workflows/runninghub-handoff-check.yml .github/workflows/runninghub-public-evidence.yml docs/05-RunningHub-API scripts/rh_public_price_probe.py scripts/rh_survey_handoff.py scripts/rh_survey_import_public_snapshot.py scripts/rh_survey_public.py tests/scripts/test_rh_public_evidence.py
+          git restore .github/workflows/runninghub-handoff-check.yml .github/workflows/runninghub-public-evidence.yml
+          git add README.md docs/05-RunningHub-API scripts/rh_public_price_probe.py scripts/rh_survey_handoff.py scripts/rh_survey_import_public_snapshot.py scripts/rh_survey_public.py tests/scripts/test_rh_public_evidence.py
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix: publish current official 2K prices and stage billing evidence'
           git push origin HEAD:refs/heads/fix/runninghub-cost-reconciliation-20260921
