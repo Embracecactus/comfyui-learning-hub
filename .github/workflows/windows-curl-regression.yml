@@ -40,13 +40,13 @@ jobs:
           [IO.File]::WriteAllBytes($zip,$bytes)
           $dir = Join-Path $env:RUNNER_TEMP 'RH windows test'
           Expand-Archive -LiteralPath $zip -DestinationPath $dir
-          foreach ($sha in @('deb0f3a5d407c2b75e19f8f3e620166f284c58ac','f9e202c262861bb55c0fe50d2af93f31a3293509')) {
+          foreach ($sha in @('deb0f3a5d407c2b75e19f8f3e620166f284c58ac','f64ec51d12ee68296ec3b52d0b1a28e4c11107b8')) {
             $patchPath = Join-Path $env:RUNNER_TEMP ($sha+'.py')
             [IO.File]::WriteAllBytes($patchPath,(Get-BlobBytes $sha))
             python $patchPath $dir
             if ($LASTEXITCODE -ne 0) { throw 'Verified followup failed' }
           }
-          $expected = @{'rh-curl.ps1'='deeaa694ac553a139b3fa840bd77ca0359b57681a4e7746bad990ead3bc503b4';'99-Check-Offline.ps1'='e24dfcf43852db05f9251eed2e45871cafff3a73b86021a6253893a23a29cabd';'Set-RHKey.ps1'='00928133351f7a75d14224d4d794d39b6e25f349cf4ae9a3611770dc269b1ef2'}
+          $expected = @{'rh-curl.ps1'='b13df7e6a80cf2ab793c29b84dc559ffd194c559af04ff55da93f68ac1dd9af9';'99-Check-Offline.ps1'='e24dfcf43852db05f9251eed2e45871cafff3a73b86021a6253893a23a29cabd';'Set-RHKey.ps1'='00928133351f7a75d14224d4d794d39b6e25f349cf4ae9a3611770dc269b1ef2'}
           foreach ($name in $expected.Keys) {
             if ((Get-FileHash -LiteralPath (Join-Path $dir $name) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected[$name]) { throw ('Final source hash mismatch: '+$name) }
           }
