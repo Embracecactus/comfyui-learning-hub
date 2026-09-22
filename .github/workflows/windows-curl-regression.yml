@@ -1,0 +1,73 @@
+name: Windows curl preflight regression
+on:
+  push:
+    branches: [test/windows-curl-preflight-20260922]
+    paths: [.github/workflows/windows-curl-regression.yml]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [powershell, pwsh]
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recover exact test files
+        shell: python
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          import base64,hashlib,json,os,urllib.request,zipfile,io
+          from pathlib import Path
+          repo='Embracecactus/comfyui-learning-hub'
+          shas=['1e52f80fe158ff16aab08c8a2189412f9c5ae81c','29973cc6a9cc2d1736cdeff5310f804ab9fd5f39','0d35d196a461058618ffb7a88337b7943abf29bb']
+          parts=[]
+          for sha in shas:
+              req=urllib.request.Request('https://api.github.com/repos/'+repo+'/git/blobs/'+sha,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+              obj=json.loads(urllib.request.urlopen(req,timeout=30).read())
+              parts.append(base64.b64decode(obj['content']).decode('ascii'))
+          raw=base64.b64decode(''.join(parts),validate=True)
+          assert hashlib.sha256(raw).hexdigest()=='701c3ea0903e9e44634d2feebc2add98e976429d235c8a1983f827c5fa0533d3'
+          root=Path(os.environ['RUNNER_TEMP'])/'RH windows test';root.mkdir()
+          with zipfile.ZipFile(io.BytesIO(raw)) as z:
+              for i in z.infolist():
+                  assert (root/i.filename).resolve().is_relative_to(root.resolve())
+              z.extractall(root)
+          (root/'source-sha256.json').write_text(json.dumps({f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in root.iterdir() if f.is_file()},indent=2))
+      - name: Execute synthetic regression and actual curl loopback
+        shell: ${{ matrix.shell }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $dir=Join-Path $env:RUNNER_TEMP 'RH windows test'
+          $portFile=Join-Path $dir 'port.txt'
+          $server=Join-Path $dir 'loopback_server.py'
+          $python=(Get-Command python -CommandType Application).Source
+          $proc=Start-Process -FilePath $python -ArgumentList @(('"'+$server+'"'),('"'+$portFile+'"')) -PassThru -WindowStyle Hidden
+          try {
+            for ($i=0;$i -lt 60;$i++) {
+              if (Test-Path -LiteralPath $portFile) { break }
+              Start-Sleep -Milliseconds 250
+            }
+            if (-not (Test-Path -LiteralPath $portFile)) { throw 'loopback server not ready' }
+            $env:RH_CURL_LOOPBACK_ORIGIN='http://127.0.0.1:'+[IO.File]::ReadAllText($portFile).Trim()
+            $env:RH_TEST_RESULT_PATH=Join-Path $dir 'test-result.json'
+            & (Join-Path $dir '99-Check-Offline.ps1')
+            if (-not (Test-Path -LiteralPath $env:RH_TEST_RESULT_PATH)) { throw 'test did not reach completion' }
+          } finally {
+            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-curl-${{ matrix.shell }}-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/RH windows test/*.ps1
+            ${{ runner.temp }}/RH windows test/source-sha256.json
+            ${{ runner.temp }}/RH windows test/test-result.json
+          retention-days: 7
+          if-no-files-found: error
