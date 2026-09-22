@@ -5,6 +5,7 @@ on:
       - test/windows-curl-preflight-20260922
     paths:
       - .github/workflows/windows-curl-regression.yml
+      - tests/windows_curl/**
 permissions:
   contents: read
 jobs:
@@ -18,7 +19,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Recover exact test files
+      - name: Recover and patch exact delivered scripts
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -44,9 +45,14 @@ jobs:
             $patchPath = Join-Path $env:RUNNER_TEMP ($sha+'.py')
             [IO.File]::WriteAllBytes($patchPath,(Get-BlobBytes $sha))
             python $patchPath $dir
-            if ($LASTEXITCODE -ne 0) { throw 'Verified followup failed' }
+            if ($LASTEXITCODE -ne 0) { throw 'Verified v1.1 recovery failed' }
           }
-          $expected = @{'rh-curl.ps1'='5c1e7e21f4c286d87dc82352da5a4e9448bb9873ce73fc55f10636b8f7d3d1a1';'99-Check-Offline.ps1'='e24dfcf43852db05f9251eed2e45871cafff3a73b86021a6253893a23a29cabd';'Set-RHKey.ps1'='00928133351f7a75d14224d4d794d39b6e25f349cf4ae9a3611770dc269b1ef2'}
+          python tests/windows_curl/apply_prompt_enum_hotfix.py $dir
+          if ($LASTEXITCODE -ne 0) { throw 'v1.1.1 source patch failed' }
+          $text=[IO.File]::ReadAllText((Join-Path $env:GITHUB_WORKSPACE 'tests/windows_curl/Test-FieldData.ps1'))
+          $text=$text.Replace("`r`n","`n").Replace("`n","`r`n")
+          [IO.File]::WriteAllText((Join-Path $dir 'Test-FieldData.ps1'),$text,[Text.UTF8Encoding]::new($true))
+          $expected = @{'rh-curl.ps1'='7022fede8497d5375df748dcfdff2fbcba191e6adfda6a861b9e181a0c8f1806';'99-Check-Offline.ps1'='3630a6b621a0c6f7e77a8ceb979d5c66732ee2e4c4727d9d032932e1d8128f16';'Set-RHKey.ps1'='00928133351f7a75d14224d4d794d39b6e25f349cf4ae9a3611770dc269b1ef2';'Test-FieldData.ps1'='a1ff94ec3651ff7e34e9e1c504202a46e713336068f53573110be090114ee025'}
           foreach ($name in $expected.Keys) {
             if ((Get-FileHash -LiteralPath (Join-Path $dir $name) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected[$name]) { throw ('Final source hash mismatch: '+$name) }
           }
@@ -67,8 +73,11 @@ jobs:
             if (-not (Test-Path -LiteralPath $portFile)) { throw 'loopback server not ready' }
             $env:RH_CURL_LOOPBACK_ORIGIN='http://127.0.0.1:'+[IO.File]::ReadAllText($portFile).Trim()
             $env:RH_TEST_RESULT_PATH=Join-Path $dir ('test-result-'+$PSVersionTable.PSVersion.Major+'.json')
+            $env:RH_ENUM_RESULT_PATH=Join-Path $dir ('enum-result-'+$PSVersionTable.PSVersion.Major+'.json')
             & (Join-Path $dir '99-Check-Offline.ps1')
-            if (-not (Test-Path -LiteralPath $env:RH_TEST_RESULT_PATH)) { throw 'Test did not reach completion' }
+            if (-not (Test-Path -LiteralPath $env:RH_TEST_RESULT_PATH)) { throw 'Base tests did not reach completion' }
+            & (Join-Path $dir 'Test-FieldData.ps1')
+            if (-not (Test-Path -LiteralPath $env:RH_ENUM_RESULT_PATH)) { throw 'Enum tests did not reach completion' }
           } finally {
             Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
           }
@@ -88,10 +97,12 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: windows-curl-regression
+          name: windows-curl-v1.1.1-enum-regression
           path: |
             ${{ runner.temp }}/RH windows test/*.ps1
+            ${{ runner.temp }}/RH windows test/loopback_server.py
             ${{ runner.temp }}/RH windows test/source-sha256.json
             ${{ runner.temp }}/RH windows test/test-result-*.json
+            ${{ runner.temp }}/RH windows test/enum-result-*.json
           retention-days: 7
           if-no-files-found: error
