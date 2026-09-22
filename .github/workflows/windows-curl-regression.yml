@@ -38,6 +38,16 @@ jobs:
           [IO.File]::WriteAllBytes($zip,$bytes)
           $dir = Join-Path $env:RUNNER_TEMP 'RH windows test'
           Expand-Archive -LiteralPath $zip -DestinationPath $dir
+          $followup = Invoke-RestMethod -Uri 'https://api.github.com/repos/Embracecactus/comfyui-learning-hub/git/blobs/deb0f3a5d407c2b75e19f8f3e620166f284c58ac' -Headers @{Authorization=('Bearer '+$env:GH_TOKEN);Accept='application/vnd.github+json'}
+          $patchPath = Join-Path $env:RUNNER_TEMP 'rh-followup.py'
+          [IO.File]::WriteAllBytes($patchPath,[Convert]::FromBase64String($followup.content))
+          python $patchPath $dir
+          if ($LASTEXITCODE -ne 0) { throw 'Verified followup failed' }
+          $expected = @{'rh-curl.ps1'='9ab8d44a000dd2f6a18e587dcd655ea5c9da9b50a717cd1559c2e435f7e7ffc4';'99-Check-Offline.ps1'='e24dfcf43852db05f9251eed2e45871cafff3a73b86021a6253893a23a29cabd';'Set-RHKey.ps1'='00928133351f7a75d14224d4d794d39b6e25f349cf4ae9a3611770dc269b1ef2'}
+          foreach ($name in $expected.Keys) {
+            if ((Get-FileHash -LiteralPath (Join-Path $dir $name) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected[$name]) { throw ('Final source hash mismatch: '+$name) }
+          }
+          $expected | ConvertTo-Json | Set-Content (Join-Path $dir 'source-sha256.json') -Encoding utf8
           $run = @'
           $ErrorActionPreference='Stop'
           $dir=$PSScriptRoot
@@ -78,6 +88,7 @@ jobs:
           name: windows-curl-regression
           path: |
             ${{ runner.temp }}/RH windows test/*.ps1
+            ${{ runner.temp }}/RH windows test/source-sha256.json
             ${{ runner.temp }}/RH windows test/test-result-*.json
           retention-days: 7
           if-no-files-found: error
